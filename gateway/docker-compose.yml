@@ -1,0 +1,119 @@
+
+
+services:
+
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: always
+    ports:
+      - "${PORT_PROXY}:${PORT_PROXY}"
+      - "${PORT_PROXY_SSL}:${PORT_PROXY_SSL}"
+      - "${PORT_PROXY_DASHBOARD}:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "${DATA}/traefik/config:/etc/traefik/config:ro"
+      - "${DATA}/acme:/opt/acme:ro"
+    command: 
+
+      --global.checkNewVersion=false
+      --global.sendAnonymousUsage=false
+
+      --serversTransport.insecureSkipVerify=true
+      --log.level=DEBUG
+
+      --api=true
+      --api.debug=false
+      --api.insecure=false
+      --api.dashboard=true
+
+      --entrypoints.web.address=:${PORT_PROXY}
+      --entrypoints.websecure.address=:${PORT_PROXY_SSL}
+
+      --providers.docker=true 
+      --providers.docker.watch=true
+      
+      --providers.docker.exposedbydefault=false
+      --providers.docker.endpoint=unix:///var/run/docker.sock
+
+      --providers.file=true
+      --providers.file.watch=true
+      --providers.file.directory=/etc/traefik/config
+      
+    labels:
+      - traefik.enable=true
+      # global redirect to https
+      - traefik.http.routers.http-redirect.rule=HostRegexp(`.*`)
+      - traefik.http.routers.http-redirect.entrypoints=web
+      # https redirect
+      - traefik.http.routers.http-redirect.middlewares=https-redirect
+      # https redirect middleware
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=false
+
+
+      #- traefik.http.routers.dashboard.rule=Host(`traefik.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      - traefik.http.routers.dashboard.rule=HostRegexp(`^traefik\..*`)
+      - traefik.http.routers.dashboard.tls=true
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.middlewares=https-redirect
+      - traefik.http.routers.dashboard.middlewares=dashboard-auth
+      # middleware auth users  https://tool.oschina.net/htpasswd
+      - traefik.http.middlewares.dashboard-auth.basicauth.users=admin:${HTPASSWD}
+
+        # just adummy label to fixed in swarm mode
+      - "traefik.http.services.adummy.loadbalancer.server.port="
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "128k"
+        max-file: "1"
+    deploy:
+      placement:
+        constraints: 
+          - node.hostname == ${HOSTNAME}
+
+  frps:
+    image: snowdreamtech/frps:0.61
+    container_name: frps
+    restart: always
+    ports:
+      - "${PORT_FRPS_BIND}:7000"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/frps/:/etc/frp/
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frps-http.rule=HostRegexp(`^frp-.+\..*`)
+      - traefik.http.routers.frps-http.tls=true
+      - traefik.http.routers.frps-http.entrypoints=websecure
+      - traefik.http.routers.frps-http.service=frps-http@docker
+      - traefik.http.services.frps-http.loadbalancer.server.port=8080
+      - traefik.http.services.frps-http.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.frps-http.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.frps-http.headers.contentSecurityPolicy=upgrade-insecure-requests
+      - traefik.tcp.routers.frps-tcp.rule=HostSNIRegexp(`^tcp-.+\..*`)
+      - traefik.tcp.routers.frps-tcp.tls=true
+      - traefik.tcp.routers.frps-tcp.entrypoints=websecure
+      - traefik.tcp.routers.frps-tcp.service=frps-tcp@docker 
+      - traefik.tcp.services.frps-tcp.loadbalancer.server.port=8000
+      - traefik.http.routers.frps-ui.rule=HostRegexp(`^frps\..*`)
+      - traefik.http.routers.frps-ui.tls=true
+      - traefik.http.routers.frps-ui.entrypoints=websecure
+      - traefik.http.routers.frps-ui.service=frps-ui@docker
+      - traefik.http.services.frps-ui.loadbalancer.server.port=7500
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.role == manager
+
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+    

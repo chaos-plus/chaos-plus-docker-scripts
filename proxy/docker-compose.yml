@@ -1,0 +1,90 @@
+services:
+  # https://github.com/iCloudBot/DockerRescue/tree/main/2.Deploy-Docker-Proxy
+  # crproxy:
+  #   image: cleverest/crproxy:latest
+  #   container_name: crproxy
+  #   restart: always
+  #   ports:
+  #     - "${PROXY_CR}:80"
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #   environment:
+  #     - dockerhub=true
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.crproxy.rule=HostRegexp(`^cr\..*`)
+  #     - traefik.http.routers.crproxy.tls=true
+  #     - traefik.http.routers.crproxy.entrypoints=websecure
+  #     - traefik.http.routers.crproxy.service=crproxy@docker
+  #     - traefik.http.services.crproxy.loadbalancer.server.port=80
+  #     - traefik.http.services.crproxy.loadBalancer.passHostHeader=true
+
+  #   deploy:
+  #     mode: global
+  #     placement:
+  #       constraints:
+  #         - node.role == manager
+
+  # https://github.com/kubesre/docker-registry-mirrors/blob/main/dockerproxy/README.md
+  crproxy:
+    image: ghcr.io/daocloud/crproxy/crproxy:${PROXY_CR_VERSION}
+    container_name: crproxy
+    restart: unless-stopped
+    ports:
+      - "${PROXY_CR}:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.crproxy.rule=HostRegexp(`^(cr|docker|dhub|l5d|elastic|gcr|ghcr|k8s-gcr|k8s|mcr|nvcr|quay|jujucharms)\.${DOMAIN}`)
+      - traefik.http.routers.crproxy.tls=true
+      - traefik.http.routers.crproxy.entrypoints=websecure
+      - traefik.http.routers.crproxy.service=crproxy@docker
+      - traefik.http.services.crproxy.loadbalancer.server.port=8080
+      - traefik.http.services.crproxy.loadBalancer.passHostHeader=true
+    command: |
+      -a :8080 
+      --enable-pprof true 
+      --retry 3 
+      --retry-interval 3s 
+      --disable-keep-alives nvcr.io 
+      --privileged-no-auth 
+      --simple-auth 
+      --token-url "https://cr.${DOMAIN}/auth/token"
+      --override-default-registry=docker.${DOMAIN}=docker.io
+      --override-default-registry=dhub.${DOMAIN}=docker.io
+      --override-default-registry=l5d.${DOMAIN}=cr.l5d.io
+      --override-default-registry=elastic.${DOMAIN}=docker.elastic.co
+      --override-default-registry=gcr.${DOMAIN}=gcr.io
+      --override-default-registry=ghcr.${DOMAIN}=ghcr.io
+      --override-default-registry=k8s-gcr.${DOMAIN}=k8s.gcr.io
+      --override-default-registry=k8s.${DOMAIN}=registry.k8s.io
+      --override-default-registry=mcr.${DOMAIN}=mcr.microsoft.com
+      --override-default-registry=nvcr.${DOMAIN}=nvcr.io
+      --override-default-registry=quay.${DOMAIN}=quay.io
+      --override-default-registry=jujucharms.${DOMAIN}=registry.jujucharms.com
+
+  ghproxy:
+    image: hunsh/gh-proxy-py:latest
+    container_name: ghproxy
+    restart: always
+    ports:
+      - "${PROXY_GH}:80"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ghproxy.rule=HostRegexp(`^gh\..*`)
+      - traefik.http.routers.ghproxy.tls=true
+      - traefik.http.routers.ghproxy.entrypoints=websecure
+      - traefik.http.routers.ghproxy.service=ghproxy@docker
+      - traefik.http.services.ghproxy.loadbalancer.server.port=80
+      - traefik.http.services.ghproxy.loadBalancer.passHostHeader=true
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
