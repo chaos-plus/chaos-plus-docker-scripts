@@ -22,8 +22,8 @@ bash install.sh
 
 ## 整合自以下项目
 
-- [sing-box-yg](https://github.com/yonggekkk/sing-box-yg)
+- [https://github.com/yonggekkk/sing-box-yg](https://github.com/yonggekkk/sing-box-yg)
 
-- [gh-proxy](https://github.com/hunshcn/gh-proxy)
+- [https://github.com/hunshcn/gh-proxy](https://github.com/hunshcn/gh-proxy)
 
-- [crproxy](https://github.com/DaoCloud/crproxy)
+- [https://github.com/DaoCloud/crproxy](https://github.com/DaoCloud/crproxy)
