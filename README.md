@@ -26,4 +26,4 @@ bash install.sh
 
 - [gh-proxy](https://github.com/hunshcn/gh-proxy)
 
-- [crproxy](https://github.com/DaoCloud/crproxy
+- [crproxy](https://github.com/DaoCloud/crproxy)
