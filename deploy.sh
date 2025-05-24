@@ -8,11 +8,11 @@ function init() {
     ########################
 
     if command -v apt &>/dev/null; then
-        apt install -y git wget curl vim
+        apt install -y git wget curl vim fail2ban
     fi
 
     if command -v yum &>/dev/null; then
-        yum install -y git wget curl vim
+        yum install -y git wget curl vim fail2ban
     fi
 
     if [ ! -n "$(which ansible 2>/dev/null)" ]; then
