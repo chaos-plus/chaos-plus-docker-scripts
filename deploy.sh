@@ -43,10 +43,8 @@ function init() {
 
     if command -v docker-compose &>/dev/null; then
         if echo "$(docker-compose version --short 2>/dev/null)" | grep -q '^1\.'; then
-            echo "docker-compose is v1.x"
+            echo "docker-compose is v1.x, need upgrade"
             $PM uninstall -y docker-compose
-        else
-            echo "docker-compose is not v1.x"
         fi
     fi
 
