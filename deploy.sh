@@ -134,6 +134,8 @@ function deploy() {
 
         if [ ! -f '.noinit' ]; then
             init
+        else
+            echo "found .noinit file, skip init"
         fi
     
         # before
