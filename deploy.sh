@@ -123,7 +123,6 @@ function deploy() {
     echo "deploy env ===> ${ENV}"
     echo "deploy domain ===> ${DOMAIN}"
     echo "deploy domains ===> ${DOMAINS[*]}"
-    init
 
     # 按顺序部署服务
     for serv in ${SERVICES[@]}; do #也可以写成for element in ${array[*]}
@@ -133,6 +132,10 @@ function deploy() {
         echo "#####################################################################"
         echo "######################## service: ${serv} begin ########################"
 
+        if [ ! -f '.noinit' ]; then
+            init
+        fi
+    
         # before
         [ -f "before.sh" ] && source before.sh $COMPOSE
         # before
