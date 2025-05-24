@@ -13,7 +13,7 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "${DATA}/traefik/config:/etc/traefik/config:ro"
-      - "${DATA}/acme:/opt/acme:ro"
+      - "${DATA}/acme:${DATA}/acme:ro"
     command: 
 
       --global.checkNewVersion=false
