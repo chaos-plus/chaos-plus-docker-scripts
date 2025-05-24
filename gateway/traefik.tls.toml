@@ -18,6 +18,6 @@
   [tls.stores]
     [tls.stores.default]
     [tls.stores.default.defaultCertificate]
-      certFile = "/opt/acme/MY_DOMAIN/fullchain.cer"
-      keyFile  = "/opt/acme/MY_DOMAIN/MY_DOMAIN.key"
+      certFile = "/opt/data/acme/MY_DOMAIN/fullchain.cer"
+      keyFile  = "/opt/data/acme/MY_DOMAIN/MY_DOMAIN.key"
 
