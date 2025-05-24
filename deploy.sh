@@ -40,8 +40,33 @@ function init() {
         exit 1
     fi
 
-    if [ ! -n "$(which docker-compose 2>/dev/null)" ]; then
-        $PM install -y docker-compose
+
+    if command -v docker-compose &>/dev/null; then
+        if echo "$(docker-compose version --short 2>/dev/null)" | grep -q '^1\.'; then
+            echo "docker-compose is v1.x"
+            $PM uninstall -y docker-compose
+        else
+            echo "docker-compose is not v1.x"
+        fi
+    fi
+
+
+    if ! command -v docker-compose &>/dev/null; then
+        # 设置安装路径
+        DEST=/usr/local/bin/docker-compose
+        # 获取最新版本号（从 GitHub API）
+        version=$(curl -s https://api.github.com/repos/docker/compose/releases/latest \
+            | grep '"tag_name":' | cut -d '"' -f 4)
+        if [[ -z "$version" ]]; then
+            echo "❌ 无法获取 docker-compose 最新版本号"
+            exit 1
+        fi
+        echo "📦 正在下载 docker-compose $version ..."
+        # 构建下载 URL
+        url="https://github.com/docker/compose/releases/download/$version/docker-compose-$(uname -s)-$(uname -m)"
+        # 下载并安装
+        curl -L "$url" -o "$DEST"
+        chmod +x "$DEST"
     fi
 
     if [ ! -n "$(which docker-compose 2>/dev/null)" ]; then
