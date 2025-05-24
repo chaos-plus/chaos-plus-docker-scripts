@@ -1,6 +1,6 @@
 #
 
-export SERVICES=('acme' 'gateway' 'proxy' 'sing-box')
+export SERVICES=( 'gateway' 'proxy' 'sing-box' 'acme' )
 
 export PASSWORD=${PASSWORD:-"12345678"}
 export HTPASSWD=$(openssl passwd -apr1 $PASSWORD)
