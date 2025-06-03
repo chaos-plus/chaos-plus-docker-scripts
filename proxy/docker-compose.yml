@@ -35,19 +35,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.crproxy.rule=HostRegexp(`^(cr|docker|dhub|l5d|elastic|gcr|ghcr|k8s-gcr|k8s|mcr|nvcr|quay|jujucharms)\.${DOMAIN}`)
-      - traefik.http.routers.crproxy.tls.certresolver=cm
-      - traefik.http.routers.crproxy.tls.domains[0].main=cr-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[1].main=dhub-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[2].main=l5d-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[3].main=elastic-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[4].main=gcr-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[5].main=ghcr-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[6].main=k8s-gcr-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[7].main=k8s-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[8].main=mcr-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[9].main=nvcr-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[10].main=quay-${DOMAIN}
-      - traefik.http.routers.crproxy.tls.domains[11].main=jujucharms-${DOMAIN}
       - traefik.http.routers.crproxy.tls=true
       - traefik.http.routers.crproxy.entrypoints=websecure
       - traefik.http.routers.crproxy.service=crproxy@docker
@@ -86,8 +73,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.ghproxy.rule=HostRegexp(`^gh\..*`)
-      - traefik.http.routers.ghproxy.tls.certresolver=cm
-      - traefik.http.routers.ghproxy.tls.domains[0].main=gh-${DOMAIN}
       - traefik.http.routers.ghproxy.tls=true
       - traefik.http.routers.ghproxy.entrypoints=websecure
       - traefik.http.routers.ghproxy.service=ghproxy@docker
