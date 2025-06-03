@@ -8,11 +8,11 @@ function init() {
     ########################
 
     if command -v apt &>/dev/null; then
-        apt install -y git wget curl vim
+        apt install -y git wget curl vim fail2ban
     fi
 
     if command -v yum &>/dev/null; then
-        yum install -y git wget curl vim
+        yum install -y git wget curl vim fail2ban
     fi
 
     # if [ ! -n "$(which ansible 2>/dev/null)" ]; then
@@ -40,8 +40,31 @@ function init() {
         exit 1
     fi
 
-    if [ ! -n "$(which docker-compose 2>/dev/null)" ]; then
-        $PM install -y docker-compose
+
+    if command -v docker-compose &>/dev/null; then
+        if echo "$(docker-compose version --short 2>/dev/null)" | grep -q '^1\.'; then
+            echo "docker-compose is v1.x, need upgrade"
+            $PM uninstall -y docker-compose
+        fi
+    fi
+
+
+    if ! command -v docker-compose &>/dev/null; then
+        # 设置安装路径
+        DEST=/usr/local/bin/docker-compose
+        # 获取最新版本号（从 GitHub API）
+        version=$(curl -s https://api.github.com/repos/docker/compose/releases/latest \
+            | grep '"tag_name":' | cut -d '"' -f 4)
+        if [[ -z "$version" ]]; then
+            echo "❌ 无法获取 docker-compose 最新版本号"
+            exit 1
+        fi
+        echo "📦 正在下载 docker-compose $version ..."
+        # 构建下载 URL
+        url="https://github.com/docker/compose/releases/download/$version/docker-compose-$(uname -s)-$(uname -m)"
+        # 下载并安装
+        curl -L "$url" -o "$DEST"
+        chmod +x "$DEST"
     fi
 
     if [ ! -n "$(which docker-compose 2>/dev/null)" ]; then
@@ -100,7 +123,6 @@ function deploy() {
     echo "deploy env ===> ${ENV}"
     echo "deploy domain ===> ${DOMAIN}"
     echo "deploy domains ===> ${DOMAINS[*]}"
-    init
 
     # 按顺序部署服务
     for serv in ${SERVICES[@]}; do #也可以写成for element in ${array[*]}
@@ -110,6 +132,12 @@ function deploy() {
         echo "#####################################################################"
         echo "######################## service: ${serv} begin ########################"
 
+        if [ ! -f '.noinit' ]; then
+            init
+        else
+            echo "found .noinit file, skip init"
+        fi
+    
         # before
         [ -f "before.sh" ] && source before.sh $COMPOSE
         # before
