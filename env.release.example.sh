@@ -5,15 +5,21 @@ export SERVICES=('acme' 'gateway' 'proxy' 'sing-box')
 export PASSWORD=${PASSWORD:-"12345678"}
 export HTPASSWD=$(openssl passwd -apr1 $PASSWORD)
 
-export DOMAIN="noproxy.top"
-export DOMAIN_REGEX=${DOMAIN/./\\.}
 export DOMAINS=("noproxy.top")
+export DOMAIN=${DOMAINS[0]}
+export DOMAIN_REGEX=${DOMAIN/./\\.}
 
-export ACME_DNS="dns_namesilo"
-export ACME_DNS_ID_NAME=""
-export ACME_DNS_ID_VALUE=""
-export ACME_DNS_KEY_NAME="Namesilo_Key"
-export ACME_DNS_KEY_VALUE="xxxx"
+# https://go-acme.github.io/lego/dns/index.html
+export ACME_DNS="namesilo"
+export NAMESILO_API_KEY="xxxx"
+
+#
+
+# export ACME_DNS="dns_namesilo"
+# export ACME_DNS_ID_NAME=""
+# export ACME_DNS_ID_VALUE=""
+# export ACME_DNS_KEY_NAME="Namesilo_Key"
+# export ACME_DNS_KEY_VALUE="xxxx"
 
 # dns_dp
 # export ACME_DNS=${ACME_DNS:-"dns_dp"}

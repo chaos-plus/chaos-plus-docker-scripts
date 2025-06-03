@@ -15,9 +15,9 @@ function init() {
         yum install -y git wget curl vim
     fi
 
-    if [ ! -n "$(which ansible 2>/dev/null)" ]; then
-        $PM install -y ansible
-    fi
+    # if [ ! -n "$(which ansible 2>/dev/null)" ]; then
+    #     $PM install -y ansible
+    # fi
 
     if [ ! -n "$(which docker 2>/dev/null)" ]; then
         bash <(curl -sfL https://linuxmirrors.cn/docker.sh)
