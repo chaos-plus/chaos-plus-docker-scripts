@@ -1,4 +1,11 @@
 
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
 services:
 
   mysql:
@@ -60,9 +67,3 @@ services:
         reservations:
           memory: ${RES_RESER_MEM}
 
-
-# docker network create --driver overlay --attachable cluster
-networks:
-  default:
-    name: ${NETWORK}
-    external: true

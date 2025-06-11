@@ -1,3 +1,11 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
 services:
   hiddify:
     #only for local build and development
