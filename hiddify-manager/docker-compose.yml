@@ -14,7 +14,7 @@ services:
     restart: always
 
     #latest release version
-    image: ghcr.io/hiddify/hiddify-manager:latest
+    image: ghcr.io/hiddify/hiddify-manager:v10.80.0
 
     #latest beta version
     #image: ghcr.io/hiddify/hiddify-manager:beta
