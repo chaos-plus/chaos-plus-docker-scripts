@@ -1,6 +1,6 @@
 #
 
-export SERVICES=('sing-box' 'acme' 'gateway' 'proxy')
+export SERVICES=('acme' 'gateway' 'proxy' 'db' 'hiddify-manager')
 
 export PASSWORD=${PASSWORD:-"12345678"}
 export HTPASSWD=$(openssl passwd -apr1 $PASSWORD)

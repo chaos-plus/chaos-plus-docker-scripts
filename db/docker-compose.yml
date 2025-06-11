@@ -1,0 +1,71 @@
+
+
+version: "3.8"
+
+services:
+
+  mysql:
+    image: mysql:5.7-oracle
+    container_name: mysql
+    restart: always
+    privileged: true
+    ports:
+      - "${PORT_MYSQL}:3306"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/mysql/data:/var/lib/mysql
+      - ${DATA}/mysql/log:/var/log/mysql
+      - ${DATA}/mysql/conf/my.cnf:/etc/mysql/my.cnf
+    #  - /opt/data/mariadb/config/my.cnf:/etc/mysql/my.cnf 
+    environment:
+      TIMEZONE: Asis/Shanghai
+      MYSQL_ROOT_PASSWORD: ${PASSWORD}
+      MYSQL_DATABASE: public
+    command:
+      --innodb-flush-method=fsync
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "${PORT_REDIS}:6379"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/redis/redis.conf:/etc/redis/redis.conf
+      - ${DATA}/redis:/data
+    command: 
+      - redis-server 
+      - '--requirepass "${PASSWORD}" '
+      - '--tcp-keepalive 50'
+      - '--appendonly yes'
+      - '--appendfsync everysec'
+      #- '--stop-writes-on-bgsave-error no'
+      - '--save 60 1'
+      - '--bind 0.0.0.0'
+      - '--protected-mode yes'
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
