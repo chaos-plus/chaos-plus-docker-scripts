@@ -2,6 +2,8 @@ services:
   hiddify:
     #only for local build and development
     #build: .
+    container_name: hiddify
+    restart: always
 
     #latest release version
     image: ghcr.io/hiddify/hiddify-manager:latest
