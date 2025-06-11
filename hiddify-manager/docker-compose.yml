@@ -24,7 +24,7 @@ services:
     cap_add:
       - NET_ADMIN
     volumes:
-       - ./docker-data/:/hiddify-data/
+       - ${DATA}/hiddify:/hiddify-data/
     environment:
       REDIS_URI_MAIN: 'redis://:${PASSWORD}@redis:6379/0'
       REDIS_URI_SSH: 'redis://:${PASSWORD}@redis:6379/1'
