@@ -27,7 +27,7 @@ services:
     ports:
       - "${PORT_HIDDIFY}:80"
       - "${PORT_HIDDIFY_SSL}:443"
-      - "11000-60000"  #for custom protocols like hysteria tuic wiregaurd 
+      - "50000-60000"  #for custom protocols like hysteria tuic wiregaurd 
     privileged: true
     cap_add:
       - NET_ADMIN
