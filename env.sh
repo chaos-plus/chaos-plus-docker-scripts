@@ -38,9 +38,6 @@ export PORT_PROXY_DASHBOARD=8081
 
 export PORT_FRPS_BIND=7777
 
-export PORT_HIDDIFY=8080
-export PORT_HIDDIFY_SSL=8443
-
 export PORT_PROXY_GH=9511
 export PORT_PROXY_CR=9522
 export PROXY_CR_VERSION=$(get_github_release_version "DaoCloud/crproxy")
