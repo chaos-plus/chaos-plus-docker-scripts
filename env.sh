@@ -1,23 +1,7 @@
 #!/bin/bash -e
 
-get_github_release_version() {
-    local repo=$1
-    if [[ $repo =~ releases/latest ]]; then
-        local url="https://api.github.com/repos/$repo"
-    else
-        local url="https://api.github.com/repos/$repo/releases/latest"
-    fi
-    echo $(curl -sfL $url | grep -oE '"tag_name": "[^"]+"' | head -n1 | cut -d'"' -f4)
-}
 
 export HOSTNAME=$(hostname)
-
-if [ -f "/usr/bin/apt" ]; then
-    export PM=/usr/bin/apt
-fi
-if [ -f "/usr/bin/yum" ]; then
-    export PM=/usr/bin/yum
-fi
 
 export NETWORK=traefik
 
@@ -29,15 +13,52 @@ export DATA=/opt/data
 mkdir -p ${TEMP}
 mkdir -p ${DATA}
 
-export RES_LIMIT_MEM="512M"
-export RES_RESER_MEM="512M"
+export RES_LIMIT_MEM="1024M"
+export RES_RESER_MEM="1024M"
 
 export PORT_PROXY=80
 export PORT_PROXY_SSL=443
 export PORT_PROXY_DASHBOARD=8081
 
+export PORT_MYSQL7=3307
+export PORT_MYSQL8=3308
+
+export PORT_REDIS=6379
+
 export PORT_FRPS_BIND=7777
 
 export PORT_PROXY_GH=9511
 export PORT_PROXY_CR=9522
-export PROXY_CR_VERSION=$(get_github_release_version "DaoCloud/crproxy")
+
+
+export PORT_WORDPRESS=8080
+
+
+export PORT_GRAFANA=3000
+export PORT_ALIST=5244
+
+
+
+export PORT_EMQX_MQTT=31883
+export PORT_EMQX_MQTT_SSL=38883
+export PORT_EMQX_MQTT_WS=38083
+export PORT_EMQX_MQTT_WSS=38084
+export PORT_EMQX_HTTP=38081
+export PORT_EMQX_UI=38089
+
+export PORT_RABBITMQ_EPMD=34369
+export PORT_RABBITMQ_AMQP_SSL=35671
+export PORT_RABBITMQ_AMQP=35672
+#export PORT_RABBITMQ_STOMP=61613
+#export PORT_RABBITMQ_STOMP_SSL=61614
+#export PORT_RABBITMQ_STOMP_WS=15674
+#export PORT_RABBITMQ_MQTT=1883
+#export PORT_RABBITMQ_MQTT_SSL=8883
+#export PORT_RABBITMQ_MQTT_WS=15675
+export PORT_RABBITMQ_UI=35673
+export PORT_RABBITMQ_CLUSTER=35674
+
+
+export PORT_NACOS=38848
+export PORT_SENTINEL=38858
+export PORT_SEATA=38091

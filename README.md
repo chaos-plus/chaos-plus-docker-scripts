@@ -12,18 +12,21 @@ git clone https://github.com/chaos-plus/chaos-plus-proxy-scripts.git
 
 cd chaos-plus-proxy-scripts
 
-\cp env.release.example.sh env.release.sh
+\cp env.example.sh env.release.sh
 
 vim env.release.sh # 修改
 
+
+# install all
 bash install.sh
 
+
+# install custom
+
+bash install.sh acme
+bash install.sh traefik
+bash install.sh crproxy
+bash install.sh ghproxy
+bash install.sh gfw
+
 ```
-
-## 整合自以下项目
-
-- [https://github.com/yonggekkk/sing-box-yg](https://github.com/yonggekkk/sing-box-yg)
-
-- [https://github.com/hunshcn/gh-proxy](https://github.com/hunshcn/gh-proxy)
-
-- [https://github.com/DaoCloud/crproxy](https://github.com/DaoCloud/crproxy)

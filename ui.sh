@@ -10,19 +10,4 @@ IP_LAN=$(ip addr | grep inet | grep -v inet6 | awk '{print $2}' | grep -v 127.0.
 
 echo "LAN IP: $IP_LAN"
 
-IP=$IP_WAN
-
-echo "------"
-
-if [ -n "$(docker ps | grep ghproxy)" ]; then
-    echo -e "GH PROXY ->* \e[4;34m http://$IP:${PROXY_GH} \e[0m"
-fi
-
-if [ -n "$(docker ps | grep crproxy)" ]; then
-    echo -e "CR PROXY ->* \e[4;34m http://$IP:${PROXY_CR} \e[0m"
-fi
-
-echo ""
-echo ""
-
 ##

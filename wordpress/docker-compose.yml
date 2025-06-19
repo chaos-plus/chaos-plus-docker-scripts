@@ -1,0 +1,59 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+
+  # https://github.com/bitnami/containers/tree/main/bitnami/wordpress#how-to-use-this-image
+  wordpress:
+    image: bitnami/wordpress:latest 
+    container_name: wordpress
+    restart: always
+    ports:
+      - "${PORT_WORDPRESS}:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/wordpress/:/bitnami/wordpress
+    environment:
+      - WORDPRESS_DATABASE_HOST=mysql7
+      - WORDPRESS_DATABASE_USER=root
+      - WORDPRESS_DATABASE_PASSWORD=${PASSWORD}
+      - WORDPRESS_DATABASE_NAME=wordpress
+      - WORDPRESS_TABLE_PREFIX=wp_
+      - WORDPRESS_USERNAME=admin
+      - WORDPRESS_PASSWORD=${PASSWORD}
+    labels:
+      - traefik.enable=true
+
+      # *
+      - traefik.http.routers.cms.rule=HostRegexp(`.*`)
+      - traefik.http.routers.cms.tls=true
+      - traefik.http.routers.cms.entrypoints=websecure
+      - traefik.http.routers.cms.service=cms@docker
+      - traefik.http.services.cms.loadbalancer.server.port=8080
+      - traefik.http.services.cms.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.cms.compress=true
+      # www
+      - traefik.http.routers.cmswww.rule=HostRegexp(`^www\..*`)
+      - traefik.http.routers.cmswww.tls=true
+      - traefik.http.routers.cmswww.entrypoints=websecure
+      - traefik.http.routers.cmswww.service=cmswww@docker
+      - traefik.http.services.cmswww.loadbalancer.server.port=8080
+      - traefik.http.services.cmswww.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.cmswww.compress=true
+
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.hostname == ${HOSTNAME}
+          #- node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}

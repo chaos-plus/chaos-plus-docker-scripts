@@ -1,0 +1,47 @@
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+    
+
+services:
+
+  frps:
+    image: snowdreamtech/frps:0.61
+    container_name: frps
+    restart: always
+    ports:
+      - "${PORT_FRPS_BIND}:7000"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/frps/:/etc/frp/
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frps-http.rule=HostRegexp(`^frp-.+\..*`)
+      - traefik.http.routers.frps-http.tls=true
+      - traefik.http.routers.frps-http.entrypoints=websecure
+      - traefik.http.routers.frps-http.service=frps-http@docker
+      - traefik.http.services.frps-http.loadbalancer.server.port=8080
+      - traefik.http.services.frps-http.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.frps-http.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.frps-http.headers.contentSecurityPolicy=upgrade-insecure-requests
+      - traefik.tcp.routers.frps-tcp.rule=HostSNIRegexp(`^tcp-.+\..*`)
+      - traefik.tcp.routers.frps-tcp.tls=true
+      - traefik.tcp.routers.frps-tcp.entrypoints=websecure
+      - traefik.tcp.routers.frps-tcp.service=frps-tcp@docker 
+      - traefik.tcp.services.frps-tcp.loadbalancer.server.port=8000
+      - traefik.http.routers.frps-ui.rule=HostRegexp(`^frps\..*`)
+      - traefik.http.routers.frps-ui.tls=true
+      - traefik.http.routers.frps-ui.entrypoints=websecure
+      - traefik.http.routers.frps-ui.service=frps-ui@docker
+      - traefik.http.services.frps-ui.loadbalancer.server.port=7500
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.role == manager
+
+

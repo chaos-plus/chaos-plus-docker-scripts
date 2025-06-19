@@ -1,11 +1,9 @@
 #
 
-export SERVICES=('acme' 'gateway' 'proxy' 'db' 'gfw')
-
 export PASSWORD=${PASSWORD:-"12345678"}
 export HTPASSWD=$(openssl passwd -apr1 $PASSWORD)
 
-export DOMAINS=("noproxy.top")
+export DOMAINS=("example.com")
 export DOMAIN="${DOMAINS[0]}"
 export DOMAIN_REGEX=${DOMAIN/./\\.}
 

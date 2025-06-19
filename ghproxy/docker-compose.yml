@@ -1,0 +1,30 @@
+
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  ghproxy:
+    image: hunsh/gh-proxy-py:latest
+    container_name: ghproxy
+    restart: always
+    ports:
+      - "${PORT_PROXY_GH}:80"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ghproxy.rule=HostRegexp(`^gh\..*`)
+      - traefik.http.routers.ghproxy.tls=true
+      - traefik.http.routers.ghproxy.entrypoints=websecure
+      - traefik.http.routers.ghproxy.service=ghproxy@docker
+      - traefik.http.services.ghproxy.loadbalancer.server.port=80
+      - traefik.http.services.ghproxy.loadBalancer.passHostHeader=true
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager

@@ -8,44 +8,34 @@ function init() {
     ########################
 
     if command -v apt &>/dev/null; then
-        apt install -y git wget curl vim fail2ban
+        sudo apt install -y git wget curl vim fail2ban ansible
     fi
 
     if command -v yum &>/dev/null; then
-        yum install -y git wget curl vim fail2ban
+        sudo yum install -y git wget curl vim fail2ban ansible
     fi
 
-    if [ ! -n "$(which ansible 2>/dev/null)" ]; then
-        $PM install -y ansible
+    if command -v pacman &>/dev/null; then
+        sudo pacman -S --noconfirm git wget curl vim fail2ban ansible
     fi
 
-    if [ ! -n "$(which docker 2>/dev/null)" ]; then
+    if ! command -v docker &>/dev/null; then
         bash <(curl -sfL https://linuxmirrors.cn/docker.sh)
     fi
 
-    if [ ! -n "$(which docker 2>/dev/null)" ]; then
+    if ! command -v docker &>/dev/null; then
         curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
     fi
 
-    if [ ! -n "$(which docker 2>/dev/null)" ]; then
-        $PM install -y docker.io
-    fi
-
-    if [ ! -n "$(which docker 2>/dev/null)" ]; then
-        $PM install -y docker-ce
+    if ! command -v docker &>/dev/null; then
+        if command -v pacman &>/dev/null; then
+            pacman -S --noconfirm docker || true
+        fi
     fi
 
     if ! command -v docker &>/dev/null; then
         echo "docker is not installed"
         exit 1
-    fi
-
-
-    if command -v docker-compose &>/dev/null; then
-        if echo "$(docker-compose version --short 2>/dev/null)" | grep -q '^1\.'; then
-            echo "docker-compose is v1.x, need upgrade"
-            $PM uninstall -y docker-compose
-        fi
     fi
 
 
@@ -68,7 +58,16 @@ function init() {
     fi
 
     if [ ! -n "$(which docker-compose 2>/dev/null)" ]; then
-        $PM install -y docker-compose-plugin || true
+        if command -v apt &>/dev/null; then
+            apt install -y docker-compose-plugin || true
+        fi
+        if command -v yum &>/dev/null; then
+            yum install -y docker-compose-plugin || true
+        fi
+        if command -v pacman &>/dev/null; then
+            pacman -S --noconfirm docker-compose || true
+        fi
+
         DOCKER_COMPOSE=$(find / -name docker-compose | grep "docker" 2>/dev/null)
         if [ -n "$DOCKER_COMPOSE" ]; then
             echo $DOCKER_COMPOSE
@@ -81,6 +80,13 @@ function init() {
         echo "docker-compose is not installed"
         exit 1
     fi
+
+    # ( ( ( (sudo usermod -aG docker $USER) ) ) )
+    # ( ( ( (newgrp docker) ) ) )
+
+    docker version
+    docker info
+    docker ps -a
 
     ## 创建共享网络
     if [ -n "$(docker network list | grep ${NETWORK})" ]; then
@@ -124,20 +130,32 @@ function deploy() {
     echo "deploy domain ===> ${DOMAIN}"
     echo "deploy domains ===> ${DOMAINS[*]}"
 
+    if [ -z "${SERVICES}" ]; then
+        SERVICES=("${@:1}" )
+    fi
+
+    if [ -z "${SERVICES}" ]; then
+        SERVICES=( $(find . -maxdepth 1 -type d -not -name '.*' -printf '%f\n') )
+    fi
+
+    echo "deploy services ===> ${SERVICES[*]}"
+
+    init
+
     # 按顺序部署服务
     for serv in ${SERVICES[@]}; do #也可以写成for element in ${array[*]}
         cd $WORK_SPACE
+
+        if [ ! -d "${serv}" ]; then
+            echo "service ${serv} not found"
+            continue
+        fi
+
         cd ${serv}
         echo ""
         echo "#####################################################################"
         echo "######################## service: ${serv} begin ########################"
 
-        if [ ! -f '.noinit' ]; then
-            init
-        else
-            echo "found .noinit file, skip init"
-        fi
-    
         # before
         [ -f "before.sh" ] && source before.sh $COMPOSE
         # before
@@ -176,11 +194,20 @@ function deploy() {
     ui
 }
 
-function exec() {
-    source ./env.sh
-    source ./env.$1.sh
-    export ENV=$1
-    deploy
-}
 
-exec release
+if [ -z "${ENV}" ]; then
+    ENV=release
+fi
+if [ -f "./env.sh" ]; then
+    source ./env.sh
+fi
+
+if [ ! -f "./env.${ENV}.sh" ]; then
+    \cp ./env.example.sh ./env.${ENV}.sh
+    vim ./env.${ENV}.sh
+fi
+
+if [ -f "./env.${ENV}.sh" ]; then
+    source ./env.${ENV}.sh
+fi
+deploy $*

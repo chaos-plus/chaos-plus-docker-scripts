@@ -1,3 +1,10 @@
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
 services:
   # https://github.com/iCloudBot/DockerRescue/tree/main/2.Deploy-Docker-Proxy
   # crproxy:
@@ -61,30 +68,3 @@ services:
       --override-default-registry=nvcr.${DOMAIN}=nvcr.io
       --override-default-registry=quay.${DOMAIN}=quay.io
       --override-default-registry=jujucharms.${DOMAIN}=registry.jujucharms.com
-
-  ghproxy:
-    image: hunsh/gh-proxy-py:latest
-    container_name: ghproxy
-    restart: always
-    ports:
-      - "${PORT_PROXY_GH}:80"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.ghproxy.rule=HostRegexp(`^gh\..*`)
-      - traefik.http.routers.ghproxy.tls=true
-      - traefik.http.routers.ghproxy.entrypoints=websecure
-      - traefik.http.routers.ghproxy.service=ghproxy@docker
-      - traefik.http.services.ghproxy.loadbalancer.server.port=80
-      - traefik.http.services.ghproxy.loadBalancer.passHostHeader=true
-    deploy:
-      mode: global
-      placement:
-        constraints:
-          - node.role == manager
-
-networks:
-  default:
-    name: ${NETWORK}
-    external: true

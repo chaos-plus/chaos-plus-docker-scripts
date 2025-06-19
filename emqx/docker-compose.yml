@@ -1,0 +1,63 @@
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+
+  emqx:
+    # https://www.emqx.io/docs/zh/v5.0/admin/api.html
+    image: emqx/emqx:5.10
+    container_name: emqx
+    restart: always
+    ports:
+      - "${PORT_EMQX_MQTT}:1883"
+      - "${PORT_EMQX_MQTT_SSL}:8883"
+      - "${PORT_EMQX_MQTT_WS}:8083"
+      - "${PORT_EMQX_MQTT_WSS}:8084"
+      - "${PORT_EMQX_HTTP}:8081"
+      - "${PORT_EMQX_UI}:18083"
+      # dashboard admin:public
+    environment:
+      EMQX_HOST: 127.0.0.1
+      EMQX_NAME: emqx_cloud
+    volumes:
+      - ${DATA}/emqx/data:/opt/emqx/data 
+      - ${DATA}/emqx/etc:/opt/emqx/etc 
+      - ${DATA}/emqx/log:/opt/emqx/log  
+    labels:
+      - traefik.enable=true
+      
+      - traefik.tcp.routers.mqtt.rule=HostSNIRegexp(`^mqtt\..*`)
+      - traefik.tcp.routers.mqtt.tls=true
+      - traefik.tcp.routers.mqtt.entrypoints=websecure
+      - traefik.tcp.routers.mqtt.service=mqtt@docker
+      - traefik.tcp.services.mqtt.loadbalancer.server.port=1883
+
+      - traefik.http.routers.emqx.rule=HostRegexp(`^emqx\..*`)
+      - traefik.http.routers.emqx.tls=true
+      - traefik.http.routers.emqx.entrypoints=websecure
+      - traefik.http.routers.emqx.service=emqx@docker
+      - traefik.http.services.emqx.loadbalancer.server.port=18083
+
+      - traefik.http.routers.websocket.rule=HostRegexp(`^websocket\..*`)
+      - traefik.http.routers.websocket.tls=true
+      - traefik.http.routers.websocket.entrypoints=websecure
+      - traefik.http.routers.websocket.service=websocket@docker
+      - traefik.http.services.websocket.loadbalancer.server.port=8083
+      - traefik.http.services.websocket.loadBalancer.passHostHeader=true
+
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
+

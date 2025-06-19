@@ -1,0 +1,23 @@
+
+
+
+services:
+  3x-ui:
+    image: ghcr.io/xeefei/3x-ui:latest
+    container_name: 3x-ui
+    environment:
+      - XRAY_VMESS_AEAD_FORCED=false
+    volumes:
+      - ${DATA}/3x-ui/db/:/etc/x-ui/
+      - ${DATA}/3x-ui/cert/:/root/cert/
+    network_mode: host
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "128k"
+        max-file: "1"
+    deploy:
+      placement:
+        constraints: 
+          - node.hostname == ${HOSTNAME}
