@@ -16,6 +16,8 @@ else
     sudo docker cp emqx:/opt/emqx/etc/ ${DATA}/emqx
     sudo docker cp emqx:/opt/emqx/log/ ${DATA}/emqx
     
+    sudo chmod -R 777 ${DATA}/emqx
+
     export EMQX_CONF=${DATA}/emqx/etc/emqx.conf
     sudo echo ''>> ${EMQX_CONF} 
     sudo echo "dashboard.default_username=\"admin\"">> ${EMQX_CONF} 
@@ -29,5 +31,3 @@ else
     docker rm -f emqx
 fi
 
-
-sudo chmod -R 777 ${DATA}/emqx

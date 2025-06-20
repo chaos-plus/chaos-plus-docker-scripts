@@ -9,7 +9,7 @@ networks:
 services:
 
   mysql8:
-    image: mysql:8.0
+    image: mysql:8.0-oracle
     container_name: mysql8
     restart: always
     privileged: true
