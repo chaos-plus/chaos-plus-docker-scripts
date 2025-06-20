@@ -1,0 +1,50 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  dtm:
+    image: yedf/dtm:latest
+    container_name: dtm
+    restart: unless-stopped
+    ports:
+      - "${PORT_DTM_UI:-36788}:8080"
+      - "${PORT_DTM_HTTP:-36789}:36789"
+      - "${PORT_DTM_GRPC:-36790}:36790"
+    environment:
+      STORE_DRIVER: mysql
+      STORE_HOST: mysql8
+      STORE_USER: root
+      STORE_PASSWORD: ${PASSWORD}
+      STORE_PORT: 3306
+      STORE_DB: dtm
+      TIME_ZONE_OFFSET: '0'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+      start_period: 10s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dtm.rule=HostRegexp(`^dtm\..*`)
+      - traefik.http.routers.dtm.tls=true
+      - traefik.http.routers.dtm.entrypoints=websecure
+      - traefik.http.routers.dtm.service=dtm@docker
+      - traefik.http.services.dtm.loadbalancer.server.port=8080
+      - traefik.http.services.dtm.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.dtm.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.dtm.headers.contentSecurityPolicy=upgrade-insecure-requests
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}

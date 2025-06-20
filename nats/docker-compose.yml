@@ -1,0 +1,26 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  nats:
+    image: nats
+    ports:
+      - "${PORT_NATS_CLIENT:-4222}:4222"
+      - "${PORT_NATS_HTTP:-8222}:8222"
+    volumes:
+      - ${DATA}/nats/nats.conf:/etc/nats/nats.conf
+      - ${DATA}/nats/data:/data
+    command: "--config /etc/nats/nats.conf"
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}

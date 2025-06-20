@@ -1,0 +1,52 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  nacos:
+    image: nacos/nacos-server:latest
+    container_name: nacos
+    restart: always
+    ports:
+      - "${PORT_NACOS_UI:-8080}:8080"
+      - "${PORT_NACOS_HTTP:-8848}:8848"
+      - "${PORT_NACOS_GRPC:-9848}:9848"
+    environment:
+      - MODE=standalone
+      # 使用 mysql 作为数据库
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=mysql8
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_DB_NAME=nacos
+      - MYSQL_SERVICE_PASSWORD=${PASSWORD}
+      # 设置连接 mysql 的连接参数
+      - MYSQL_DB_PARAM="characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&serverTimezone=Asia/Shanghai"
+      - NACOS_AUTH_ENABLE=true
+      - NACOS_AUTH_TOKEN=$(echo -n '${PASSWORD}${PASSWORD}${PASSWORD}${PASSWORD}${PASSWORD}' | base64) 
+      - NACOS_AUTH_IDENTITY_KEY=$(echo -n '${PASSWORD}' | base64) 
+      - NACOS_AUTH_IDENTITY_VALUE=${PASSWORD}${PASSWORD}${PASSWORD}${PASSWORD}
+    volumes:
+      - ${DATA}/nacos/logs:/home/nacos/logs
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nacos.rule=HostRegexp(`^nacos\..*`)
+      - traefik.http.routers.nacos.tls=true
+      - traefik.http.routers.nacos.entrypoints=websecure
+      - traefik.http.routers.nacos.service=nacos@docker
+      - traefik.http.services.nacos.loadbalancer.server.port=8080
+      - traefik.http.services.nacos.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.waline.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.waline.headers.contentSecurityPolicy=upgrade-insecure-requests
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}

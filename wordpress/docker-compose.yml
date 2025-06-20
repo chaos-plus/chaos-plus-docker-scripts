@@ -19,7 +19,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/wordpress/:/bitnami/wordpress
     environment:
-      - WORDPRESS_DATABASE_HOST=mysql7
+      - WORDPRESS_DATABASE_HOST=mysql8
       - WORDPRESS_DATABASE_USER=root
       - WORDPRESS_DATABASE_PASSWORD=${PASSWORD}
       - WORDPRESS_DATABASE_NAME=wordpress

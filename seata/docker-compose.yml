@@ -1,0 +1,31 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  seata-server:
+    image: apache/seata-server:latest
+    hostname: seata-server
+    ports:
+      - ${PORT_SEATA_CLIENT:-7091}:7091
+      - ${PORT_SEATA_SERVER:-8091}:8091
+    environment:
+      - SEATA_PORT=8091
+      - STORE_MODE=file
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - "${DATA}/seata/resources:/seata-server/resources"
+      - "${DATA}/seata/logs:/seata-server/logs"
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}

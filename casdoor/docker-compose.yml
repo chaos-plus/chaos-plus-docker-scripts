@@ -1,0 +1,41 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+
+services:
+  casdoor:
+    image: casbin/casdoor:v1.941.0 # 如果使用国内镜像加速, latest 不一定是最新的
+    container_name: casdoor
+    restart: always
+    ports:
+      - "${PORT_CASDOOR}:8000"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - RUNNING_IN_DOCKER=true
+      - driverName=mysql
+      - dataSourceName=root:${PASSWORD}@tcp(mysql8:3306)/
+      - dbName=casdoor
+    entrypoint: /bin/sh -c './server --createDatabase=true'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.casdoor.rule=Host(`casdoor.${DOMAIN}`)
+      - traefik.http.routers.casdoor.tls=true
+      - traefik.http.routers.casdoor.entrypoints=websecure
+      - traefik.http.routers.casdoor.service=casdoor@docker
+      - traefik.http.services.casdoor.loadbalancer.server.port=8000
+      - traefik.http.services.casdoor.loadBalancer.passHostHeader=true
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}

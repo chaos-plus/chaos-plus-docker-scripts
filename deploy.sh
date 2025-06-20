@@ -151,6 +151,13 @@ function deploy() {
             continue
         fi
 
+        if [[ "$serv" == "."* || "$serv" == "-"* ]]; then
+            echo "service ${serv} ignored"
+            continue
+        fi
+
+
+
         cd ${serv}
         echo ""
         echo "#####################################################################"

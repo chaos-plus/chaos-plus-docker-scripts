@@ -1,0 +1,45 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  umami:
+    image: umamisoftware/umami:mysql-latest
+    container_name: umami
+    restart: unless-stopped
+    ports:
+      - "${PORT_UMAMI:-3000}:3000"
+    environment:
+      TRACKER_SCRIPT_NAME: ${UMAMI_TRACKER_SCRIPT:-"analytics"}
+      DISABLE_TELEMETRY: "1"
+      DISABLE_UPDATES: "1"
+      DATABASE_URL: mysql://root:${PASSWORD}@mysql8:3306/umami
+      APP_SECRET: ${UMAMI_APP_SECRET:-$(pwgen 16 -n 1)}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+      start_period: 10s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.umami.rule=HostRegexp(`^umami\..*`)
+      - traefik.http.routers.umami.tls=true
+      - traefik.http.routers.umami.entrypoints=websecure
+      - traefik.http.routers.umami.service=umami@docker
+      - traefik.http.services.umami.loadbalancer.server.port=3000
+      - traefik.http.services.umami.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.umami.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.umami.headers.contentSecurityPolicy=upgrade-insecure-requests
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}

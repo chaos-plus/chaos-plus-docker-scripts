@@ -1,0 +1,41 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  # admin  http://127.0.0.1:9980/browser/dist/admin/admin.html
+  collabora:
+    image: collabora/code
+    container_name: collabora
+    restart: unless-stopped
+    cap_add:
+      - ALL
+      - CAP_MKNOD
+    ports:
+      - "${PORT_COLLABORA}:9980"
+    environment:
+      - domain=collabora.${DOMAIN}
+      - username=admin
+      - password=${PASSWORD}
+      - extra_params=--o:ssl.enable=false
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.collabora.rule=Host(`collabora.${DOMAIN}`)
+      - traefik.http.routers.collabora.tls=true
+      - traefik.http.routers.collabora.entrypoints=websecure
+      - traefik.http.routers.collabora.service=collabora@docker
+      - traefik.http.services.collabora.loadbalancer.server.port=9980
+      - traefik.http.services.collabora.loadBalancer.passHostHeader=true
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
