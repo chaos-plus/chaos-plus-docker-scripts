@@ -20,16 +20,16 @@ function init() {
     fi
 
     if ! command -v docker &>/dev/null; then
-        bash <(curl -sfL https://linuxmirrors.cn/docker.sh)
+        sudo bash <(curl -sfL https://linuxmirrors.cn/docker.sh)
     fi
 
     if ! command -v docker &>/dev/null; then
-        curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+        sudo curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
     fi
 
     if ! command -v docker &>/dev/null; then
         if command -v pacman &>/dev/null; then
-            pacman -S --noconfirm docker || true
+            sudo pacman -S --noconfirm docker || true
         fi
     fi
 
@@ -53,26 +53,26 @@ function init() {
         # 构建下载 URL
         url="https://github.com/docker/compose/releases/download/$version/docker-compose-$(uname -s)-$(uname -m)"
         # 下载并安装
-        curl -L "$url" -o "$DEST"
-        chmod +x "$DEST"
+        sudo curl -L "$url" -o "$DEST"
+        sudo chmod +x "$DEST"
     fi
 
     if [ ! -n "$(which docker-compose 2>/dev/null)" ]; then
         if command -v apt &>/dev/null; then
-            apt install -y docker-compose-plugin || true
+            sudo apt install -y docker-compose-plugin || true
         fi
         if command -v yum &>/dev/null; then
-            yum install -y docker-compose-plugin || true
+            sudo yum install -y docker-compose-plugin || true
         fi
         if command -v pacman &>/dev/null; then
-            pacman -S --noconfirm docker-compose || true
+            sudo pacman -S --noconfirm docker-compose || true
         fi
 
         DOCKER_COMPOSE=$(find / -name docker-compose | grep "docker" 2>/dev/null)
         if [ -n "$DOCKER_COMPOSE" ]; then
             echo $DOCKER_COMPOSE
             sudo chmod 777 $DOCKER_COMPOSE
-            \cp -rf $DOCKER_COMPOSE /usr/bin/docker-compose
+            sudo \cp -rf $DOCKER_COMPOSE /usr/bin/docker-compose
         fi
     fi
 
@@ -84,19 +84,19 @@ function init() {
     # ( ( ( (sudo usermod -aG docker $USER) ) ) )
     # ( ( ( (newgrp docker) ) ) )
 
-    docker version
-    docker info
-    docker ps -a
+    sudo docker version
+    sudo docker info
+    sudo docker ps -a
 
     ## 创建共享网络
-    if [ -n "$(docker network list | grep ${NETWORK})" ]; then
+    if [ -n "$(sudo docker network list | grep ${NETWORK})" ]; then
         # NET EXISTS
         echo "docker network exists, skip"
     else
         # NET INIT
         echo "docker network lost, create"
         # docker network create --driver overlay --attachable cluster
-        docker network create ${NETWORK}
+        sudo docker network create ${NETWORK}
     fi
 
     ########################
@@ -114,12 +114,12 @@ function compose() {
     if [ -z "$PULL" ]; then
         echo ""
     else
-        local CMD_PULL="docker-compose pull"
+        local CMD_PULL="sudo -E docker-compose pull"
         echo $CMD_PULL
         eval $CMD_PULL
     fi
 
-    local CMD_UP="docker-compose -f $1 --compatibility up -d "
+    local CMD_UP="sudo -E docker-compose -f $1 --compatibility up -d "
     echo "$(pwd) $CMD_UP"
     eval $CMD_UP
 }

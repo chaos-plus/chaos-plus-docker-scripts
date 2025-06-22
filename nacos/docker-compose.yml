@@ -17,21 +17,19 @@ services:
       - "${PORT_NACOS_GRPC:-9848}:9848"
     environment:
       - MODE=standalone
-      # 使用 mysql 作为数据库
+      # mysql
       - SPRING_DATASOURCE_PLATFORM=mysql
       - MYSQL_SERVICE_HOST=mysql8
-      - MYSQL_SERVICE_USER=root
       - MYSQL_SERVICE_PORT=3306
-      - MYSQL_SERVICE_DB_NAME=nacos
+      - MYSQL_SERVICE_USER=root
       - MYSQL_SERVICE_PASSWORD=${PASSWORD}
-      # 设置连接 mysql 的连接参数
+      - MYSQL_SERVICE_DB_NAME=nacos
       - MYSQL_DB_PARAM="characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
-      - NACOS_AUTH_ENABLE=true
-      - NACOS_AUTH_TOKEN=$(echo -n '${PASSWORD}${PASSWORD}${PASSWORD}${PASSWORD}${PASSWORD}' | base64) 
-      - NACOS_AUTH_IDENTITY_KEY=$(echo -n '${PASSWORD}' | base64) 
-      - NACOS_AUTH_IDENTITY_VALUE=${PASSWORD}${PASSWORD}${PASSWORD}${PASSWORD}
-
-      - JAVA_OPT_EXT="-Dnacos.config.namespace.compatible.mode=false"
+      # auth
+      - NACOS_AUTH_ENABLE=${NACOS_AUTH_ENABLE}
+      - NACOS_AUTH_TOKEN=${NACOS_AUTH_TOKEN}
+      - NACOS_AUTH_IDENTITY_KEY=${NACOS_AUTH_IDENTITY_KEY}
+      - NACOS_AUTH_IDENTITY_VALUE=${NACOS_AUTH_IDENTITY_VALUE}
     volumes:
       - ${DATA}/nacos/logs:/home/nacos/logs
     labels:
