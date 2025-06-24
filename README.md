@@ -1,16 +1,14 @@
 ## Proxy Deploy Scripts For Debian/Ubuntu
 
-> `traefik + crproxy + ghproxy + sing-box `
-
 > 自用. 仅用于学习, 随时删库!
 
 ## 使用说明(基于 docker)
 
 ```bash
 
-git clone https://github.com/chaos-plus/chaos-plus-proxy-scripts.git
+git clone https://github.com/chaos-plus/chaos-plus-docker-scripts.git
 
-cd chaos-plus-proxy-scripts
+cd chaos-plus-docker-scripts
 
 \cp env.example.sh env.release.sh
 
