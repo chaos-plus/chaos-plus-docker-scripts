@@ -28,3 +28,5 @@ bash install.sh ghproxy
 bash install.sh gfw
 
 ```
+
+
