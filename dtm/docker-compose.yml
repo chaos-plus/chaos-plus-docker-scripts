@@ -34,7 +34,7 @@ services:
       - traefik.http.routers.dtm.tls=true
       - traefik.http.routers.dtm.entrypoints=websecure
       - traefik.http.routers.dtm.service=dtm@docker
-      - traefik.http.services.dtm.loadbalancer.server.port=8080
+      - traefik.http.services.dtm.loadbalancer.server.port=36789
       - traefik.http.services.dtm.loadBalancer.passHostHeader=true
       - traefik.http.middlewares.dtm.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.dtm.headers.contentSecurityPolicy=upgrade-insecure-requests
