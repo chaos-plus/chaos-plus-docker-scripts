@@ -9,13 +9,13 @@ sudo wget https://raw.githubusercontent.com/alibaba/nacos/refs/heads/master/dist
 
 sudo sed -i '/^CREATE TABLE[^;]*$/I{/IF NOT EXISTS/I!s/CREATE TABLE/CREATE TABLE IF NOT EXISTS/}' ${DATA}/nacos/mysql-schema.sql
 
-cat ${DATA}/nacos/mysql-schema.sql
+sudo cat ${DATA}/nacos/mysql-schema.sql
 
-docker exec -i mysql7 mysql -uroot -p${PASSWORD} \
+sudo docker exec -i mysql7 mysql -uroot -p${PASSWORD} \
     -e "CREATE DATABASE IF NOT EXISTS nacos DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
 sudo docker exec -i mysql7 mysql -uroot -p${PASSWORD} nacos < ${DATA}/nacos/mysql-schema.sql
 
-docker exec -i mysql8 mysql -uroot -p${PASSWORD} \
+sudo docker exec -i mysql8 mysql -uroot -p${PASSWORD} \
     -e "CREATE DATABASE IF NOT EXISTS nacos DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
 
 sudo docker exec -i mysql8 mysql -uroot -p${PASSWORD} nacos < ${DATA}/nacos/mysql-schema.sql

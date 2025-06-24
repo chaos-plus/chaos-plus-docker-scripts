@@ -12,7 +12,6 @@ services:
     container_name: dtm
     restart: unless-stopped
     ports:
-      - "${PORT_DTM_UI:-36788}:8080"
       - "${PORT_DTM_HTTP:-36789}:36789"
       - "${PORT_DTM_GRPC:-36790}:36790"
     environment:
@@ -24,7 +23,7 @@ services:
       STORE_DB: dtm
       TIME_ZONE_OFFSET: '0'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:36789/health"]
       interval: 10s
       timeout: 2s
       retries: 3
