@@ -1,4 +1,4 @@
-## Proxy Deploy Scripts For Debian/Ubuntu
+## Docker Deploy Scripts For Debian/Ubuntu
 
 > 自用. 仅用于学习, 随时删库!
 
