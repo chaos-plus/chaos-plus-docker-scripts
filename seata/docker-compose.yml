@@ -7,9 +7,10 @@ networks:
 
 
 services:
-  seata-server:
+  seata:
     image: apache/seata-server:latest
-    hostname: seata-server
+    container_name: seata
+    restart: always
     ports:
       - ${PORT_SEATA_CLIENT:-7091}:7091
       - ${PORT_SEATA_SERVER:-8091}:8091
@@ -19,7 +20,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-      - "${DATA}/seata/resources:/seata-server/resources"
+      # - "${DATA}/seata/resources:/seata-server/resources"
       - "${DATA}/seata/logs:/seata-server/logs"
     deploy:
       placement:

@@ -16,13 +16,23 @@ jetstream {
   store_dir: /data/jetstream
 }
 
-cluster {
-  name: "NATS"
-  listen: "0.0.0.0:6222"
-
-  authorization {
-    user: root
-    password: ${PASSWORD}
-  }
+authorization {
+  user: "root"
+  password: "${PASSWORD}"
 }
+
+# cluster {
+#   name: "NATS"
+#   listen: "0.0.0.0:6222"
+
+#   routes = [
+#     nats-route://root:${PASSWORD}@127.0.0.1:6222
+#   ]
+
+#   authorization {
+#     user: "root"
+#     password: "${PASSWORD}"
+#   }
+# }
+
 EOF

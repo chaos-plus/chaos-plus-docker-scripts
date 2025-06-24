@@ -51,7 +51,6 @@ services:
       - traefik.http.services.websocket.loadBalancer.passHostHeader=true
 
     deploy:
-      mode: global
       placement:
         constraints: 
           - node.role == manager

@@ -1,0 +1,33 @@
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+
+  elasticsearch:
+    container_name: es
+    image: bitnami/elasticsearch:latest
+    restart: always
+    environment:
+      - "ELASTICSEARCH_PASSWORD=${PASSWORD}"
+    ports:
+      - "${PORT_ELASTICSEARCH_HTTP:-9200}:9200"
+      - "${PORT_ELASTICSEARCH_TCP:-9300}:9300"
+    volumes:
+      # - ./config:/usr/share/elasticsearch/config
+      - ${DATA}/elasticsearch/data:/usr/share/elasticsearch/data
+      - ${DATA}/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+    deploy:
+      placement:
+        constraints: 
+          - node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
+

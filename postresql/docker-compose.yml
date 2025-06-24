@@ -1,0 +1,31 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+
+  postgresql:
+    image: postgres:17
+    container_name: postgresql
+    restart: always
+    privileged: true
+    ports:
+      - "${PORT_POSTGRESQL}:5432"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/postgresql/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: ${PASSWORD}
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
