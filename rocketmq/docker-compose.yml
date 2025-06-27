@@ -1,0 +1,90 @@
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+
+  rmqnamesrv:
+    image: apache/rocketmq:latest
+    container_name: rmqnamesrv
+    ports:
+      - ${PORT_ROCKETMQ_NAMESRV}:9876
+    command: sh mqnamesrv
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
+  rmqbroker:
+    image: apache/rocketmq:latest
+    container_name: rmqbroker
+    ports:
+      - ${PORT_ROCKETMQ_BROKER}:10909
+      - ${PORT_ROCKETMQ_BROKER_HTTP}:10911
+      - ${PORT_ROCKETMQ_BROKER_HTTPS}:10912
+    environment:
+      - NAMESRV_ADDR=rmqnamesrv:9876
+    volumes:
+      - ${DATA}/rocketmq/store:/home/rocketmq/store
+    depends_on:
+      - rmqnamesrv
+    command: sh mqbroker
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.role == manager
+          
+  rmqproxy:
+    image: apache/rocketmq:latest
+    container_name: rmqproxy
+    depends_on:
+      - rmqbroker
+      - rmqnamesrv
+    ports:
+      - ${PORT_ROCKETMQ_PROXY_HTTP}:8080
+      - ${PORT_ROCKETMQ_PROXY_HTTPS}:8081
+    restart: on-failure
+    environment:
+      - NAMESRV_ADDR=rmqnamesrv:9876
+    command: sh mqproxy
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
+
+  dashboard:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    container_name: dashboard
+    depends_on:
+      - rmqproxy
+    ports:
+      # 修改了映射端口号
+      - ${PORT_ROCKETMQ_DASHBOARD_HTTP}:8080
+    environment:
+      - JAVA_OPTS=-Drocketmq.namesrv.addr=rmqnamesrv:9876
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
