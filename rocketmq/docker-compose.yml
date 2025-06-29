@@ -70,7 +70,7 @@ services:
 
   dashboard:
     image: apacherocketmq/rocketmq-dashboard:latest
-    container_name: dashboard
+    container_name: rmqdashboard
     depends_on:
       - rmqproxy
     ports:
