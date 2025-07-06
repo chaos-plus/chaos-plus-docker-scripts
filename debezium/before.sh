@@ -6,6 +6,6 @@ if [ -z "${PASSWORD}" ]; then
     exit 1
 fi
 
-sudo mkdir -p ${DATA}/kafka
-sudo chmod -R 777 ${DATA}/kafka
+sudo mkdir -p ${DATA}/debezium
+sudo chmod -R 777 ${DATA}/debezium
 
