@@ -4,20 +4,339 @@ set -e
 
 WORK_SPACE=$(pwd)
 
-function init() {
-    ########################
-
+pm_install_one() {
+    local package_name="$1"
+    # 判断系统并选择合适的包管理器
     if command -v apt &>/dev/null; then
-        sudo apt install -y git wget curl vim fail2ban ansible
+        # 使用 apt
+        if apt search "$package_name" | grep -q "$package_name"; then
+            echo "Installing $package_name using apt."
+            sudo apt install -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in apt repository."
+        fi
+    fi
+
+    if command -v apt-get &>/dev/null; then
+        # 使用 apt-get
+        if apt-cache search "$package_name" | grep -q "$package_name"; then
+            echo "Installing $package_name using apt-get."
+            sudo apt-get install -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in apt-get repository."
+        fi
     fi
 
     if command -v yum &>/dev/null; then
-        sudo yum install -y git wget curl vim fail2ban ansible
+        # 使用 yum
+        if yum list available "$package_name" &>/dev/null; then
+            echo "Installing $package_name using yum."
+            sudo yum install -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in yum repository."
+        fi
     fi
 
     if command -v pacman &>/dev/null; then
-        sudo pacman -S --noconfirm git wget curl vim fail2ban ansible
+        # 使用 pacman
+        if pacman -Q "$package_name" &>/dev/null; then
+            echo "✅ Package '$package_name' is already installed."
+            return
+        else
+            echo "📦 Installing '$package_name' using pacman..."
+            if sudo pacman -S --noconfirm "$package_name"; then
+                echo "✅ Installed '$package_name' successfully."
+                return
+            else
+                echo "❌ Failed to install '$package_name'. Maybe it doesn't exist in repositories?"
+            fi
+        fi
     fi
+
+    if command -v dnf &>/dev/null; then
+        # 使用 dnf
+        if dnf list available "$package_name" &>/dev/null; then
+            echo "Installing $package_name using dnf."
+            sudo dnf install -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in dnf repository."
+        fi
+    fi
+
+    if command -v snap &>/dev/null; then
+        # 使用 snap
+        if snap info "$package_name" &>/dev/null; then
+            echo "Installing $package_name using snap."
+            sudo snap install "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in snap repository."
+        fi
+    fi
+
+    if command -v yay &>/dev/null; then
+        # 使用 yay
+        if yay -Ss "$package_name" | grep -q "$package_name"; then
+            echo "Installing $package_name using yay."
+            yay -S --noconfirm "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in yay repository."
+        fi
+    fi
+
+    if command -v zypper &>/dev/null; then
+        # 使用 zypper
+        if zypper search "$package_name" &>/dev/null; then
+            echo "Installing $package_name using zypper."
+            sudo zypper install -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in zypper repository."
+        fi
+    fi
+
+    if command -v brew &>/dev/null; then
+        # 使用 brew
+        if brew search "$package_name" &>/dev/null; then
+            echo "Installing $package_name using brew."
+            brew install "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in brew repository."
+        fi
+    fi
+
+    if command -v flatpak &>/dev/null; then
+        # 使用 flatpak
+        if flatpak search "$package_name" &>/dev/null; then
+            echo "Installing $package_name using flatpak."
+            sudo flatpak install -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in flatpak repository."
+        fi
+    fi
+
+    if command -v port &>/dev/null; then
+        # 使用 port
+        if port search "$package_name" &>/dev/null; then
+            echo "Installing $package_name using port."
+            sudo port install "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in port repository."
+        fi
+    fi
+
+    if command -v conda &>/dev/null; then
+        # 使用 conda
+        if conda search "$package_name" &>/dev/null; then
+            echo "Installing $package_name using conda."
+            conda install -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in conda repository."
+        fi
+    fi
+
+    if command -v nix &>/dev/null; then
+        # 使用 nix
+        if nix search "$package_name" &>/dev/null; then
+            echo "Installing $package_name using nix."
+            nix-env -i "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in nix repository."
+        fi
+    fi
+
+    echo "Package manager not supported on this system."
+}
+
+pm_uninstall_one() {
+    local package_name="$1"
+
+    # 判断系统并选择合适的包管理器进行卸载
+    if command -v apt &>/dev/null; then
+        # 使用 apt
+        if dpkg-query -l "$package_name" &>/dev/null; then
+            echo "Uninstalling $package_name using apt."
+            sudo apt remove -y "$package_name"
+            sudo apt autoremove -y
+            return
+        else
+            echo "Package '$package_name' not found in apt repository."
+        fi
+    fi
+
+    if command -v apt-get &>/dev/null; then
+        # 使用 apt-get
+        if dpkg-query -l "$package_name" &>/dev/null; then
+            echo "Uninstalling $package_name using apt-get."
+            sudo apt-get remove -y "$package_name"
+            sudo apt-get autoremove -y
+            return
+        else
+            echo "Package '$package_name' not found in apt-get repository."
+        fi
+    fi
+
+    if command -v yum &>/dev/null; then
+        # 使用 yum
+        if yum list installed "$package_name" &>/dev/null; then
+            echo "Uninstalling $package_name using yum."
+            sudo yum remove -y "$package_name"
+            sudo yum autoremove -y
+            return
+        else
+            echo "Package '$package_name' not found in yum repository."
+        fi
+    fi
+
+    if command -v pacman &>/dev/null; then
+        # 使用 pacman
+        if pacman -Qs "$package_name" | grep -q "$package_name"; then
+            echo "Uninstalling $package_name using pacman."
+            sudo pacman -R --noconfirm "$package_name"
+            sudo pacman -R $(pacman -Qdtq)
+            return
+        else
+            echo "Package '$package_name' not found in pacman repository."
+        fi
+    fi
+
+    if command -v dnf &>/dev/null; then
+        # 使用 dnf
+        if dnf list installed "$package_name" &>/dev/null; then
+            echo "Uninstalling $package_name using dnf."
+            sudo dnf remove -y "$package_name"
+            sudo dnf autoremove -y
+            return
+        else
+            echo "Package '$package_name' not found in dnf repository."
+        fi
+    fi
+
+    if command -v snap &>/dev/null; then
+        # 使用 snap
+        if snap list "$package_name" &>/dev/null; then
+            echo "Uninstalling $package_name using snap."
+            sudo snap remove "$package_name" --purge
+            return
+        else
+            echo "Package '$package_name' not found in snap repository."
+        fi
+    fi
+
+    if command -v yay &>/dev/null; then
+        # 使用 yay
+        if yay -Qs "$package_name" | grep -q "$package_name"; then
+            echo "Uninstalling $package_name using yay."
+            yay -R --noconfirm "$package_name"
+            yay -R $(yay -Qdtq)
+            return
+        else
+            echo "Package '$package_name' not found in yay repository."
+        fi
+    fi
+
+    if command -v zypper &>/dev/null; then
+        # 使用 zypper
+        if zypper search --installed-only "$package_name" &>/dev/null; then
+            echo "Uninstalling $package_name using zypper."
+            sudo zypper remove -y "$package_name"
+            sudo zypper autoremove -y
+            return
+        else
+            echo "Package '$package_name' not found in zypper repository."
+        fi
+    fi
+
+    if command -v brew &>/dev/null; then
+        # 使用 brew
+        if brew list "$package_name" &>/dev/null; then
+            echo "Uninstalling $package_name using brew."
+            brew uninstall "$package_name"
+            brew cleanup --prune=all
+            return
+        else
+            echo "Package '$package_name' not found in brew repository."
+        fi
+    fi
+
+    if command -v flatpak &>/dev/null; then
+        # 使用 flatpak
+        if flatpak list | grep -q "$package_name"; then
+            echo "Uninstalling $package_name using flatpak."
+            sudo flatpak uninstall -y "$package_name"
+            return
+        else
+            echo "Package '$package_name' not found in flatpak repository."
+        fi
+    fi
+
+    if command -v port &>/dev/null; then
+        # 使用 port
+        if port installed | grep -q "$package_name"; then
+            echo "Uninstalling $package_name using port."
+            sudo port uninstall "$package_name"
+            sudo port autoremove -y
+            return
+        else
+            echo "Package '$package_name' not found in port repository."
+        fi
+    fi
+
+    if command -v conda &>/dev/null; then
+        # 使用 conda
+        if conda list | grep -q "$package_name"; then
+            echo "Uninstalling $package_name using conda."
+            conda remove -y "$package_name"
+            conda clean -y
+            return
+        else
+            echo "Package '$package_name' not found in conda repository."
+        fi
+    fi
+
+    if command -v nix &>/dev/null; then
+        # 使用 nix
+        if nix-env -q | grep -q "$package_name"; then
+            echo "Uninstalling $package_name using nix."
+            nix-env -e "$package_name"
+            nix-env --delete-generations old
+            return
+        else
+            echo "Package '$package_name' not found in nix repository."
+        fi
+    fi
+
+    echo "Package manager not supported on this system."
+}
+
+pm_install() {
+    for package_name in $@; do
+        pm_install_one "$package_name"
+    done
+}
+
+pm_uninstall() {
+    for package_name in $@; do
+        pm_uninstall_one "$package_name"
+    done
+    hash -r
+}
+
+
+function init() {
+    ########################
+
+    pm_install git wget curl vim fail2ban ansible
 
     if ! command -v docker &>/dev/null; then
         sudo bash <(curl -sfL https://linuxmirrors.cn/docker.sh)
