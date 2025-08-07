@@ -41,7 +41,7 @@ services:
       - "${PORT_PROXY_CR}:8080"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.crproxy.rule=HostRegexp(`^(cr|docker|dhub|l5d|elastic|gcr|ghcr|k8s-gcr|k8s|mcr|nvcr|quay|jujucharms)\.${DOMAIN}`)
+      - traefik.http.routers.crproxy.rule=HostRegexp(`^(cr|docker|dhub|l5d|elastic|gcr|ghcr|k8s-gcr|k8s|mcr|nvcr|quay|jujucharms)\..*`)
       - traefik.http.routers.crproxy.tls=true
       - traefik.http.routers.crproxy.entrypoints=websecure
       - traefik.http.routers.crproxy.service=crproxy@docker

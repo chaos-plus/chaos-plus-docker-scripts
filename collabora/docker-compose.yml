@@ -24,7 +24,7 @@ services:
       - extra_params=--o:ssl.enable=false
     labels:
       - traefik.enable=true
-      - traefik.http.routers.collabora.rule=Host(`collabora.${DOMAIN}`)
+      - traefik.http.routers.collabora.rule=HostRegexp(`^collabora\..*`)
       - traefik.http.routers.collabora.tls=true
       - traefik.http.routers.collabora.entrypoints=websecure
       - traefik.http.routers.collabora.service=collabora@docker

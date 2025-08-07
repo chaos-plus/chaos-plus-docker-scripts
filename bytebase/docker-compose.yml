@@ -18,7 +18,7 @@ services:
       - ${PORT_BYTEBASE:-8080}:8080
     labels:
       - traefik.enable=true
-      - traefik.http.routers.bytebase.rule=Host(`bytebase.${DOMAIN}`)
+      - traefik.http.routers.bytebase.rule=HostRegexp(`^bytebase\..*`)
       - traefik.http.routers.bytebase.tls=true
       - traefik.http.routers.bytebase.entrypoints=websecure
       - traefik.http.routers.bytebase.service=bytebase@docker

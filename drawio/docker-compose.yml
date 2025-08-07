@@ -23,7 +23,7 @@ services:
       COUNTRY_CODE: country
     labels:
       - traefik.enable=true
-      - traefik.http.routers.drawio.rule=Host(`drawio.${DOMAIN}`)
+      - traefik.http.routers.drawio.rule=HostRegexp(`^drawio\..*`)
       - traefik.http.routers.drawio.tls=true
       - traefik.http.routers.drawio.entrypoints=websecure
       - traefik.http.routers.drawio.service=drawio@docker

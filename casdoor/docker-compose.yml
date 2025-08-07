@@ -24,7 +24,7 @@ services:
     entrypoint: /bin/sh -c './server --createDatabase=true'
     labels:
       - traefik.enable=true
-      - traefik.http.routers.casdoor.rule=Host(`casdoor.${DOMAIN}`)
+      - traefik.http.routers.casdoor.rule=HostRegexp(`^casdoor\..*`)
       - traefik.http.routers.casdoor.tls=true
       - traefik.http.routers.casdoor.entrypoints=websecure
       - traefik.http.routers.casdoor.service=casdoor@docker
