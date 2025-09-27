@@ -5,7 +5,7 @@ sudo mkdir -p ${DATA}/nacos
 sudo chmod -R 777 ${DATA}/nacos/
 
 
-sudo wget https://raw.githubusercontent.com/alibaba/nacos/refs/heads/master/distribution/conf/mysql-schema.sql -O ${DATA}/nacos/mysql-schema.sql
+sudo wget ${GHPROXY}https://raw.githubusercontent.com/alibaba/nacos/refs/heads/master/distribution/conf/mysql-schema.sql -O ${DATA}/nacos/mysql-schema.sql
 
 sudo sed -i '/^CREATE TABLE[^;]*$/I{/IF NOT EXISTS/I!s/CREATE TABLE/CREATE TABLE IF NOT EXISTS/}' ${DATA}/nacos/mysql-schema.sql
 

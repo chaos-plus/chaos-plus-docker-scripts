@@ -10,6 +10,8 @@ export SERV_NAME=cloud
 export TEMP=/opt/tmp
 export DATA=/opt/data
 
+export GHPROXY=https://ghproxy.net/
+
 mkdir -p ${TEMP}
 mkdir -p ${DATA}
 
