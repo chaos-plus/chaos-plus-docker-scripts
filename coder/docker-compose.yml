@@ -1,0 +1,38 @@
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  coder:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: coder
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - PASSWORD=$PASSWORD # Optional
+    volumes:
+      - ${DATA}/code-server/config:/config
+    ports:
+      - ${PORT_CODER:-8443}:8443
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.waline.rule=HostRegexp(`^waline\..*`)
+      - traefik.http.routers.waline.tls=true
+      - traefik.http.routers.waline.entrypoints=websecure
+      - traefik.http.routers.waline.service=waline@docker
+      - traefik.http.services.waline.loadbalancer.server.port=8360
+      - traefik.http.services.waline.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.waline.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.waline.headers.contentSecurityPolicy=upgrade-insecure-requests
+    deploy:
+      placement:
+        constraints: [ node.host == manager ]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
