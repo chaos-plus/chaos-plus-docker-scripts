@@ -339,7 +339,7 @@ function init() {
     pm_install git wget curl vim fail2ban ansible
 
     if ! command -v docker &>/dev/null; then
-        sudo bash <(curl -sfL https://linuxmirrors.cn/docker.sh)
+        sudo curl -fsSL https://linuxmirrors.cn/docker.sh
     fi
 
     if ! command -v docker &>/dev/null; then
