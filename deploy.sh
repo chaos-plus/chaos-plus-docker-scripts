@@ -455,6 +455,8 @@ function deploy() {
 
     if [ -z "${SERVICES}" ]; then
         SERVICES=( $(find . -maxdepth 1 -type d -not -name '.*' -printf '%f\n') )
+        echo "services is empty, please input services: ${SERVICES[*]}"
+        exit 1
     fi
 
     echo "deploy services ===> ${SERVICES[*]}"
