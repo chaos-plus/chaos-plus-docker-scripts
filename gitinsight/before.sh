@@ -2,6 +2,7 @@
 #!/bin/bash -e
 
 mkdir -p ${DATA}/gitinsight
+chmod -R 777 ${DATA}/gitinsight
 cd ${DATA}/gitinsight
 
 touch config.yaml

@@ -11,12 +11,12 @@ services:
   gitinsight:
     image: 'robotism/gitinsight:latest'
     container_name: gitinsight
+    restart: always
     volumes:
         - ${DATA}/gitinsight/config.yaml:/app/config.yaml
         - ${DATA}/gitinsight/.repo:/app/.repo
     ports:
         - '${PORT_GITINSIGHT}:8080'
-    restart: always
     labels:
       - traefik.enable=true
       - traefik.http.routers.gitinsight.rule=HostRegexp(`^gitinsight\..*`)
