@@ -16,6 +16,7 @@ services:
     network_mode: "${FRPS_NET:-${NETWORK}}"
     ports:
       - "${PORT_FRPS_BIND}:7000"
+      - "${PORT_FRPS_UI}:7500"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/frps/:/etc/frp/
