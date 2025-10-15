@@ -8,7 +8,7 @@ networks:
 
 services:
   uptime:
-    image: louislam/uptime-kuma:latest
+    image: louislam/uptime-kuma:beta
     container_name: uptime
     restart: ${SRV_RESTART:-always}
     ports:
@@ -16,14 +16,14 @@ services:
     volumes:
       - ${DATA}/uptime:/app/data
     environment:
-      # - UPTIME_KUMA_DB_TYPE=mariadb
-      # - UPTIME_KUMA_DB_HOSTNAME=mysql8
-      # - UPTIME_KUMA_DB_PORT=3306
-      # - UPTIME_KUMA_DB_NAME=uptime
-      # - UPTIME_KUMA_DB_USERNAME=root
-      # - UPTIME_KUMA_DB_PASSWORD=${PASSWORD}
-      # - UPTIME_KUMA_HOST=0.0.0.0
-      # - UPTIME_KUMA_PORT=3001
+      - UPTIME_KUMA_DB_TYPE=mariadb
+      - UPTIME_KUMA_DB_HOSTNAME=mysql8
+      - UPTIME_KUMA_DB_PORT=3306
+      - UPTIME_KUMA_DB_NAME=uptime
+      - UPTIME_KUMA_DB_USERNAME=root
+      - UPTIME_KUMA_DB_PASSWORD=${PASSWORD}
+      - UPTIME_KUMA_HOST=0.0.0.0
+      - UPTIME_KUMA_PORT=3001
       - ADMIN_EMAIL=admin.${DOMAIN}
       - ADMIN_PASSWORD=${PASSWORD}
     healthcheck:
