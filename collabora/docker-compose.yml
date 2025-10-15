@@ -11,7 +11,7 @@ services:
   collabora:
     image: collabora/code
     container_name: collabora
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     cap_add:
       - ALL
       - CAP_MKNOD

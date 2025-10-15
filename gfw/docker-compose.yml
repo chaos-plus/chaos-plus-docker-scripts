@@ -11,7 +11,7 @@ services:
       - ${DATA}/3x-ui/db/:/etc/x-ui/
       - ${DATA}/3x-ui/cert/:/root/cert/
     network_mode: host
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     logging:
       driver: "json-file"
       options:

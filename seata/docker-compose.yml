@@ -10,7 +10,7 @@ services:
   seata:
     image: apache/seata-server:latest
     container_name: seata
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - ${PORT_SEATA_CLIENT:-7091}:7091
       - ${PORT_SEATA_SERVER:-8091}:8091

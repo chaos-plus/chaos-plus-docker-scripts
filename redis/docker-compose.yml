@@ -11,7 +11,7 @@ services:
   redis:
     image: redis:7
     container_name: redis
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - "${PORT_REDIS}:6379"
     volumes:

@@ -10,7 +10,7 @@ services:
   # crproxy:
   #   image: cleverest/crproxy:latest
   #   container_name: crproxy
-  #   restart: unless-stopped
+  #   restart: ${SRV_RESTART:-always}
   #   ports:
   #     - "${PORT_PROXY_CR}:80"
   #   volumes:
@@ -36,7 +36,7 @@ services:
   crproxy:
     image: ghcr.io/daocloud/crproxy/crproxy:${PROXY_CR_VERSION}
     container_name: crproxy
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - "${PORT_PROXY_CR}:8080"
     labels:

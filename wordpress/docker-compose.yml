@@ -12,7 +12,7 @@ services:
   wordpress:
     image: bitnami/wordpress:latest 
     container_name: wordpress
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - "${PORT_WORDPRESS}:8080"
     volumes:

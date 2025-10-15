@@ -10,7 +10,7 @@ services:
   waline:
     image: lizheming/waline:latest
     container_name: waline
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - "${PORT_WALINE:-8360}:8360"
     environment:

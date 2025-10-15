@@ -8,9 +8,9 @@ networks:
 
 services:
   uptime:
-    image: louislam/uptime-kuma:beta
+    image: elestio/uptime-kuma:latest
     container_name: uptime
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - "${PORT_UPTIME:-3001}:3001"
     volumes:
@@ -22,6 +22,9 @@ services:
       - UPTIME_KUMA_DB_NAME=uptime
       - UPTIME_KUMA_DB_USERNAME=root
       - UPTIME_KUMA_DB_PASSWORD=${PASSWORD}
+      - UPTIME_KUMA_HOST=0.0.0.0
+      - UPTIME_KUMA_PORT=3001
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/"]
       interval: 10s

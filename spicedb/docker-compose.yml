@@ -10,7 +10,7 @@ services:
   spicedb:
     image: authzed/spicedb:${SPICEDB_VERSION}
     container_name: spicedb
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - ${PORT_SPICEDB_HTTP:-8443}:8443
       - ${PORT_SPICEDB_GRPC:-50051}:50051

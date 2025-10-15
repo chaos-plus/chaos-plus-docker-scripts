@@ -10,7 +10,7 @@ services:
   bytebase:
     image: bytebase/bytebase:latest
     container_name: bytebase
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/bytebase:/var/opt/bytebase

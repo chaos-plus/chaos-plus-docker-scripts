@@ -11,7 +11,7 @@ services:
   metersphere:
     image: metersphere/metersphere
     container_name: metersphere
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     privileged: true
     ports:
       - "${PORT_METERSPHERE}:8080"

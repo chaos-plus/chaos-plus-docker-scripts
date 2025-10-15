@@ -10,7 +10,7 @@ services:
   victoriametrics:
     image: victoriametrics/victoria-metrics:v1.120.0
     container_name: vmdb
-    restart: unless-stopped
+    restart: ${SRV_RESTART:-always}
     ports:
       - ${PORT_VICTORIAMETRICS_HTTP}:8428
       - ${PORT_VICTORIAMETRICS_INFLUX}:8089

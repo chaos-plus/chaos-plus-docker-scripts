@@ -1,3 +1,4 @@
+#!/bin/bash -e
 
 sudo mkdir -p /etc/docker
 sudo chmod 777 -R /etc/docker
