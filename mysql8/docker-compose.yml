@@ -12,7 +12,6 @@ services:
     image: mysql:8.0-oracle
     container_name: mysql8
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_MYSQL8:-bridge}}
     networks:
       - ${NETWORK}
     privileged: true

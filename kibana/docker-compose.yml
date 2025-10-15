@@ -12,7 +12,6 @@ services:
     container_name: kibana
     image: bitnami/kibana:latest
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_KIBANA:-bridge}}
     ports:
       - "${PORT_KIBANA:-5601}:5601"
     environment:

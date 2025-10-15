@@ -12,7 +12,6 @@ services:
     image: collabora/code
     container_name: collabora
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_COLLABORA:-bridge}}
     cap_add:
       - ALL
       - CAP_MKNOD

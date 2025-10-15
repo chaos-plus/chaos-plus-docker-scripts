@@ -11,7 +11,6 @@ services:
     image: bytebase/bytebase:latest
     container_name: bytebase
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_BYTEBASE:-bridge}}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/bytebase:/var/opt/bytebase

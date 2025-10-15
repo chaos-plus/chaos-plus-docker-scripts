@@ -12,7 +12,6 @@ services:
     container_name: kafka
     image: bitnami/kafka:latest
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_KAFKA:-bridge}}
     ports:
       - '${PORT_KAFKA}:9092'
       - '${PORT_KAFKA_CONTROLLER}:9093'

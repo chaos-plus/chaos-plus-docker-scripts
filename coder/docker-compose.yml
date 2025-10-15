@@ -9,7 +9,6 @@ services:
     image: lscr.io/linuxserver/code-server:latest
     container_name: coder
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_CODER:-bridge}}
     environment:
       - PUID=1000
       - PGID=1000
