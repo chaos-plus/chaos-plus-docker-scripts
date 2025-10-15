@@ -11,7 +11,7 @@ services:
     image: nacos/nacos-server:latest
     container_name: nacos
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_NACOS:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_NACOS:-bridge}}
     ports:
       - "${PORT_NACOS_UI:-8080}:8080"
       - "${PORT_NACOS_HTTP:-8848}:8848"

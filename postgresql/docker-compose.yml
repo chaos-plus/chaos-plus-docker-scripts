@@ -12,7 +12,7 @@ services:
     image: postgres:17
     container_name: postgresql
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_POSTGRESQL:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_POSTGRESQL:-bridge}}
     privileged: true
     ports:
       - "${PORT_POSTGRESQL}:5432"

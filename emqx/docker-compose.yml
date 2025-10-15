@@ -13,7 +13,7 @@ services:
     image: emqx/emqx:5.10
     container_name: emqx
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_EMQX:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_EMQX:-bridge}}
     ports:
       - "${PORT_EMQX_MQTT}:1883"
       - "${PORT_EMQX_MQTT_SSL}:8883"

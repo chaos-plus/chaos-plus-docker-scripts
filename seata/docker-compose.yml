@@ -11,7 +11,7 @@ services:
     image: apache/seata-server:latest
     container_name: seata
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_SEATA:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_SEATA:-bridge}}
     ports:
       - ${PORT_SEATA_CLIENT:-7091}:7091
       - ${PORT_SEATA_SERVER:-8091}:8091

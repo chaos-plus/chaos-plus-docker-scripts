@@ -12,7 +12,7 @@ services:
     image: casbin/casdoor:v1.941.0 # 如果使用国内镜像加速, latest 不一定是最新的
     container_name: casdoor
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_CASDOOR:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_CASDOOR:-bridge}}
     ports:
       - "${PORT_CASDOOR}:8000"
     volumes:

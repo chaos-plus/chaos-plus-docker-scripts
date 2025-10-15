@@ -13,7 +13,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_GRAFANA:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_GRAFANA:-bridge}}
     ports:
       - "${PORT_GRAFANA}:3000"
     volumes:

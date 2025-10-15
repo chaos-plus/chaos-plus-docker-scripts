@@ -12,7 +12,7 @@ services:
     image: mysql:5.7-oracle
     container_name: mysql7
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_MYSQL7:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_MYSQL7:-bridge}}
     privileged: true
     ports:
       - "${PORT_MYSQL7}:3306"

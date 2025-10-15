@@ -11,7 +11,7 @@ services:
     image: lizheming/waline:latest
     container_name: waline
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_WALINE:-}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_WALINE:-bridge}}
     ports:
       - "${PORT_WALINE:-8360}:8360"
     environment:
