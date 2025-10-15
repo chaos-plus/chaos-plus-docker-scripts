@@ -1,0 +1,48 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  uptime:
+    image: louislam/uptime-kuma:beta
+    container_name: uptime
+    restart: unless-stopped
+    ports:
+      - "${PORT_UPTIME:-3001}:3001"
+    volumes:
+      - ${DATA}/uptime:/app/data
+    environment:
+      - UPTIME_KUMA_DB_TYPE=mariadb
+      - UPTIME_KUMA_DB_HOSTNAME=mysql8
+      - UPTIME_KUMA_DB_PORT=3306
+      - UPTIME_KUMA_DB_NAME=uptime
+      - UPTIME_KUMA_DB_USERNAME=root
+      - UPTIME_KUMA_DB_PASSWORD=${PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+      start_period: 10s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.uptime.rule=HostRegexp(`^uptime\..*`)
+      - traefik.http.routers.uptime.tls=true
+      - traefik.http.routers.uptime.entrypoints=websecure
+      - traefik.http.routers.uptime.service=uptime@docker
+      - traefik.http.services.uptime.loadbalancer.server.port=3001
+      - traefik.http.services.uptime.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.uptime.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.uptime.headers.contentSecurityPolicy=upgrade-insecure-requests
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM}
+        reservations:
+          memory: ${RES_RESER_MEM}
