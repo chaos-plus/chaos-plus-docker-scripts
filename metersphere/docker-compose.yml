@@ -12,7 +12,7 @@ services:
     image: metersphere/metersphere
     container_name: metersphere
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_METERSPHERE:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_METERSPHERE:-}}
     privileged: true
     ports:
       - "${PORT_METERSPHERE}:8080"

@@ -11,7 +11,7 @@ services:
   #   image: cleverest/crproxy:latest
   #   container_name: crproxy
   #   restart: ${SRV_RESTART_MODE:-always}
-  #   network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_CRPROXY:-bridge}}
+  #   network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_CRPROXY:-}}
   #   ports:
   #     - "${PORT_PROXY_CR}:80"
   #   volumes:
@@ -38,7 +38,7 @@ services:
     image: ghcr.io/daocloud/crproxy/crproxy:${PROXY_CR_VERSION}
     container_name: crproxy
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_CRPROXY:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_CRPROXY:-}}
     ports:
       - "${PORT_PROXY_CR}:8080"
     labels:

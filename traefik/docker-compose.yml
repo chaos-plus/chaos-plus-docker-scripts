@@ -13,7 +13,7 @@ services:
     image: traefik:v3.0
     container_name: traefik
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_TRAEFIK:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_TRAEFIK:-}}
     ports:
       - "${PORT_PROXY}:${PORT_PROXY}"
       - "${PORT_PROXY_SSL}:${PORT_PROXY_SSL}"

@@ -12,7 +12,7 @@ services:
     container_name: es
     image: bitnami/elasticsearch:latest
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ELASTICSEARCH:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ELASTICSEARCH:-}}
     environment:
       - "ELASTICSEARCH_PASSWORD=${PASSWORD}"
     ports:

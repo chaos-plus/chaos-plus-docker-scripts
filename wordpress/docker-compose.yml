@@ -13,7 +13,7 @@ services:
     image: bitnami/wordpress:latest 
     container_name: wordpress
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_WORDPRESS:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_WORDPRESS:-}}
     ports:
       - "${PORT_WORDPRESS}:8080"
     volumes:

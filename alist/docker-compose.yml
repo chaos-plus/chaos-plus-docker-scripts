@@ -12,7 +12,7 @@ services:
     image: 'xhofe/alist:latest'
     container_name: alist
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ALIST:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ALIST:-}}
     volumes:
         - ${DATA}/alist:/opt/alist/data
     ports:

@@ -12,7 +12,7 @@ services:
     image: redis:7
     container_name: redis
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_REDIS:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_REDIS:-}}
     ports:
       - "${PORT_REDIS}:6379"
     volumes:

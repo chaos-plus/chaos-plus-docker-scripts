@@ -12,7 +12,7 @@ services:
     image: jgraph/drawio
     container_name: drawio
     restart: ${SRV_RESTART_MODE:-always}
-    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_DRAWIO:-bridge}}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_DRAWIO:-}}
     ports:
       - "${PORT_DRAWIO}:8080"
     environment:
