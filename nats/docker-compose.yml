@@ -10,7 +10,7 @@ services:
   nats:
     image: nats
     container_name: nats
-    restart: always
+    restart: unless-stopped
     ports:
       - "${PORT_NATS_CLIENT:-4222}:4222"
       - "${PORT_NATS_HTTP:-8222}:8222"

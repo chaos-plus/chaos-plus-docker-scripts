@@ -10,7 +10,7 @@ services:
   pulsar:
     image: apachepulsar/pulsar:latest
     container_name: pulsar
-    restart: always
+    restart: unless-stopped
     ports:
       - "${PORT_PULSAR}:6650"
       - "${PORT_PULSAR_HTTP}:8080"

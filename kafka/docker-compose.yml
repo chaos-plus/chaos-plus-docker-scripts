@@ -11,7 +11,7 @@ services:
   kafka:
     container_name: kafka
     image: bitnami/kafka:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - '${PORT_KAFKA}:9092'
       - '${PORT_KAFKA_CONTROLLER}:9093'

@@ -10,7 +10,7 @@ services:
   # crproxy:
   #   image: cleverest/crproxy:latest
   #   container_name: crproxy
-  #   restart: always
+  #   restart: unless-stopped
   #   ports:
   #     - "${PORT_PROXY_CR}:80"
   #   volumes:

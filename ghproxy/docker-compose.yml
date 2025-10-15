@@ -10,7 +10,7 @@ services:
   ghproxy:
     image: hunsh/gh-proxy-py:latest
     container_name: ghproxy
-    restart: always
+    restart: unless-stopped
     ports:
       - "${PORT_PROXY_GH}:80"
     volumes:

@@ -12,7 +12,7 @@ services:
     # https://www.emqx.io/docs/zh/v5.0/admin/api.html
     image: emqx/emqx:5.10
     container_name: emqx
-    restart: always
+    restart: unless-stopped
     ports:
       - "${PORT_EMQX_MQTT}:1883"
       - "${PORT_EMQX_MQTT_SSL}:8883"

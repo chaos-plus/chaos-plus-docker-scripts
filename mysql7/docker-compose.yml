@@ -11,7 +11,7 @@ services:
   mysql7:
     image: mysql:5.7-oracle
     container_name: mysql7
-    restart: always
+    restart: unless-stopped
     privileged: true
     ports:
       - "${PORT_MYSQL7}:3306"

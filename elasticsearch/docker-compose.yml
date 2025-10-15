@@ -11,7 +11,7 @@ services:
   elasticsearch:
     container_name: es
     image: bitnami/elasticsearch:latest
-    restart: always
+    restart: unless-stopped
     environment:
       - "ELASTICSEARCH_PASSWORD=${PASSWORD}"
     ports:

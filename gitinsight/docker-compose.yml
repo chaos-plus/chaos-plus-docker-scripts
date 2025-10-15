@@ -11,7 +11,7 @@ services:
   gitinsight:
     image: 'robotism/gitinsight:latest'
     container_name: gitinsight
-    restart: always
+    restart: unless-stopped
     volumes:
         - ${DATA}/gitinsight/config.yaml:/app/config.yaml
         - ${DATA}/gitinsight/.repo:/app/.repo
