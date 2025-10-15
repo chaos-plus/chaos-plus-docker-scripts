@@ -11,8 +11,6 @@ services:
     image: louislam/uptime-kuma:beta
     container_name: uptime
     restart: ${SRV_RESTART_MODE:-always}
-    networks:
-      - ${NETWORK}
     ports:
       - "${PORT_UPTIME:-3001}:3001"
     volumes:

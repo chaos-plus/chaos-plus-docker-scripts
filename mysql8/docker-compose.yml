@@ -12,8 +12,6 @@ services:
     image: mysql:8.0-oracle
     container_name: mysql8
     restart: ${SRV_RESTART_MODE:-always}
-    networks:
-      - ${NETWORK}
     privileged: true
     ports:
       - "${PORT_MYSQL8}:3306"
