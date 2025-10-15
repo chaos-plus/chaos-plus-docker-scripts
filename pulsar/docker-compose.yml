@@ -10,7 +10,8 @@ services:
   pulsar:
     image: apachepulsar/pulsar:latest
     container_name: pulsar
-    restart: ${SRV_RESTART:-always}
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_PULSAR:-bridge}}
     ports:
       - "${PORT_PULSAR}:6650"
       - "${PORT_PULSAR_HTTP}:8080"

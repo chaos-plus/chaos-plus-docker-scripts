@@ -10,7 +10,8 @@ services:
   nats:
     image: nats
     container_name: nats
-    restart: ${SRV_RESTART:-always}
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_NATS:-bridge}}
     ports:
       - "${PORT_NATS_CLIENT:-4222}:4222"
       - "${PORT_NATS_HTTP:-8222}:8222"

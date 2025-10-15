@@ -5,13 +5,13 @@ services:
   3x-ui:
     image: ghcr.io/xeefei/3x-ui:latest
     container_name: 3x-ui
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_3XUI:-host}}
     environment:
       - XRAY_VMESS_AEAD_FORCED=false
     volumes:
       - ${DATA}/3x-ui/db/:/etc/x-ui/
       - ${DATA}/3x-ui/cert/:/root/cert/
-    network_mode: host
-    restart: ${SRV_RESTART:-always}
     logging:
       driver: "json-file"
       options:

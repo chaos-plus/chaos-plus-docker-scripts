@@ -11,7 +11,8 @@ services:
   gitinsight:
     image: 'robotism/gitinsight:latest'
     container_name: gitinsight
-    restart: ${SRV_RESTART:-always}
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_GITINSIGHT:-bridge}}
     volumes:
         - ${DATA}/gitinsight/config.yaml:/app/config.yaml
         - ${DATA}/gitinsight/.repo:/app/.repo

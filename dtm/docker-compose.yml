@@ -10,7 +10,8 @@ services:
   dtm:
     image: yedf/dtm:latest
     container_name: dtm
-    restart: ${SRV_RESTART:-always}
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_DTM:-bridge}}
     ports:
       - "${PORT_DTM_HTTP:-36789}:36789"
       - "${PORT_DTM_GRPC:-36790}:36790"

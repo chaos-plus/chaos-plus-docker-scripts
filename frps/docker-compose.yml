@@ -12,8 +12,8 @@ services:
   frps:
     image: snowdreamtech/frps:0.61
     container_name: frps
-    restart: ${SRV_RESTART:-always}
-    network_mode: "${FRPS_NET:-${NETWORK}}"
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_FRPS:-bridge}}
     ports:
       - "${PORT_FRPS_BIND}:7000"
       - "${PORT_FRPS_UI}:7500"

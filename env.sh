@@ -37,7 +37,6 @@ export PORT_REDIS=6379
 
 export PORT_FRPS_BIND=7000
 export PORT_FRPS_UI=7500
-export FRPS_NET=host
 
 export PORT_PROXY_GH=9511
 export PORT_PROXY_CR=9522

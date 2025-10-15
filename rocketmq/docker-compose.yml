@@ -11,6 +11,8 @@ services:
   rmqnamesrv:
     image: apache/rocketmq:latest
     container_name: rmqnamesrv
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ROCKETMQ:-bridge}}
     ports:
       - ${PORT_ROCKETMQ_NAMESRV}:9876
     command: sh mqnamesrv
@@ -27,6 +29,8 @@ services:
   rmqbroker:
     image: apache/rocketmq:latest
     container_name: rmqbroker
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ROCKETMQ:-bridge}}
     ports:
       - ${PORT_ROCKETMQ_BROKER}:10909
       - ${PORT_ROCKETMQ_BROKER_HTTP}:10911
@@ -47,13 +51,14 @@ services:
   rmqproxy:
     image: apache/rocketmq:latest
     container_name: rmqproxy
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ROCKETMQ:-bridge}}
     depends_on:
       - rmqbroker
       - rmqnamesrv
     ports:
       - ${PORT_ROCKETMQ_PROXY_HTTP}:8080
       - ${PORT_ROCKETMQ_PROXY_HTTPS}:8081
-    restart: on-failure
     environment:
       - NAMESRV_ADDR=rmqnamesrv:9876
     command: sh mqproxy
@@ -71,6 +76,8 @@ services:
   dashboard:
     image: apacherocketmq/rocketmq-dashboard:latest
     container_name: rmqdashboard
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_ROCKETMQ:-bridge}}
     depends_on:
       - rmqproxy
     ports:

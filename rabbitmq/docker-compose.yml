@@ -11,7 +11,8 @@ services:
   rabbitmq:
     image: rabbitmq:4-management
     container_name: rabbitmq
-    restart: ${SRV_RESTART:-always}
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: ${SRV_NETWORK_MODE:-${NETWORK_MODE_RABBITMQ:-bridge}}
     privileged: true
     ports:
       # epmd
