@@ -1,5 +1,5 @@
 #!/bin/bash -e
 
-mkdir -p ${DATA}/metersphere
-chmod -R 777 ${DATA}/metersphere
+sudo mkdir -p ${DATA}/metersphere
+sudo chmod -R 777 ${DATA}/metersphere
 

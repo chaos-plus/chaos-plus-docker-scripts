@@ -2,5 +2,5 @@
 
 
 
-mkdir -p ${DATA}/uptime
-chmod -R 777 ${DATA}/uptime
+sudo mkdir -p ${DATA}/uptime
+sudo chmod -R 777 ${DATA}/uptime

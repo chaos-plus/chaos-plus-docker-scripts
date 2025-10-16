@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
-mkdir -p ${DATA}/acme
-mkdir -p ${DATA}/cron
+sudo mkdir -p ${DATA}/acme
+sudo mkdir -p ${DATA}/cron
 
 ACME_CRON_DIR=${DATA}/cron
-mkdir -p $ACME_CRON_DIR
+sudo mkdir -p $ACME_CRON_DIR
 ACME_CRON_SH=$ACME_CRON_DIR/acme.cron.sh
 ACME_CRON_LOG=$ACME_CRON_DIR/acme.cron.log
 
@@ -38,7 +38,7 @@ if [ -z "${ACME_DNS_KEY_VALUE}" ]; then
     exit 1
 fi
 
-cat <<EOF >$ACME_CRON_SH
+sudo cat <<EOF >$ACME_CRON_SH
 echo "##############################################################################"
 echo "acme.sh exec @ \$(date +%F) \$(date +%T)"
 docker run -it --rm \\
@@ -54,7 +54,7 @@ docker run -it --rm \\
 EOF
 
 for name in ${DOMAINS[*]}; do
-    cat <<EOF >>$ACME_CRON_SH
+    sudo cat <<EOF >>$ACME_CRON_SH
     -d ${name} \\
     -d *.${name} \\
 EOF
@@ -68,7 +68,7 @@ docker restart traefik 2>/dev/null
 #
 EOF
 
-chmod +x $ACME_CRON_SH
+sudo chmod +x $ACME_CRON_SH
 echo ""
 echo "--------------------------------------------------------------------------"
 ls -al $ACME_CRON_DIR

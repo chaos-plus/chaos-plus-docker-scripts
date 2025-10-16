@@ -18,10 +18,13 @@ else
 fi
 
 
-mkdir -p ${DATA}/traefik/config/
+sudo mkdir -p ${DATA}/traefik/config/
+sudo mkdir -p ${DATA}/traefik/data/
+sudo mkdir -p ${DATA}/traefik/log/
+
 
 export TRAEFIX_CONF=${DATA}/traefik/config/
-cp -rf ./traefik*.*ml ${TRAEFIX_CONF}
+sudo cp -rf ./traefik*.*ml ${TRAEFIX_CONF}
 
 sudo sed -i "s/MY_DOMAIN.key/${DOMAIN}.key/g" `grep MY_DOMAIN -rl ${TRAEFIX_CONF}`
 
@@ -30,5 +33,7 @@ if [ -d "${DATA}/acme/${DOMAIN}_ecc" ]; then
 else
     sudo sed -i "s/MY_DOMAIN/${DOMAIN}/g" `grep MY_DOMAIN -rl ${TRAEFIX_CONF}`
 fi
+
+sudo chmod -R 777 ${DATA}/traefik
 
 ################################################
