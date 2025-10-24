@@ -49,6 +49,7 @@ docker run -it --rm \\
     neilpang/acme.sh:3.0.6 \\
     --register-account -m acme@${DOMAIN} \\
     --set-default-ca --server letsencrypt \\
+    --preferred-chain "DST Root CA X3" \\
     --issue --force --debug 2 \\
     --dns ${ACME_DNS}  \\
 EOF
