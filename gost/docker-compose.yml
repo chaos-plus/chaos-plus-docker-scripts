@@ -1,0 +1,41 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+    
+services:
+
+
+  # 服务端： 海外节点
+  gost:
+    image: 'gogost/gost:latest'
+    container_name: gost
+    restart: ${SRV_RESTART_MODE:-always}
+    volumes:
+        - ${DATA}/gost:/gost/
+    ports:
+        - '${PORT_GOST:-8989}:8989'
+    working_dir: /gost
+    command: ["-DD", "-L relay+wss://gost:${PASSWORD}@:8989?certFile=cert.pem&keyFile=key.pem"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gost.rule=HostRegexp(`^gost\..*`)
+      - traefik.http.routers.gost.tls=true
+      - traefik.http.routers.gost.entrypoints=websecure
+      - traefik.http.routers.gost.service=gost@docker
+      - traefik.http.services.gost.loadbalancer.server.port=8989
+      - traefik.http.services.gost.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.gost.compress=true
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.hostname == ${HOSTNAME}
+          #- node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_GOST:-${RES_LIMIT_MEM:-1G}}
+        reservations:
+          memory: ${RES_RESER_MEM_GOST:-${RES_RESER_MEM:-64M}}

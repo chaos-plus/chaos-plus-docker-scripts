@@ -34,9 +34,9 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM}
+          memory: ${RES_LIMIT_MEM_KAFKA:-${RES_LIMIT_MEM:-1G}}
         reservations:
-          memory: ${RES_RESER_MEM}
+          memory: ${RES_RESER_MEM_KAFKA:-${RES_RESER_MEM:-64M}}
 
   kafka-ui:
     container_name: kafka-ui
@@ -52,6 +52,6 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM}
+          memory: ${RES_LIMIT_MEM_KAFKA_UI:-${RES_LIMIT_MEM:-1G}}
         reservations:
-          memory: ${RES_RESER_MEM}
+          memory: ${RES_RESER_MEM_KAFKA_UI:-${RES_RESER_MEM:-64M}}

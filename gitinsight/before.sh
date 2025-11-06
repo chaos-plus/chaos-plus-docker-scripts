@@ -3,10 +3,9 @@
 
 mkdir -p ${DATA}/gitinsight
 chmod -R 777 ${DATA}/gitinsight
-cd ${DATA}/gitinsight
 
-touch config.yaml
+touch ${DATA}/gitinsight/config.yaml
 docker run --rm \
--v $(pwd)/config.yaml:/app/config.yaml \
+-v ${DATA}/gitinsight/config.yaml:/app/config.yaml \
 ghcr.io/robotism/gitinsight:latest \
 ./gitinsight config gen -f /app/config.yaml 

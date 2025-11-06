@@ -47,6 +47,6 @@ services:
         constraints: [node.host == manager]
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM}
+          memory: ${RES_LIMIT_MEM_NACOS:-${RES_LIMIT_MEM:-1G}}
         reservations:
-          memory: ${RES_RESER_MEM}
+          memory: ${RES_RESER_MEM_NACOS:-${RES_RESER_MEM:-64M}}
