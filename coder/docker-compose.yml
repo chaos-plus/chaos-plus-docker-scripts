@@ -20,14 +20,14 @@ services:
       - ${PORT_CODER:-8443}:8443
     labels:
       - traefik.enable=true
-      - traefik.http.routers.waline.rule=HostRegexp(`^waline\..*`)
-      - traefik.http.routers.waline.tls=true
-      - traefik.http.routers.waline.entrypoints=websecure
-      - traefik.http.routers.waline.service=waline@docker
-      - traefik.http.services.waline.loadbalancer.server.port=8360
-      - traefik.http.services.waline.loadBalancer.passHostHeader=true
-      - traefik.http.middlewares.waline.headers.customrequestheaders.X-Forwarded-Proto=https
-      - traefik.http.middlewares.waline.headers.contentSecurityPolicy=upgrade-insecure-requests
+      - traefik.http.routers.coder.rule=HostRegexp(`^coder\..*`)
+      - traefik.http.routers.coder.tls=true
+      - traefik.http.routers.coder.entrypoints=websecure
+      - traefik.http.routers.coder.service=coder@docker
+      - traefik.http.services.coder.loadbalancer.server.port=8443
+      - traefik.http.services.coder.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.coder.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.coder.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
       placement:
         constraints: [ node.host == manager ]
