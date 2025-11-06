@@ -10,16 +10,22 @@ sudo cat > /etc/docker/daemon.json <<EOF
         "https://docker.m.daocloud.io",
         "https://mirror.ccs.tencentyun.com"
     ],
-    "max-concurrent-downloads": 20,
-    "log-driver": "json-file",
-    "log-level": "warn",
-    "log-opts": {"max-size":"100m", "max-file":"1"},
-    "exec-opts": ["native.cgroupdriver=systemd"],
-    "storage-driver": "overlay2",
     "insecure-registries": [
       "sealos.hub:5000"
     ],
-    "data-root": "/var/lib/docker"
+    "max-concurrent-downloads": 20,
+    "log-driver": "json-file",
+    "log-level": "warn",
+    "log-opts": {"max-size": "1024m", "max-file": "3"},
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "storage-driver": "overlay2",
+    "default-shm-size": "128M",
+    "live-restore": true,
+    "userland-proxy": false,
+    "iptables": true,
+    "ipv6": false,
+    "experimental": false,
+    "metrics-addr": "127.0.0.1:9323"
 }
 EOF
 sudo cat /etc/docker/daemon.json
