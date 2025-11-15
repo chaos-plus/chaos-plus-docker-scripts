@@ -29,6 +29,11 @@ services:
       --innodb-flush-method=fsync
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
+    labels:
+      - "logging.enabled=true"
+      - "app_name=mysql8"
+      - "environment=${ENV}"
+      - "logging_level=INFO"
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 5s
