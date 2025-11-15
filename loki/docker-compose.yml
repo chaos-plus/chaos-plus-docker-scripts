@@ -62,8 +62,6 @@ services:
       - traefik.http.routers.loki.entrypoints=websecure
       - traefik.http.services.loki.loadbalancer.server.port=3100
       - traefik.http.middlewares.loki.compress=true
-    networks:
-      - ${NETWORK:-traefik}
     deploy:
       mode: global
       placement:
