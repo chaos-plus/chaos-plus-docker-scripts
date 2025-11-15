@@ -23,9 +23,6 @@ loki.write "loki" {
     // 重试配置
     min_backoff_period = "1s"
     max_backoff_period = "30s"
-    
-    // 性能优化
-    timeout = "30s"
   }
   
   // 全局标签
