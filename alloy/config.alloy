@@ -1,12 +1,73 @@
 // ============================================================
-// Grafana Alloy 配置文件 - 日志采集和转发
+// Grafana Alloy 配置文件 - 日志和指标采集
 // 功能：
-// 1. 采集 Linux 系统日志
-// 2. 采集 Docker 容器日志（仅采集有 logging.enabled=true 标签的容器）
-// 3. 提取 trace_id/span_id 用于链路追踪
-// 4. 转发日志到 Loki
-// 5. 转发指标到 Prometheus
+// 1. 采集 Linux 系统指标（CPU、内存、磁盘、网络等）
+// 2. 采集 Linux 系统日志
+// 3. 采集 Docker 容器日志（仅采集有 logging.enabled=true 标签的容器）
+// 4. 提取 trace_id/span_id 用于链路追踪
+// 5. 转发日志到 Loki
+// 6. 转发指标到 Prometheus
 // ============================================================
+
+// ---------------------------
+// Linux 系统指标采集
+// ---------------------------
+// 使用 node_exporter 采集 Linux 系统指标
+prometheus.exporter.unix "node" {
+  // 禁用不常用的收集器
+  disable_collectors = ["ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+  
+  // 启用内存详细信息收集器
+  enable_collectors = ["meminfo"]
+  
+  // 文件系统配置
+  filesystem {
+    // 排除虚拟文件系统
+    fs_types_exclude = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+    
+    // 排除特殊挂载点
+    mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+    
+    // 挂载点超时
+    mount_timeout = "5s"
+  }
+  
+  // 网络类配置
+  netclass {
+    // 忽略虚拟网络接口
+    ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
+  }
+  
+  // 网络设备配置
+  netdev {
+    // 排除虚拟网络接口
+    device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
+  }
+}
+
+// 为 node_exporter 指标添加标签
+discovery.relabel "node" {
+  targets = prometheus.exporter.unix.node.targets
+  
+  // 设置实例标签为主机名
+  rule {
+    target_label = "instance"
+    replacement  = env("HOSTNAME")
+  }
+  
+  // 设置作业标签
+  rule {
+    target_label = "job"
+    replacement = "integrations/node_exporter"
+  }
+}
+
+// 抓取 node_exporter 指标
+prometheus.scrape "node" {
+  targets    = discovery.relabel.node.output
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+  scrape_interval = "15s"
+}
 
 // ---------------------------
 // Loki 输出端点配置
@@ -116,6 +177,24 @@ discovery.relabel "docker_logs" {
     source_labels = ["__meta_docker_container_label_app_name"]
     target_label = "job"
   }
+  
+  // 8. 提取自定义标签：request_id（如果容器有这个标签）
+  rule {
+    source_labels = ["__meta_docker_container_label_request_id"]
+    target_label = "request_id"
+  }
+  
+  // 9. 提取自定义标签：trace_id（如果容器有这个标签）
+  rule {
+    source_labels = ["__meta_docker_container_label_trace_id"]
+    target_label = "trace_id"
+  }
+  
+  // 10. 提取自定义标签：service_name（服务名称）
+  rule {
+    source_labels = ["__meta_docker_container_label_service_name"]
+    target_label = "service_name"
+  }
 }
 
 // ---------------------------
@@ -143,16 +222,28 @@ loki.process "parse_logs" {
     expression = "(?i)span[-_]?id[=:\\s]+(?P<span_id>[a-f0-9]{8,16})"
   }
   
-  // 阶段 3: 提取日志级别（如果没有从标签获取）
+  // 阶段 3: 提取 request_id（支持多种格式）
+  stage.regex {
+    expression = "(?i)request[-_]?id[=:\\s]+(?P<request_id>[a-zA-Z0-9-]{8,64})"
+  }
+  
+  // 阶段 4: 提取 correlation_id（关联 ID）
+  stage.regex {
+    expression = "(?i)correlation[-_]?id[=:\\s]+(?P<correlation_id>[a-zA-Z0-9-]{8,64})"
+  }
+  
+  // 阶段 5: 提取日志级别（如果没有从标签获取）
   stage.regex {
     expression = "(?i)\\[?(?P<level>TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\\]?"
   }
   
-  // 阶段 4: 将提取的字段添加为标签
+  // 阶段 6: 将提取的字段添加为标签
   stage.labels {
     values = {
       trace_id = "",
       span_id = "",
+      request_id = "",
+      correlation_id = "",
       level = "",
     }
   }
@@ -161,28 +252,65 @@ loki.process "parse_logs" {
 }
 
 // ---------------------------
-// 采集 Linux 系统日志（可选）
+// 采集 Linux 系统日志
 // ---------------------------
-// 注意：如果宿主机没有这些日志文件，会产生警告但不影响运行
-// 如果不需要系统日志，可以注释掉整个 block
-// 检查你的系统有哪些日志：ls -lh /var/log/
 
-// loki.source.file "system_logs" {
-//   targets = [
-//     {
-//       __path__ = "/var/log/syslog",      // Debian/Ubuntu
-//       job = "syslog",
-//       host = env("HOSTNAME"),
-//     },
-//     {
-//       __path__ = "/var/log/messages",    // CentOS/RHEL
-//       job = "messages",
-//       host = env("HOSTNAME"),
-//     },
-//   ]
-//   
-//   forward_to = [loki.write.loki.receiver]
+// 方式 1: 采集 systemd journal 日志（推荐）
+// 适用于使用 systemd 的 Linux 系统（Ubuntu 16.04+, CentOS 7+）
+// 注意：需要 Alloy 容器挂载 /var/log/journal
+
+// 为 systemd journal 日志添加标签
+discovery.relabel "journal" {
+  targets = []
+  
+  // 提取 systemd 单元名称
+  rule {
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "unit"
+  }
+  
+  // 提取启动 ID
+  rule {
+    source_labels = ["__journal__boot_id"]
+    target_label  = "boot_id"
+  }
+  
+  // 提取传输类型
+  rule {
+    source_labels = ["__journal__transport"]
+    target_label  = "transport"
+  }
+  
+  // 提取日志级别
+  rule {
+    source_labels = ["__journal_priority_keyword"]
+    target_label  = "level"
+  }
+}
+
+// 采集 systemd journal 日志（如果系统支持）
+// 取消注释以启用
+// loki.source.journal "system" {
+//   max_age       = "24h"  // 只采集最近24小时的日志
+//   relabel_rules = discovery.relabel.journal.rules
+//   forward_to    = [loki.write.loki.receiver]
 // }
+
+// 方式 2: 采集文件日志（通用）
+// 适用于所有 Linux 系统
+local.file_match "system_logs" {
+  path_targets = [{
+    __address__ = "localhost",
+    __path__    = "/var/log/{syslog,messages,*.log}",  // 自动匹配常见日志文件
+    instance    = env("HOSTNAME"),
+    job         = "integrations/node_exporter",
+  }]
+}
+
+loki.source.file "system_logs" {
+  targets    = local.file_match.system_logs.targets
+  forward_to = [loki.write.loki.receiver]
+}
 
 // ---------------------------
 // 采集应用日志文件（可选）
