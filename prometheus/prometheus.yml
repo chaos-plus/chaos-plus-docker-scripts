@@ -1,0 +1,143 @@
+# Prometheus 配置文件
+# 版本: Prometheus 3.0.1
+
+global:
+  # 全局抓取间隔
+  scrape_interval: 15s
+  
+  # 全局评估间隔（告警规则）
+  evaluation_interval: 15s
+  
+  # 抓取超时
+  scrape_timeout: 10s
+  
+  # 外部标签（用于联邦或远程存储）
+  external_labels:
+    cluster: 'main'
+    environment: 'production'
+
+# 告警管理器配置（可选）
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# 告警规则文件
+rule_files:
+  - '/etc/prometheus/rules/*.yml'
+
+# 抓取配置
+scrape_configs:
+  # =============================================
+  # Prometheus 自监控
+  # =============================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          app: 'prometheus'
+          environment: 'production'
+
+  # =============================================
+  # Node Exporter（主机监控）
+  # =============================================
+  - job_name: 'node'
+    static_configs:
+      - targets: []
+        # 示例：添加你的主机
+        # - targets: ['192.168.1.100:9100']
+        labels:
+          app: 'node-exporter'
+
+  # =============================================
+  # Docker 容器监控（cAdvisor）
+  # =============================================
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: []
+        # 示例：
+        # - targets: ['192.168.1.100:8080']
+        labels:
+          app: 'cadvisor'
+
+  # =============================================
+  # Grafana Alloy 指标
+  # =============================================
+  - job_name: 'alloy'
+    static_configs:
+      - targets: ['alloy:12345']
+        labels:
+          app: 'alloy'
+          component: 'log-collector'
+
+  # =============================================
+  # Loki 指标
+  # =============================================
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+        labels:
+          app: 'loki'
+          component: 'log-storage'
+
+  # =============================================
+  # Tempo 指标（如果部署了 Tempo）
+  # =============================================
+  - job_name: 'tempo'
+    static_configs:
+      - targets: []
+        # - targets: ['tempo:3200']
+        labels:
+          app: 'tempo'
+          component: 'tracing'
+
+  # =============================================
+  # Grafana 指标
+  # =============================================
+  - job_name: 'grafana'
+    static_configs:
+      - targets: []
+        # 示例：
+        # - targets: ['grafana:3000']
+        labels:
+          app: 'grafana'
+
+  # =============================================
+  # 自定义应用（Java/SpringBoot）
+  # =============================================
+  - job_name: 'spring-boot'
+    # 服务发现：通过文件动态发现
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets/*.json'
+        refresh_interval: 30s
+    
+    # 或者静态配置
+    static_configs:
+      - targets: []
+        # 示例：添加你的 SpringBoot 应用
+        # - targets: ['app1:8080', 'app2:8080']
+        labels:
+          app: 'spring-boot'
+
+# =============================================
+# 远程写入配置（可选）
+# =============================================
+# 如果需要将数据推送到其他 Prometheus 或云服务
+# remote_write:
+#   - url: "http://remote-prometheus:9090/api/v1/write"
+#     queue_config:
+#       capacity: 10000
+#       max_shards: 50
+#       min_shards: 1
+#       max_samples_per_send: 5000
+#       batch_send_deadline: 5s
+#       min_backoff: 30ms
+#       max_backoff: 100ms
+
+# =============================================
+# 远程读取配置（可选）
+# =============================================
+# remote_read:
+#   - url: "http://remote-prometheus:9090/api/v1/read"

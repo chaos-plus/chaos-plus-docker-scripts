@@ -1,0 +1,235 @@
+// ============================================================
+// Grafana Alloy 配置文件 - 日志采集和转发
+// 功能：
+// 1. 采集 Linux 系统日志
+// 2. 采集 Docker 容器日志（仅采集有 logging.enabled=true 标签的容器）
+// 3. 提取 trace_id/span_id 用于链路追踪
+// 4. 转发日志到 Loki
+// 5. 转发指标到 Prometheus
+// ============================================================
+
+// ---------------------------
+// Loki 输出端点配置
+// ---------------------------
+loki.write "loki" {
+  endpoint {
+    // 使用环境变量 LOKI_URL，默认值为本地地址
+    url = env("LOKI_URL")
+    
+    // 批处理优化
+    batch_wait = "5s"
+    batch_size = "1MiB"
+    
+    // 重试配置
+    min_backoff_period = "1s"
+    max_backoff_period = "30s"
+    
+    // 性能优化
+    timeout = "30s"
+  }
+  
+  // 全局标签
+  external_labels = {
+    cluster = env("HOSTNAME"),
+    environment = "production",
+  }
+}
+
+// ---------------------------
+// Prometheus 指标输出配置
+// ---------------------------
+prometheus.remote_write "prometheus" {
+  endpoint {
+    url = env("PROMETHEUS_URL")
+    
+    // 批处理配置
+    queue_config {
+      capacity = 10000
+      max_shards = 50
+      min_shards = 1
+      max_samples_per_send = 1000
+      batch_send_deadline = "5s"
+    }
+  }
+  
+  external_labels = {
+    cluster = env("HOSTNAME"),
+  }
+}
+
+// ---------------------------
+// Docker 容器发现和过滤
+// ---------------------------
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "10s"
+  
+  // 过滤规则：仅发现有 logging.enabled=true 标签的容器
+  filter {
+    name = "label"
+    values = ["logging.enabled=true"]
+  }
+}
+
+// ---------------------------
+// Docker 标签重写规则
+// ---------------------------
+discovery.relabel "docker_logs" {
+  targets = discovery.docker.containers.targets
+  
+  // 1. 提取容器名称
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/(.*)"
+    target_label = "container"
+  }
+  
+  // 2. 提取容器 ID
+  rule {
+    source_labels = ["__meta_docker_container_id"]
+    target_label = "container_id"
+  }
+  
+  // 3. 提取镜像名称
+  rule {
+    source_labels = ["__meta_docker_container_image"]
+    target_label = "image"
+  }
+  
+  // 4. 提取自定义标签：应用名称
+  rule {
+    source_labels = ["__meta_docker_container_label_app_name"]
+    target_label = "app"
+  }
+  
+  // 5. 提取自定义标签：环境
+  rule {
+    source_labels = ["__meta_docker_container_label_environment"]
+    target_label = "environment"
+  }
+  
+  // 6. 提取自定义标签：日志级别
+  rule {
+    source_labels = ["__meta_docker_container_label_logging_level"]
+    target_label = "level"
+  }
+  
+  // 7. 添加 job 标签
+  rule {
+    source_labels = ["__meta_docker_container_label_app_name"]
+    target_label = "job"
+  }
+}
+
+// ---------------------------
+// 采集 Docker 容器日志
+// ---------------------------
+loki.source.docker "docker_logs" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.docker_logs.output
+  forward_to = [loki.process.parse_logs.receiver]
+  relabel_rules = discovery.relabel.docker_logs.rules
+  refresh_interval = "10s"
+}
+
+// ---------------------------
+// 日志处理管道：提取 trace_id 和 span_id
+// ---------------------------
+loki.process "parse_logs" {
+  // 阶段 1: 提取 trace_id（支持多种格式）
+  stage.regex {
+    expression = "(?i)trace[-_]?id[=:\\s]+(?P<trace_id>[a-f0-9]{16,32})"
+  }
+  
+  // 阶段 2: 提取 span_id
+  stage.regex {
+    expression = "(?i)span[-_]?id[=:\\s]+(?P<span_id>[a-f0-9]{8,16})"
+  }
+  
+  // 阶段 3: 提取日志级别（如果没有从标签获取）
+  stage.regex {
+    expression = "(?i)\\[?(?P<level>TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\\]?"
+  }
+  
+  // 阶段 4: 将提取的字段添加为标签
+  stage.labels {
+    values = {
+      trace_id = "",
+      span_id = "",
+      level = "",
+    }
+  }
+  
+  forward_to = [loki.write.loki.receiver]
+}
+
+// ---------------------------
+// 采集 Linux 系统日志
+// ---------------------------
+loki.source.file "system_logs" {
+  targets = [
+    {
+      __path__ = "/var/log/syslog",
+      job = "syslog",
+      host = env("HOSTNAME"),
+    },
+    {
+      __path__ = "/var/log/messages",
+      job = "messages",
+      host = env("HOSTNAME"),
+    },
+    {
+      __path__ = "/var/log/auth.log",
+      job = "auth",
+      host = env("HOSTNAME"),
+    },
+    {
+      __path__ = "/var/log/kern.log",
+      job = "kernel",
+      host = env("HOSTNAME"),
+    },
+  ]
+  
+  forward_to = [loki.write.loki.receiver]
+}
+
+// ---------------------------
+// 采集应用日志文件（如果容器挂载了日志目录）
+// ---------------------------
+// 7link-v2 和 7link-v3 应用日志
+local.file_match "app_logs" {
+  path_targets = [
+    {
+      __path__ = "/opt/data/logs/7link-v2/**/*.log",
+      job = "7link-v2",
+      app = "7link-v2",
+    },
+    {
+      __path__ = "/opt/data/logs/7link-v3/**/*.log",
+      job = "7link-v3",
+      app = "7link-v3",
+    },
+  ]
+}
+
+loki.source.file "app_logs" {
+  targets = local.file_match.app_logs.targets
+  forward_to = [loki.process.parse_logs.receiver]
+}
+
+// ---------------------------
+// 自监控：导出 Alloy 自身的指标
+// ---------------------------
+prometheus.exporter.self "alloy" { }
+
+prometheus.scrape "alloy_metrics" {
+  targets = prometheus.exporter.self.alloy.targets
+  forward_to = [prometheus.remote_write.prometheus.receiver]
+  
+  scrape_interval = "15s"
+  
+  // 添加标签
+  clustering {
+    enabled = false
+  }
+}

@@ -1,0 +1,147 @@
+# Prometheus 告警规则
+# 参考: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+
+groups:
+  # =============================================
+  # 主机监控告警
+  # =============================================
+  - name: host_alerts
+    interval: 30s
+    rules:
+      # CPU 使用率过高
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "主机 CPU 使用率过高"
+          description: "主机 {{ $labels.instance }} CPU 使用率为 {{ $value }}%"
+
+      # 内存使用率过高
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "主机内存使用率过高"
+          description: "主机 {{ $labels.instance }} 内存使用率为 {{ $value }}%"
+
+      # 磁盘使用率过高
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"} / node_filesystem_size_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "磁盘使用率过高"
+          description: "主机 {{ $labels.instance }} 磁盘 {{ $labels.mountpoint }} 使用率为 {{ $value }}%"
+
+      # 主机宕机
+      - alert: HostDown
+        expr: up{job="node"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "主机宕机"
+          description: "主机 {{ $labels.instance }} 无法访问"
+
+  # =============================================
+  # 日志系统告警
+  # =============================================
+  - name: logging_alerts
+    interval: 30s
+    rules:
+      # Loki 服务不可用
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Loki 服务不可用"
+          description: "Loki 服务已停止响应"
+
+      # Alloy 服务不可用
+      - alert: AlloyDown
+        expr: up{job="alloy"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alloy 服务不可用"
+          description: "Alloy 日志采集器已停止"
+
+  # =============================================
+  # 应用监控告警
+  # =============================================
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # 应用服务不可用
+      - alert: ApplicationDown
+        expr: up{job="spring-boot"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "应用服务不可用"
+          description: "应用 {{ $labels.instance }} 无法访问"
+
+      # HTTP 错误率过高
+      - alert: HighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP 错误率过高"
+          description: "应用 {{ $labels.instance }} 5xx 错误率为 {{ $value }}"
+
+      # 响应时间过长
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "响应时间过长"
+          description: "应用 {{ $labels.instance }} P95 响应时间为 {{ $value }}s"
+
+  # =============================================
+  # 容器监控告警
+  # =============================================
+  - name: container_alerts
+    interval: 30s
+    rules:
+      # 容器 CPU 使用率过高
+      - alert: ContainerHighCPU
+        expr: rate(container_cpu_usage_seconds_total{container!=""}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "容器 CPU 使用率过高"
+          description: "容器 {{ $labels.container }} CPU 使用率为 {{ $value }}"
+
+      # 容器内存使用率过高
+      - alert: ContainerHighMemory
+        expr: (container_memory_usage_bytes{container!=""} / container_spec_memory_limit_bytes) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "容器内存使用率过高"
+          description: "容器 {{ $labels.container }} 内存使用率为 {{ $value }}"
+
+      # 容器重启过于频繁
+      - alert: ContainerRestartTooOften
+        expr: rate(container_restarts_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "容器重启过于频繁"
+          description: "容器 {{ $labels.container }} 在过去 15 分钟内重启了 {{ $value }} 次"
