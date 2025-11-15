@@ -193,18 +193,12 @@ loki.source.file "system_logs" {
 // ---------------------------
 // 采集应用日志文件（如果容器挂载了日志目录）
 // ---------------------------
-// 7link-v2 和 7link-v3 应用日志
 local.file_match "app_logs" {
   path_targets = [
     {
-      __path__ = "/opt/data/logs/7link-v2/**/*.log",
-      job = "7link-v2",
-      app = "7link-v2",
-    },
-    {
-      __path__ = "/opt/data/logs/7link-v3/**/*.log",
-      job = "7link-v3",
-      app = "7link-v3",
+      __path__ = "/opt/data/**/*.log",
+      job = "data",
+      app = "data",
     },
   ]
 }
