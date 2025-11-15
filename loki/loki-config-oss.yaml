@@ -210,7 +210,7 @@ ruler:
       region: ${OSS_REGION:-ap-southeast-3}
       access_key_id: ${OSS_ACCESS_KEY_ID}
       secret_access_key: ${OSS_SECRET_ACCESS_KEY}
-      s3forcepathstyle: true
+      s3forcepathstyle: ${S3_FORCEPATHSTYLE:-false}
       insecure: false
   
   rule_path: /loki/rules-temp
