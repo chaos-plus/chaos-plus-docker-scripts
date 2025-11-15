@@ -45,8 +45,9 @@ common:
         response_header_timeout: 0s
         insecure_skip_verify: false
       
-      # 启用路径样式（OSS 兼容性）
-      s3forcepathstyle: true
+      # 阿里云 OSS 必须使用虚拟主机样式（Virtual Hosted Style）
+      # AWS S3 用 true，阿里云 OSS 用 false
+      s3forcepathstyle: ${OSS_S3FORCEPATHSTYLE:-false}
   
   # 环形拓扑配置
   ring:
@@ -81,7 +82,7 @@ storage_config:
     region: ${OSS_REGION:-ap-southeast-3}
     access_key_id: ${OSS_ACCESS_KEY_ID}
     secret_access_key: ${OSS_SECRET_ACCESS_KEY}
-    s3forcepathstyle: true
+    s3forcepathstyle: false  # 阿里云 OSS 必须用 false
     insecure: false
     
     # HTTP 配置
