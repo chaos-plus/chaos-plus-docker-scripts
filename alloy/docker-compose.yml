@@ -26,3 +26,5 @@ services:
       - "12345:12345"
     environment:
       - HOSTNAME=${HOSTNAME}
+      - LOKI_URL=${LOKI_URL:-http://loki:3100/loki/api/v1/push}
+      - PROMETHEUS_URL=${PROMETHEUS_URL:-http://prometheus:9090/api/v1/write}
