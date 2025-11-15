@@ -161,52 +161,50 @@ loki.process "parse_logs" {
 }
 
 // ---------------------------
-// 采集 Linux 系统日志
+// 采集 Linux 系统日志（可选）
 // ---------------------------
-loki.source.file "system_logs" {
-  targets = [
-    {
-      __path__ = "/var/log/syslog",
-      job = "syslog",
-      host = env("HOSTNAME"),
-    },
-    {
-      __path__ = "/var/log/messages",
-      job = "messages",
-      host = env("HOSTNAME"),
-    },
-    {
-      __path__ = "/var/log/auth.log",
-      job = "auth",
-      host = env("HOSTNAME"),
-    },
-    {
-      __path__ = "/var/log/kern.log",
-      job = "kernel",
-      host = env("HOSTNAME"),
-    },
-  ]
-  
-  forward_to = [loki.write.loki.receiver]
-}
+// 注意：如果宿主机没有这些日志文件，会产生警告但不影响运行
+// 如果不需要系统日志，可以注释掉整个 block
+// 检查你的系统有哪些日志：ls -lh /var/log/
+
+// loki.source.file "system_logs" {
+//   targets = [
+//     {
+//       __path__ = "/var/log/syslog",      // Debian/Ubuntu
+//       job = "syslog",
+//       host = env("HOSTNAME"),
+//     },
+//     {
+//       __path__ = "/var/log/messages",    // CentOS/RHEL
+//       job = "messages",
+//       host = env("HOSTNAME"),
+//     },
+//   ]
+//   
+//   forward_to = [loki.write.loki.receiver]
+// }
 
 // ---------------------------
-// 采集应用日志文件（如果容器挂载了日志目录）
+// 采集应用日志文件（可选）
 // ---------------------------
-local.file_match "app_logs" {
-  path_targets = [
-    {
-      __path__ = "/opt/data/**/*.log",
-      job = "data",
-      app = "data",
-    },
-  ]
-}
+// 注意：这个是用于采集应用写到文件的日志（不是 Docker 容器日志）
+// 通常不需要，因为 Docker 容器日志已经通过上面的 loki.source.docker 采集了
+// 只有当应用特意把日志写到文件，并且挂载到宿主机时才需要启用
 
-loki.source.file "app_logs" {
-  targets = local.file_match.app_logs.targets
-  forward_to = [loki.process.parse_logs.receiver]
-}
+// local.file_match "app_logs" {
+//   path_targets = [
+//     {
+//       __path__ = "/opt/data/**/*.log",
+//       job = "app-file-logs",
+//       app = "file-logs",
+//     },
+//   ]
+// }
+
+// loki.source.file "app_logs" {
+//   targets = local.file_match.app_logs.targets
+//   forward_to = [loki.process.parse_logs.receiver]
+// }
 
 // ---------------------------
 // 自监控：导出 Alloy 自身的指标
