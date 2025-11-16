@@ -28,3 +28,11 @@ services:
       - HOSTNAME=${HOSTNAME}
       - LOKI_URL=${LOKI_URL:-http://loki:3100/loki/api/v1/push}
       - PROMETHEUS_URL=${PROMETHEUS_URL:-http://prometheus:9090/api/v1/write}
+    deploy:
+      placement:
+        constraints: [node.host == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_ALLOY:-${RES_LIMIT_MEM:-1G}}
+        reservations:
+          memory: ${RES_RESER_MEM_ALLOY:-${RES_RESER_MEM:-64M}}
