@@ -27,4 +27,9 @@ services:
       mode: global
       placement:
         constraints:
-          - node.role == manager
+          - node.hostname == ${HOSTNAME}
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_GHPROXY:-${RES_LIMIT_MEM:-1G}}
+        reservations:
+          memory: ${RES_RESER_MEM_GHPROXY:-${RES_RESER_MEM:-64M}}

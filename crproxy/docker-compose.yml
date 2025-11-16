@@ -68,3 +68,14 @@ services:
       --override-default-registry=nvcr.${DOMAIN}=nvcr.io
       --override-default-registry=quay.${DOMAIN}=quay.io
       --override-default-registry=jujucharms.${DOMAIN}=registry.jujucharms.com
+    deploy:
+      mode: global
+      placement:
+        constraints: 
+          - node.hostname == ${HOSTNAME}
+          #- node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_CRPROXY:-${RES_LIMIT_MEM:-1G}}
+        reservations:
+          memory: ${RES_RESER_MEM_CRPROXY:-${RES_RESER_MEM:-64M}}

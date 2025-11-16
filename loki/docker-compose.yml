@@ -66,10 +66,11 @@ services:
     deploy:
       mode: global
       placement:
-        constraints:
+        constraints: 
           - node.hostname == ${HOSTNAME}
+          #- node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_LOKI:-2g}
+          memory: ${RES_LIMIT_MEM_LOKI:-${RES_LIMIT_MEM:-1G}}
         reservations:
-          memory: ${RES_RESER_MEM_LOKI:-512m}
+          memory: ${RES_RESER_MEM_LOKI:-${RES_RESER_MEM:-64M}}

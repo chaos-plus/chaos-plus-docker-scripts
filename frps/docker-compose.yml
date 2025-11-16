@@ -44,6 +44,12 @@ services:
       mode: global
       placement:
         constraints: 
-          - node.role == manager
+          - node.hostname == ${HOSTNAME}
+          #- node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_FRPS:-${RES_LIMIT_MEM:-1G}}
+        reservations:
+          memory: ${RES_RESER_MEM_FRPS:-${RES_RESER_MEM:-64M}}
 
 

@@ -41,13 +41,15 @@ services:
       - traefik.http.routers.prometheus.entrypoints=websecure
       - traefik.http.services.prometheus.loadbalancer.server.port=9090
       - traefik.http.middlewares.prometheus.compress=true
+   
     deploy:
       mode: global
       placement:
-        constraints:
+        constraints: 
           - node.hostname == ${HOSTNAME}
+          #- node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_PROMETHEUS:-2g}
+          memory: ${RES_LIMIT_MEM_PROMETHEUS:-${RES_LIMIT_MEM:-1G}}
         reservations:
-          memory: ${RES_RESER_MEM_PROMETHEUS:-512m}
+          memory: ${RES_RESER_MEM_PROMETHEUS:-${RES_RESER_MEM:-64M}}

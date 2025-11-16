@@ -77,7 +77,15 @@ services:
         max-size: "128k"
         max-file: "1"
     deploy:
+      mode: global
       placement:
         constraints: 
           - node.hostname == ${HOSTNAME}
+          #- node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_TRAEFIK:-${RES_LIMIT_MEM:-1G}}
+        reservations:
+          memory: ${RES_RESER_MEM_TRAEFIK:-${RES_RESER_MEM:-64M}}
+
 
