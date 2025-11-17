@@ -1,8 +1,10 @@
 #!/bin/bash -e
 
 set -e
+set -o pipefail
 
 WORK_SPACE=$(pwd)
+
 
 pm_install_one() {
     local package_name="$1"
@@ -320,13 +322,13 @@ pm_uninstall_one() {
 }
 
 pm_install() {
-    for package_name in $@; do
+    for package_name in "$@"; do
         pm_install_one "$package_name"
     done
 }
 
 pm_uninstall() {
-    for package_name in $@; do
+    for package_name in "$@"; do
         pm_uninstall_one "$package_name"
     done
     hash -r
@@ -336,10 +338,14 @@ pm_uninstall() {
 function init() {
     ########################
 
+    echo "📦 安装基础依赖: git wget curl vim fail2ban ansible"
+
     pm_install git wget curl vim fail2ban ansible
 
+    echo "🐳 检查 Docker 安装..."
     if ! command -v docker &>/dev/null; then
-        sudo curl -fsSL https://linuxmirrors.cn/docker.sh
+        # 优先使用国内镜像脚本安装 Docker
+        sudo curl -fsSL https://linuxmirrors.cn/docker.sh | bash || echo "⚠️ linuxmirrors.cn 安装脚本执行失败，继续尝试其他方式"
     fi
 
     if ! command -v docker &>/dev/null; then
@@ -358,6 +364,7 @@ function init() {
     fi
 
 
+    echo "🧩 检查 docker-compose 安装..."
     if ! command -v docker-compose &>/dev/null; then
         # 设置安装路径
         DEST=/usr/local/bin/docker-compose
@@ -390,7 +397,7 @@ function init() {
         DOCKER_COMPOSE=$(find / -name docker-compose | grep "docker" 2>/dev/null)
         if [ -n "$DOCKER_COMPOSE" ]; then
             echo $DOCKER_COMPOSE
-            sudo chmod 777 $DOCKER_COMPOSE
+            sudo chmod 755 $DOCKER_COMPOSE
             sudo \cp -rf $DOCKER_COMPOSE /usr/bin/docker-compose
         fi
     fi
@@ -408,17 +415,19 @@ function init() {
     sudo docker ps -a
 
     ## 创建共享网络
-    if [ -n "$(sudo docker network list | grep ${NETWORK})" ]; then
+    echo "🌐 检查 Docker 网络: ${NETWORK}"
+    if sudo docker network inspect "${NETWORK}" >/dev/null 2>&1; then
         # NET EXISTS
-        echo "docker network exists, skip"
+        echo "✅ docker 网络已存在，跳过创建"
     else
         # NET INIT
-        echo "docker network lost, create"
+        echo "🚧 docker 网络不存在，正在创建: ${NETWORK}"
         # docker network create --driver overlay --attachable cluster
-        sudo docker network create ${NETWORK}
+        sudo docker network create "${NETWORK}"
     fi
 
     ########################
+    echo "📁 准备数据目录: ${DATA}"
     sudo mkdir -p ${DATA}
 }
 
@@ -445,9 +454,15 @@ function compose() {
 
 function deploy() {
 
-    echo "deploy env ===> ${ENV}"
-    echo "deploy domain ===> ${DOMAIN}"
-    echo "deploy domains ===> ${DOMAINS[*]}"
+    
+    echo "🌎 部署环境: ${ENV}"
+    echo "🌐 主域名: ${DOMAIN}"
+    if declare -p DOMAINS >/dev/null 2>&1; then
+        echo "🌐 其他域名: ${DOMAINS[*]}"
+    else
+        echo "🌐 其他域名: (未配置)"
+    fi
+    echo ""
 
     if [ -z "${SERVICES}" ]; then
         SERVICES=("${@:1}" )
@@ -459,13 +474,13 @@ function deploy() {
         exit 1
     fi
 
-    echo "deploy services ===> ${SERVICES[*]}"
+    echo "📋 将要部署的服务列表: ${SERVICES[*]}"
 
     init
 
     # 按顺序部署服务
-    for serv in ${SERVICES[@]}; do #也可以写成for element in ${array[*]}
-        cd $WORK_SPACE
+    for serv in "${SERVICES[@]}"; do #也可以写成for element in ${array[*]}
+        cd "$WORK_SPACE"
 
         if [ ! -d "${serv}" ]; then
             echo "service ${serv} not found"
@@ -479,7 +494,7 @@ function deploy() {
 
 
 
-        cd ${serv}
+        cd "${serv}"
         echo ""
         echo "#####################################################################"
         echo "######################## service: ${serv} begin ########################"
@@ -518,12 +533,12 @@ function deploy() {
         echo ""
     done
 
-    cd $WORK_SPACE
+    cd "$WORK_SPACE"
     ui
 }
 
 
-if [ -z "${ENV}" ]; then
+if [ -z "${ENV:-}" ]; then
     ENV=release
 fi
 if [ -f "./env.sh" ]; then
@@ -532,10 +547,14 @@ fi
 
 if [ ! -f "./env.${ENV}.sh" ]; then
     \cp ./env.example.sh ./env.${ENV}.sh
+    echo "📄 已生成环境配置文件: env.${ENV}.sh，请按需修改后重新执行。"
     vim ./env.${ENV}.sh
 fi
 
 if [ -f "./env.${ENV}.sh" ]; then
+    echo "📄 载入环境配置: env.${ENV}.sh"
     source ./env.${ENV}.sh
 fi
-deploy $*
+
+echo "🚀 开始执行部署流程..."
+deploy "$@"

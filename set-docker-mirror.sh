@@ -1,8 +1,23 @@
 #!/bin/bash -e
+set -u -o pipefail
 
+echo "=========================================="
+echo "  配置 Docker 镜像加速与系统参数"
+echo "=========================================="
+echo ""
+
+echo " 准备 /etc/docker 目录..."
 sudo mkdir -p /etc/docker
-sudo chmod 777 -R /etc/docker
-sudo cat > /etc/docker/daemon.json <<EOF
+
+# 若已存在 daemon.json，则先做备份
+if [ -f /etc/docker/daemon.json ]; then
+    backup="/etc/docker/daemon.json.bak-$(date +%Y%m%d%H%M%S)"
+    echo " 检测到已有 /etc/docker/daemon.json，备份到: ${backup}"
+    sudo cp /etc/docker/daemon.json "${backup}"
+fi
+
+echo " 写入 /etc/docker/daemon.json ..."
+sudo tee /etc/docker/daemon.json >/dev/null <<EOF
 {
     "registry-mirrors": [
         "https://docker.1ms.run",
@@ -28,15 +43,25 @@ sudo cat > /etc/docker/daemon.json <<EOF
     "metrics-addr": "127.0.0.1:9323"
 }
 EOF
+
+sudo chmod 644 /etc/docker/daemon.json
+sudo chmod 755 /etc/docker
+
+echo " 当前 Docker 配置:"
 sudo cat /etc/docker/daemon.json
+
+echo ""
+echo " 配置 Docker systemd 句柄数限制 ..."
 sudo mkdir -p /etc/systemd/system/docker.service.d
-sudo chmod 777 /etc/systemd/system/docker.service.d
-sudo cat > /etc/systemd/system/docker.service.d/limit-nofile.conf <<EOF
+sudo chmod 755 /etc/systemd/system/docker.service.d
+sudo tee /etc/systemd/system/docker.service.d/limit-nofile.conf >/dev/null <<EOF
 [Service]
 LimitNOFILE=1048576
 EOF
 
+echo ""
+echo " 重新加载并重启 Docker 服务 ..."
 sudo systemctl daemon-reload
-sudo systemctl start docker
 sudo systemctl enable docker
 sudo systemctl restart docker
+echo " Docker 服务已重启"

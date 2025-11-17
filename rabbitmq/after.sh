@@ -1,18 +1,44 @@
+#!/bin/bash -e
 
-if [ -f "${DATA}/rabbitmq/.erlang.cookie" ]; then
-    sudo chmod 600 ${DATA}/rabbitmq/.erlang.cookie
+set -u -o pipefail
+
+echo "=========================================="
+echo "  RabbitMQ 收尾配置"
+echo "=========================================="
+echo ""
+
+if [ -z "${DATA:-}" ]; then
+	echo "❌ 错误: DATA 环境变量未设置"
+	exit 1
 fi
 
+if ! command -v docker &>/dev/null; then
+	echo "❌ 错误: docker 命令未找到"
+	exit 1
+fi
 
-if [ -n "`docker ps | grep rabbitmq`" ]; then
+COOKIE_FILE="${DATA}/rabbitmq/.erlang.cookie"
 
-    if [ -n "`docker exec rabbitmq rabbitmq-plugins list | grep rabbitmq_event_exchange`" ]; then
-        echo ""
-    else
-        #echo "enable rabbitmq_event_exchange"
-        docker exec rabbitmq rabbitmq-plugins enable rabbitmq_event_exchange
-        docker restart rabbitmq
-        echo ""
-    fi
+echo "🔐 检查 Erlang cookie 权限..."
+if [ -f "${COOKIE_FILE}" ]; then
+	sudo chmod 600 "${COOKIE_FILE}"
+	echo "✅ 已设置 cookie 权限为 600"
+else
+	echo "ℹ️ 未找到 cookie 文件: ${COOKIE_FILE}，跳过权限调整"
+fi
 
+echo ""
+echo "🔌 检查 RabbitMQ 容器与插件状态..."
+
+if docker ps --format '{{.Names}}' | grep -q '^rabbitmq$'; then
+	if docker exec rabbitmq rabbitmq-plugins list | grep -q 'rabbitmq_event_exchange'; then
+		echo "✅ 插件 rabbitmq_event_exchange 已启用"
+	else
+		echo "⚙️ 启用插件 rabbitmq_event_exchange ..."
+		docker exec rabbitmq rabbitmq-plugins enable rabbitmq_event_exchange
+		docker restart rabbitmq
+		echo "✅ RabbitMQ 已重启，插件启用完成"
+	fi
+else
+	echo "ℹ️ 未检测到名为 rabbitmq 的容器，跳过插件配置"
 fi
