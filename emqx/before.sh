@@ -31,6 +31,9 @@ if [ -d "${DATA}/emqx" ]; then
 else
 	echo "📁 emqx data lost, create"
 	
+    # https://docs.emqx.com/zh/emqx/v5.8/
+    # 5.9.0后需要license才支持集群
+
 	# 先启动一个临时实例
 	docker run -d --name emqx emqx/emqx:5.8.8
 	# 然后拷贝数据到宿主机
