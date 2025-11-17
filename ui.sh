@@ -29,6 +29,6 @@ fi
 
 echo ""
 echo " 提示："
-echo "   - 若部署在云服务器，请优先使用 WAN IP 访问 Traefik / 应用入口"
+echo "   - 若部署在云服务器，请优先使用 WAN IP 访问应用入口"
 echo "   - 若在内网环境，则可使用 LAN IP 进行访问调试"
 echo ""
