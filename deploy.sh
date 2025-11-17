@@ -428,7 +428,7 @@ function init() {
 
     ########################
     echo "📁 准备数据目录: ${DATA}"
-    sudo mkdir -p ${DATA}
+    sudo mkdir -p "${DATA}"
 }
 
 function ui() {
@@ -439,17 +439,19 @@ function ui() {
 }
 
 function compose() {
-    if [ -z "$PULL" ]; then
-        echo ""
-    else
-        local CMD_PULL="sudo -E docker-compose pull"
-        echo $CMD_PULL
-        eval $CMD_PULL
+    local COMPOSE_FILE="$1"
+
+    # 如果启用 PULL 模式，则仅拉取镜像，不执行 up
+    if [ -n "${PULL:-}" ]; then
+        local CMD_PULL="sudo -E docker-compose -f ${COMPOSE_FILE} --compatibility pull"
+        echo "$(pwd) ${CMD_PULL}"
+        eval "${CMD_PULL}"
+        return 0
     fi
 
-    local CMD_UP="sudo -E docker-compose -f $1 --compatibility up -d "
-    echo "$(pwd) $CMD_UP"
-    eval $CMD_UP
+    local CMD_UP="sudo -E docker-compose -f ${COMPOSE_FILE} --compatibility up -d"
+    echo "$(pwd) ${CMD_UP}"
+    eval "${CMD_UP}"
 }
 
 function deploy() {
@@ -464,11 +466,11 @@ function deploy() {
     fi
     echo ""
 
-    if [ -z "${SERVICES}" ]; then
+    if [ -z "${SERVICES:-}" ]; then
         SERVICES=("${@:1}" )
     fi
 
-    if [ -z "${SERVICES}" ]; then
+    if [ -z "${SERVICES:-}" ]; then
         SERVICES=( $(find . -maxdepth 1 -type d -not -name '.*' -printf '%f\n') )
         echo "services is empty, please input services: ${SERVICES[*]}"
         exit 1
@@ -547,14 +549,21 @@ fi
 
 if [ ! -f "./env.${ENV}.sh" ]; then
     \cp ./env.example.sh ./env.${ENV}.sh
-    echo "📄 已生成环境配置文件: env.${ENV}.sh，请按需修改后重新执行。"
+    echo " 已生成环境配置文件: env.${ENV}.sh，请按需修改后重新执行。"
     vim ./env.${ENV}.sh
 fi
 
 if [ -f "./env.${ENV}.sh" ]; then
-    echo "📄 载入环境配置: env.${ENV}.sh"
+    echo " 载入环境配置: env.${ENV}.sh"
     source ./env.${ENV}.sh
 fi
 
-echo "🚀 开始执行部署流程..."
+echo " 开始执行部署流程..."
+
+# 支持 ./deploy.sh pull [service1 service2 ...] 模式：仅拉取镜像，不启动容器
+if [ "${1:-}" = "pull" ]; then
+    export PULL=1
+    shift
+fi
+
 deploy "$@"
