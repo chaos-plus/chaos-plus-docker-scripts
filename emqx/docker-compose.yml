@@ -10,7 +10,7 @@ services:
 
   emqx:
     # https://www.emqx.io/docs/zh/v5.0/admin/api.html
-    image: emqx/emqx:5.10
+    image: emqx/emqx:5.8.8
     container_name: emqx
     restart: ${SRV_RESTART_MODE:-always}
     ports:

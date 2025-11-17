@@ -32,7 +32,7 @@ else
 	echo "📁 emqx data lost, create"
 	
 	# 先启动一个临时实例
-	docker run -d --name emqx emqx/emqx:5.10
+	docker run -d --name emqx emqx/emqx:5.8.8
 	# 然后拷贝数据到宿主机
     sudo mkdir -p ${DATA}/emqx/data
     sudo chmod -R 777 ${DATA}/emqx
