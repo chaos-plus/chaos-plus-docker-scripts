@@ -11,12 +11,17 @@ services:
 
   traefik:
     image: traefik:v3.0
-    container_name: traefik
     restart: ${SRV_RESTART_MODE:-always}
     ports:
-      - "${PORT_PROXY}:${PORT_PROXY}"
-      - "${PORT_PROXY_SSL}:${PORT_PROXY_SSL}"
-      - "${PORT_PROXY_DASHBOARD}:8080"
+      - target: ${PORT_PROXY}
+        published: ${PORT_PROXY}
+        mode: host
+      - target: ${PORT_PROXY_SSL}
+        published: ${PORT_PROXY_SSL}
+        mode: host
+      - target: 8080
+        published: ${PORT_PROXY_DASHBOARD}
+        mode: host
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "${DATA}/traefik/config:/etc/traefik/config:ro"
@@ -77,6 +82,10 @@ services:
         max-size: "128k"
         max-file: "1"
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       mode: global
       placement:
         constraints: 
