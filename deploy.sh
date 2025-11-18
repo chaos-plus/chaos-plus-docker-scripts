@@ -426,8 +426,21 @@ function init() {
     ## 创建共享网络
     echo "🌐 检查 Docker 网络: ${NETWORK}"
     if sudo docker network inspect "${NETWORK}" >/dev/null 2>&1; then
-        # NET EXISTS
-        echo "✅ docker 网络已存在，跳过创建"
+        # NET EXISTS - 检查 scope 是否匹配
+        local current_scope
+        current_scope=$(sudo docker network inspect "${NETWORK}" --format '{{.Scope}}' 2>/dev/null || echo "")
+        
+        if [ "${MODE}" = "stack" ] && [ "${current_scope}" = "local" ]; then
+            echo "⚠️ 网络 ${NETWORK} scope 为 local，stack 模式需要 swarm scope"
+            echo "🔄 正在删除并重建网络..."
+            sudo docker network rm "${NETWORK}" || true
+            sudo docker network create --driver overlay --attachable "${NETWORK}"
+            echo "✅ 网络已重建为 overlay (swarm scope)"
+        elif [ "${MODE}" = "compose" ] && [ "${current_scope}" = "swarm" ]; then
+            echo "ℹ️ 网络 ${NETWORK} scope 为 swarm，compose 模式仍可使用"
+        else
+            echo "✅ docker 网络已存在，scope: ${current_scope}"
+        fi
     else
         # NET INIT
         echo "🚧 docker 网络不存在，正在创建: ${NETWORK}"
