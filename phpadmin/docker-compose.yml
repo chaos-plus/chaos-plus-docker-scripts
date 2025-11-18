@@ -1,0 +1,40 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+
+  phpadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpadmin
+    hostname: phpadmin
+    restart: ${SRV_RESTART_MODE:-always}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - ${PORT_PHPADMIN}:80
+    environment:
+      - PMA_ARBITRARY=1
+    labels:
+      - traefik.enable=true
+      - traefik.http.middlewares.phpadmin-auth.basicauth.users=admin:${HTPASSWD}
+      - traefik.http.routers.phpadmin.rule=Host(`phpadmin.${DOMAIN}`)
+      - traefik.http.routers.phpadmin.tls=true
+      - traefik.http.routers.phpadmin.middlewares=phpadmin-auth
+      - traefik.http.routers.phpadmin.entrypoints=websecure
+      - traefik.http.routers.phpadmin.service=phpadmin@docker
+      - traefik.http.services.phpadmin.loadbalancer.server.port=80
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_PHPADMIN:-${RES_LIMIT_MEM:-1G}}
+        reservations:
+          memory: ${RES_RESER_MEM_PHPADMIN:-${RES_RESER_MEM:-64M}}
+
