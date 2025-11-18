@@ -10,7 +10,6 @@ services:
 
   mysql7:
     image: mysql:5.7-oracle
-    container_name: mysql7
     restart: ${SRV_RESTART_MODE:-always}
     privileged: true
     ports:
@@ -40,8 +39,12 @@ services:
       timeout: 10s
       retries: 10
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
-        constraints: [node.host == manager]
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_MYSQL7:-${RES_LIMIT_MEM:-1G}}

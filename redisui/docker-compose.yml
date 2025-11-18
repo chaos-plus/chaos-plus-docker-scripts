@@ -10,7 +10,6 @@ services:
 
   redis-ui:
     image: patrikx3/p3x-redis-ui
-    container_name: redis-ui
     hostname: redis-ui
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
@@ -28,8 +27,12 @@ services:
       - traefik.http.routers.redis-ui.service=redis-ui@docker
       - traefik.http.services.redis-ui.loadbalancer.server.port=7843
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
-        constraints: [node.host == manager]
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_REDISUI:-${RES_LIMIT_MEM:-1G}}

@@ -30,15 +30,24 @@ echo ""
 
 echo "🗄️ 检查 MySQL 实例并创建 spicedb 数据库..."
 
-if docker ps -a --format '{{.Names}}' | grep -q '^mysql7$'; then
+# 查找服务的实际容器名
+get_container_name() {
+    local service_name=$1
+    docker ps --filter "name=${service_name}" --format "{{.Names}}" | head -n 1
+}
+
+MYSQL7_CONTAINER=$(get_container_name "mysql7")
+MYSQL8_CONTAINER=$(get_container_name "mysql8")
+
+if [ -n "$MYSQL7_CONTAINER" ]; then
     echo "   - 在 mysql7 中创建/更新 spicedb 数据库..."
-    docker exec -i mysql7 mysql -uroot -p"${PASSWORD}" \
+    docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD}" \
         -e "CREATE DATABASE IF NOT EXISTS spicedb DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
 fi
 
-if docker ps -a --format '{{.Names}}' | grep -q '^mysql8$'; then
+if [ -n "$MYSQL8_CONTAINER" ]; then
     echo "   - 在 mysql8 中创建/更新 spicedb 数据库..."
-    docker exec -i mysql8 mysql -uroot -p"${PASSWORD}" \
+    docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD}" \
         -e "CREATE DATABASE IF NOT EXISTS spicedb DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
 fi
 

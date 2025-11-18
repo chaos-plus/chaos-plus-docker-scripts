@@ -10,7 +10,6 @@ services:
 
   alist:
     image: 'xhofe/alist:latest'
-    container_name: alist
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
         - ${DATA}/alist:/opt/alist/data
@@ -31,10 +30,14 @@ services:
       - traefik.http.middlewares.alist.compress=true
     deploy:
       mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
         constraints: 
           - node.hostname == ${HOSTNAME}
-          #- node.role == manager
+          - node.role == manager
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_ALIST:-${RES_LIMIT_MEM:-1G}}

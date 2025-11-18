@@ -10,7 +10,6 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_REDIS}:6379"
@@ -29,8 +28,12 @@ services:
       - '--bind 0.0.0.0'
       - '--protected-mode yes'
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
-        constraints: [node.host == manager]
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_REDIS:-${RES_LIMIT_MEM:-1G}}

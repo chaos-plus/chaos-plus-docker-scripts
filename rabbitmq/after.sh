@@ -30,13 +30,21 @@ fi
 echo ""
 echo "🔌 检查 RabbitMQ 容器与插件状态..."
 
-if docker ps --format '{{.Names}}' | grep -q '^rabbitmq$'; then
-	if docker exec rabbitmq rabbitmq-plugins list | grep -q 'rabbitmq_event_exchange'; then
+# 查找 rabbitmq 服务的实际容器名
+get_container_name() {
+    local service_name=$1
+    docker ps --filter "name=${service_name}" --format "{{.Names}}" | head -n 1
+}
+
+RABBITMQ_CONTAINER=$(get_container_name "rabbitmq")
+
+if [ -n "$RABBITMQ_CONTAINER" ]; then
+	if docker exec "$RABBITMQ_CONTAINER" rabbitmq-plugins list | grep -q 'rabbitmq_event_exchange'; then
 		echo "✅ 插件 rabbitmq_event_exchange 已启用"
 	else
 		echo "⚙️ 启用插件 rabbitmq_event_exchange ..."
-		docker exec rabbitmq rabbitmq-plugins enable rabbitmq_event_exchange
-		docker restart rabbitmq
+		docker exec "$RABBITMQ_CONTAINER" rabbitmq-plugins enable rabbitmq_event_exchange
+		docker restart "$RABBITMQ_CONTAINER"
 		echo "✅ RabbitMQ 已重启，插件启用完成"
 	fi
 else

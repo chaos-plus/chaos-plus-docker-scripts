@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+# 查找服务的实际容器名
+get_container_name() {
+    local service_name=$1
+    docker ps --filter "name=${service_name}" --format "{{.Names}}" | head -n 1
+}
 
 sudo mkdir -p ${DATA}/nacos
 sudo chmod -R 777 ${DATA}/nacos/
@@ -11,14 +16,20 @@ sudo sed -i '/^CREATE TABLE[^;]*$/I{/IF NOT EXISTS/I!s/CREATE TABLE/CREATE TABLE
 
 sudo cat ${DATA}/nacos/mysql-schema.sql
 
-sudo docker exec -i mysql7 mysql -uroot -p${PASSWORD} \
-    -e "CREATE DATABASE IF NOT EXISTS nacos DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
-sudo docker exec -i mysql7 mysql -uroot -p${PASSWORD} nacos < ${DATA}/nacos/mysql-schema.sql
+MYSQL7_CONTAINER=$(get_container_name "mysql7")
+MYSQL8_CONTAINER=$(get_container_name "mysql8")
 
-sudo docker exec -i mysql8 mysql -uroot -p${PASSWORD} \
-    -e "CREATE DATABASE IF NOT EXISTS nacos DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
+if [ -n "$MYSQL7_CONTAINER" ]; then
+    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p${PASSWORD} \
+        -e "CREATE DATABASE IF NOT EXISTS nacos DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
+    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p${PASSWORD} nacos < ${DATA}/nacos/mysql-schema.sql
+fi
 
-sudo docker exec -i mysql8 mysql -uroot -p${PASSWORD} nacos < ${DATA}/nacos/mysql-schema.sql
+if [ -n "$MYSQL8_CONTAINER" ]; then
+    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p${PASSWORD} \
+        -e "CREATE DATABASE IF NOT EXISTS nacos DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
+    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p${PASSWORD} nacos < ${DATA}/nacos/mysql-schema.sql
+fi
 
 sudo mkdir -p ${DATA}/nacos
 sudo chmod -R 777 ${DATA}/nacos/

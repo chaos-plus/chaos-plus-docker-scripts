@@ -9,7 +9,6 @@ networks:
 services:
   nacos:
     image: nacos/nacos-server:latest
-    container_name: nacos
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_NACOS_UI:-8080}:8080"
@@ -43,8 +42,12 @@ services:
       - traefik.http.middlewares.waline.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.waline.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
-        constraints: [node.host == manager]
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_NACOS:-${RES_LIMIT_MEM:-2G}}

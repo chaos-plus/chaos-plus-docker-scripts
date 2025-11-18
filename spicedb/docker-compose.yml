@@ -9,7 +9,6 @@ networks:
 services:
   spicedb:
     image: authzed/spicedb:${SPICEDB_VERSION}
-    container_name: spicedb
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - ${PORT_SPICEDB_HTTP:-8443}:8443
@@ -27,8 +26,12 @@ services:
       - --datastore-engine=mysql 
       - --datastore-conn-uri=root:${PASSWORD}@tcp(mysql8:3306)/spicedb?parseTime=true
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
-        constraints: [node.host == manager]
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_SPICEDB:-${RES_LIMIT_MEM:-1G}}

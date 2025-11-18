@@ -10,7 +10,6 @@ services:
 
   postgresql:
     image: postgres:17
-    container_name: postgresql
     restart: ${SRV_RESTART_MODE:-always}
     privileged: true
     ports:
@@ -22,8 +21,12 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: ${PASSWORD}
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
-        constraints: [node.host == manager]
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_POSTGRESQL:-${RES_LIMIT_MEM:-1G}}

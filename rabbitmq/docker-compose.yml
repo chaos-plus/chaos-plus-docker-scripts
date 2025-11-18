@@ -10,7 +10,6 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    container_name: rabbitmq
     restart: ${SRV_RESTART_MODE:-always}
     privileged: true
     ports:
@@ -39,6 +38,10 @@ services:
       - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
 
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       mode: global
       placement:
         constraints: 

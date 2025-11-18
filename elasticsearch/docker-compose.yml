@@ -9,7 +9,6 @@ networks:
 services:
 
   elasticsearch:
-    container_name: es
     image: bitnami/elasticsearch:latest
     restart: ${SRV_RESTART_MODE:-always}
     environment:
@@ -22,6 +21,10 @@ services:
       - ${DATA}/elasticsearch/data:/usr/share/elasticsearch/data
       - ${DATA}/elasticsearch/plugins:/usr/share/elasticsearch/plugins
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
         constraints: 
           - node.role == manager
