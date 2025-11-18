@@ -574,7 +574,7 @@ function deploy() {
 
 
 if [ -z "${ENV:-}" ]; then
-    ENV=release
+    export ENV=release
 fi
 if [ -f "./env.sh" ]; then
     source ./env.sh
@@ -582,7 +582,7 @@ fi
 
 if [ ! -f "./env.${ENV}.sh" ]; then
     \cp ./env.example.sh ./env.${ENV}.sh
-    echo " 已生成环境配置文件: env.${ENV}.sh，请按需修改后重新执行。"
+    echo " 已生成环境配置文件: env.${ENV}.sh, 请按需修改后重新执行."
     vim ./env.${ENV}.sh
 fi
 
