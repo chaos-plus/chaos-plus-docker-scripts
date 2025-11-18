@@ -414,6 +414,15 @@ function init() {
     sudo docker info
     sudo docker ps -a
 
+    if [ "${MODE}" = "stack" ]; then
+        local swarm_state
+        swarm_state=$(sudo docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || true)
+        if [[ "${swarm_state}" != "active" && "${swarm_state}" != "locked" ]]; then
+            echo "⚠️ Stack 模式需要 Docker Swarm，请先执行 'sudo docker swarm init'"
+            exit 1
+        fi
+    fi
+
     ## 创建共享网络
     echo "🌐 检查 Docker 网络: ${NETWORK}"
     if sudo docker network inspect "${NETWORK}" >/dev/null 2>&1; then
@@ -422,8 +431,16 @@ function init() {
     else
         # NET INIT
         echo "🚧 docker 网络不存在，正在创建: ${NETWORK}"
-        # docker network create --driver overlay --attachable cluster
-        sudo docker network create "${NETWORK}"
+        local network_driver="bridge"
+        local network_cmd=(sudo docker network create)
+        if [ "${MODE}" = "stack" ]; then
+            network_driver="overlay"
+            network_cmd+=(--driver "${network_driver}" --attachable)
+        else
+            network_cmd+=(--driver "${network_driver}")
+        fi
+        network_cmd+=("${NETWORK}")
+        "${network_cmd[@]}"
     fi
 
     ########################
@@ -440,6 +457,21 @@ function ui() {
 
 function compose() {
     local COMPOSE_FILE="$1"
+    local SERVICE_NAME="${2:-$(basename "$(pwd)")}"
+    local mode="${MODE:-compose}"
+
+    if [ "${mode}" = "stack" ]; then
+        if [ -n "${PULL:-}" ]; then
+            echo "⚠️ stack 模式暂不支持 pull-only，跳过 ${SERVICE_NAME}"
+            return 0
+        fi
+
+        local stack="${STACK_NAME:-${SERVICE_NAME}}"
+        local CMD_STACK="sudo -E docker stack deploy --with-registry-auth -c ${COMPOSE_FILE} ${stack}"
+        echo "$(pwd) ${CMD_STACK}"
+        eval "${CMD_STACK}"
+        return 0
+    fi
 
     # 如果启用 PULL 模式，则仅拉取镜像，不执行 up
     if [ -n "${PULL:-}" ]; then
@@ -458,6 +490,7 @@ function deploy() {
 
     
     echo "🌎 部署环境: ${ENV}"
+    echo "🚀 部署模式: ${MODE}"
     echo "🌐 主域名: ${DOMAIN}"
     if declare -p DOMAINS >/dev/null 2>&1; then
         echo "🌐 其他域名: ${DOMAINS[*]}"
@@ -517,9 +550,9 @@ function deploy() {
 
         # compose.yml
         if [ -f "docker-compose-${ENV}.yml" ]; then
-            compose docker-compose-${ENV}.yml
+            compose docker-compose-${ENV}.yml "${serv}"
         elif [ -f "docker-compose.yml" ]; then
-            compose docker-compose.yml
+            compose docker-compose.yml "${serv}"
         else
             echo "missing docker-compose.yml"
         fi
@@ -556,6 +589,10 @@ fi
 if [ -f "./env.${ENV}.sh" ]; then
     echo " 载入环境配置: env.${ENV}.sh"
     source ./env.${ENV}.sh
+fi
+
+if [ -z "${MODE:-}" ]; then
+    MODE=compose
 fi
 
 echo " 开始执行部署流程..."
