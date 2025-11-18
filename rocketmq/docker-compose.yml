@@ -22,9 +22,9 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_RMQNAMESRV:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_RMQNAMESRV:-2G}
         reservations:
-          memory: ${RES_RESER_MEM_RMQNAMESRV:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_RMQNAMESRV:-512M}
   rmqbroker:
     image: apache/rocketmq:latest
     container_name: rmqbroker
@@ -47,9 +47,9 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_RMQBROKER:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_RMQBROKER:-2G}
         reservations:
-          memory: ${RES_RESER_MEM_RMQBROKER:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_RMQBROKER:-512M}
           
   rmqproxy:
     image: apache/rocketmq:latest
@@ -71,9 +71,9 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_RMQPROXY:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_RMQPROXY:-1G}
         reservations:
-          memory: ${RES_RESER_MEM_RMQPROXY:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_RMQPROXY:-256M}
 
   dashboard:
     image: apacherocketmq/rocketmq-dashboard:latest
@@ -93,6 +93,6 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_RMQDASHBOARD:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_RMQDASHBOARD:-1G}
         reservations:
-          memory: ${RES_RESER_MEM_RMQDASHBOARD:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_RMQDASHBOARD:-256M}

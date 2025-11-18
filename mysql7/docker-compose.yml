@@ -47,6 +47,6 @@ services:
         constraints: [node.role == manager]
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_MYSQL7:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_MYSQL7:-2G}
         reservations:
-          memory: ${RES_RESER_MEM_MYSQL7:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_MYSQL7:-512M}

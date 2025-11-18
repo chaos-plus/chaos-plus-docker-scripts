@@ -93,8 +93,8 @@ services:
           #- node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_TRAEFIK:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_TRAEFIK:-512M}
         reservations:
-          memory: ${RES_RESER_MEM_TRAEFIK:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_TRAEFIK:-128M}
 
 

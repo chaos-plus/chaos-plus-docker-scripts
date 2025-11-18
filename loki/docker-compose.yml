@@ -7,7 +7,6 @@ networks:
 services:
   loki:
     image: grafana/loki:3.5.7
-    container_name: loki
     restart: ${SRV_RESTART_MODE:-always}
     user: "10001:10001"
     command: 
@@ -64,6 +63,10 @@ services:
       - traefik.http.services.loki.loadbalancer.server.port=3100
       - traefik.http.middlewares.loki.compress=true
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       mode: global
       placement:
         constraints: 
@@ -71,6 +74,6 @@ services:
           #- node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_LOKI:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_LOKI:-1G}
         reservations:
-          memory: ${RES_RESER_MEM_LOKI:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_LOKI:-256M}

@@ -7,7 +7,6 @@ networks:
 services:
   prometheus:
     image: prom/prometheus:v3.0.1
-    container_name: prometheus
     restart: ${SRV_RESTART_MODE:-always}
     user: "nobody"
     command:
@@ -43,6 +42,10 @@ services:
       - traefik.http.middlewares.prometheus.compress=true
    
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       mode: global
       placement:
         constraints: 
@@ -50,6 +53,6 @@ services:
           #- node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_PROMETHEUS:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_PROMETHEUS:-2G}
         reservations:
-          memory: ${RES_RESER_MEM_PROMETHEUS:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_PROMETHEUS:-512M}

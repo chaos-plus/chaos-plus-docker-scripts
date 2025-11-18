@@ -11,7 +11,6 @@ services:
 
   grafana:
     image: grafana/grafana
-    container_name: grafana
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_GRAFANA}:3000"
@@ -32,6 +31,10 @@ services:
       - traefik.http.middlewares.grafana.compress=true
 
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       mode: global
       placement:
         constraints: 
@@ -39,6 +42,6 @@ services:
           #- node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_GRAFANA:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_GRAFANA:-512M}
         reservations:
-          memory: ${RES_RESER_MEM_GRAFANA:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_GRAFANA:-128M}

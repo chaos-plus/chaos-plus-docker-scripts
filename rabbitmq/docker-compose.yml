@@ -48,6 +48,6 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_RABBITMQ:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_RABBITMQ:-1G}
         reservations:
-          memory: ${RES_RESER_MEM_RABBITMQ:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_RABBITMQ:-256M}

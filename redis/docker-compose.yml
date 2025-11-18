@@ -36,7 +36,7 @@ services:
         constraints: [node.role == manager]
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_REDIS:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_REDIS:-1G}
         reservations:
-          memory: ${RES_RESER_MEM_REDIS:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_REDIS:-256M}
 

@@ -15,9 +15,6 @@ export DATA=/opt/data
 mkdir -p ${TEMP}
 mkdir -p ${DATA}
 
-export RES_LIMIT_MEM="1024M"
-export RES_RESER_MEM="128M"
-
 export PORT_PROXY=80
 export PORT_PROXY_SSL=443
 export PORT_PROXY_DASHBOARD=8081

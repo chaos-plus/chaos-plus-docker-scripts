@@ -42,10 +42,14 @@ services:
       - traefik.http.middlewares.uptime.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.uptime.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
         constraints: [node.host == manager]
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_UPTIME:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_UPTIME:-1G}
         reservations:
-          memory: ${RES_RESER_MEM_UPTIME:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_UPTIME:-256M}

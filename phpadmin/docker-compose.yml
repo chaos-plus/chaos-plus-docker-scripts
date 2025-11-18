@@ -37,7 +37,7 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_PHPADMIN:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_PHPADMIN:-512M}
         reservations:
-          memory: ${RES_RESER_MEM_PHPADMIN:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_PHPADMIN:-128M}
 

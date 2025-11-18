@@ -76,6 +76,6 @@ services:
           #- node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_CRPROXY:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_CRPROXY:-512M}
         reservations:
-          memory: ${RES_RESER_MEM_CRPROXY:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_CRPROXY:-128M}

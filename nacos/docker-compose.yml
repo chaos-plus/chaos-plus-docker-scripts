@@ -50,6 +50,6 @@ services:
         constraints: [node.role == manager]
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_NACOS:-${RES_LIMIT_MEM:-2G}}
+          memory: ${RES_LIMIT_MEM_NACOS:-2G}
         reservations:
-          memory: ${RES_RESER_MEM_NACOS:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_NACOS:-512M}

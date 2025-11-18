@@ -30,7 +30,7 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_ELASTICSEARCH:-${RES_LIMIT_MEM:-1G}}
+          memory: ${RES_LIMIT_MEM_ELASTICSEARCH:-2G}
         reservations:
-          memory: ${RES_RESER_MEM_ELASTICSEARCH:-${RES_RESER_MEM:-64M}}
+          memory: ${RES_RESER_MEM_ELASTICSEARCH:-512M}
 
