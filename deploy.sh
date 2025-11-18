@@ -467,7 +467,8 @@ function compose() {
         fi
 
         local stack="${STACK_NAME:-${SERVICE_NAME}}"
-        local CMD_STACK="sudo -E docker stack deploy --with-registry-auth -c ${COMPOSE_FILE} ${stack}"
+        # 确保环境变量传递给 docker stack
+        local CMD_STACK="sudo -E ENV=${ENV} MODE=${MODE} docker stack deploy --with-registry-auth -c ${COMPOSE_FILE} ${stack}"
         echo "$(pwd) ${CMD_STACK}"
         eval "${CMD_STACK}"
         return 0
@@ -475,13 +476,14 @@ function compose() {
 
     # 如果启用 PULL 模式，则仅拉取镜像，不执行 up
     if [ -n "${PULL:-}" ]; then
-        local CMD_PULL="sudo -E docker-compose -f ${COMPOSE_FILE} --compatibility pull"
+        local CMD_PULL="sudo -E ENV=${ENV} MODE=${MODE} docker-compose -f ${COMPOSE_FILE} --compatibility pull"
         echo "$(pwd) ${CMD_PULL}"
         eval "${CMD_PULL}"
         return 0
     fi
 
-    local CMD_UP="sudo -E docker-compose -f ${COMPOSE_FILE} --compatibility up -d"
+    # 确保环境变量传递给 docker-compose
+    local CMD_UP="sudo -E ENV=${ENV} MODE=${MODE} docker-compose -f ${COMPOSE_FILE} --compatibility up -d"
     echo "$(pwd) ${CMD_UP}"
     eval "${CMD_UP}"
 }
@@ -588,11 +590,14 @@ fi
 
 if [ -f "./env.${ENV}.sh" ]; then
     echo " 载入环境配置: env.${ENV}.sh"
+    # 导出所有环境变量
+    set -a
     source ./env.${ENV}.sh
+    set +a
 fi
 
 if [ -z "${MODE:-}" ]; then
-    MODE=compose
+    export MODE=compose
 fi
 
 echo " 开始执行部署流程..."
