@@ -9,7 +9,6 @@ services:
   # https://github.com/iCloudBot/DockerRescue/tree/main/2.Deploy-Docker-Proxy
   # crproxy:
   #   image: cleverest/crproxy:latest
-  #   container_name: crproxy
   #   restart: ${SRV_RESTART_MODE:-always}
   #   ports:
   #     - "${PORT_PROXY_CR}:80"
@@ -35,7 +34,6 @@ services:
   # https://github.com/kubesre/docker-registry-mirrors/blob/main/dockerproxy/README.md
   crproxy:
     image: ghcr.io/daocloud/crproxy/crproxy:${PROXY_CR_VERSION}
-    container_name: crproxy
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_PROXY_CR}:8080"

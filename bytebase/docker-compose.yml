@@ -9,7 +9,6 @@ networks:
 services:
   bytebase:
     image: bytebase/bytebase:latest
-    container_name: bytebase
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - /etc/localtime:/etc/localtime:ro

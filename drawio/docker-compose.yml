@@ -10,7 +10,6 @@ networks:
 services:
   drawio:
     image: jgraph/drawio
-    container_name: drawio
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_DRAWIO}:8080"

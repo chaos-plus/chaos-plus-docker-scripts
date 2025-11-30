@@ -9,7 +9,6 @@ networks:
 services:
   ghproxy:
     image: hunsh/gh-proxy-py:latest
-    container_name: ghproxy
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_PROXY_GH}:80"

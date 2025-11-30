@@ -10,7 +10,6 @@ services:
 
   gitinsight:
     image: 'robotism/gitinsight:latest'
-    container_name: gitinsight
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
         - ${DATA}/gitinsight/config.yaml:/app/config.yaml

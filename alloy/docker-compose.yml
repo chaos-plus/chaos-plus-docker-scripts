@@ -9,7 +9,6 @@ networks:
 services:
   alloy:
     image: grafana/alloy:v1.5.1
-    container_name: alloy
     restart: ${SRV_RESTART_MODE:-always}
     user: "0:0"
     command:

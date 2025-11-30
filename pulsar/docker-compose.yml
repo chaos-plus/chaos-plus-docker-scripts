@@ -9,7 +9,6 @@ networks:
 services:
   pulsar:
     image: apachepulsar/pulsar:latest
-    container_name: pulsar
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_PULSAR}:6650"

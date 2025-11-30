@@ -9,7 +9,6 @@ networks:
 services:
   umami:
     image: umamisoftware/umami:mysql-latest
-    container_name: umami
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_UMAMI:-3000}:3000"

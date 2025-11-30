@@ -10,7 +10,6 @@ services:
 
   debezium:
     image: debezium/connect:3.0.0.Final
-    container_name: debezium-connect
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_DEBEZIUM}:8083"  # Kafka Connect REST API

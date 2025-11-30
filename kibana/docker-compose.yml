@@ -9,7 +9,6 @@ networks:
 services:
 
   kibana:
-    container_name: kibana
     image: bitnami/kibana:latest
     restart: ${SRV_RESTART_MODE:-always}
     ports:

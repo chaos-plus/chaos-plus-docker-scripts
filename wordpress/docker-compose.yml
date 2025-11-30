@@ -11,7 +11,6 @@ services:
   # https://github.com/bitnami/containers/tree/main/bitnami/wordpress#how-to-use-this-image
   wordpress:
     image: bitnami/wordpress:latest 
-    container_name: wordpress
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_WORDPRESS}:8080"

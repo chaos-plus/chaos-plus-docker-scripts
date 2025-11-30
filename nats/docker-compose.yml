@@ -9,7 +9,6 @@ networks:
 services:
   nats:
     image: nats
-    container_name: nats
     restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_NATS_CLIENT:-4222}:4222"
