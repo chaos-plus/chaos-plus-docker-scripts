@@ -15,7 +15,7 @@ fi
 
 # 获取内网 IP（过滤本机回环和常见容器网段），仅展示第一条
 if command -v ip &>/dev/null; then
-    IP_LAN_LIST=$(ip -4 addr show | grep inet | awk '{print $2}' | grep -v '^127\.' | grep -v '^172\.' | awk -F"/" '{print $1}' || true)
+    IP_LAN_LIST=$(ip -4 addr show | grep inet | awk '{print $2}' | grep -v '^127\.' | grep -v '0\.1/' | awk -F"/" '{print $1}' || true)
     IP_LAN=$(echo "${IP_LAN_LIST}" | head -n 1)
 else
     IP_LAN=""
