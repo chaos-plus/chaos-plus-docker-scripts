@@ -588,6 +588,9 @@ function deploy() {
 }
 
 
+if [ -f "./.env.sh" ]; then
+    source ./.env.sh
+fi
 if [ -z "${ENV:-}" ]; then
     export ENV=debug
 fi
