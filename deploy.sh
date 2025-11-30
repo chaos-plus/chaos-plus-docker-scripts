@@ -550,7 +550,7 @@ function deploy() {
         echo "######################## service: ${serv} begin ########################"
 
         # before
-        [ -f "before.sh" ] && source before.sh $COMPOSE
+        [ -f "before.sh" ] && source before.sh
         # before
 
         # compose.sh
@@ -574,7 +574,7 @@ function deploy() {
         # compose.yml
 
         # after
-        [ -f "after.sh" ] && source after.sh $COMPOSE
+        [ -f "after.sh" ] && source after.sh
         # after
 
         cd $WORK_SPACE
