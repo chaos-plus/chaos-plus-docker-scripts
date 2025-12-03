@@ -14,10 +14,10 @@ services:
       GITEA_INSTANCE_URL: "${GITEA_INSTANCE_URL:-http://gitea:3000}"
       GITEA_RUNNER_REGISTRATION_TOKEN: "${GITEA_RUNNER_REGISTRATION_TOKEN:-}"
       GITEA_RUNNER_NAME: "${GITEA_RUNNER_NAME:-git-runner}"
-      GITEA_RUNNER_LABELS: "${GITEA_RUNNER_LABELS:-default}"
+      # GITEA_RUNNER_LABELS: "${GITEA_RUNNER_LABELS:-default}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${DATA}/gitea-runner/config.yaml:/config.yaml
+      # - ${DATA}/gitea-runner/config.yaml:/config.yaml
       - ${DATA}/gitea-runner:/data
     deploy:
       restart_policy:
