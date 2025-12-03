@@ -17,7 +17,7 @@ services:
       # GITEA_RUNNER_LABELS: "${GITEA_RUNNER_LABELS:-default}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      # - ${DATA}/gitea-runner/config.yaml:/config.yaml
+      - ${DATA}/gitea-runner/config.yaml:/config.yaml
       - ${DATA}/gitea-runner:/data
     deploy:
       restart_policy:
