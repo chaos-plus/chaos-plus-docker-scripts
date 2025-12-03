@@ -1,0 +1,33 @@
+version: "3.8"
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  
+  runner:
+    image: gitea/act_runner:nightly
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: "${INSTANCE_URL:-gitea}"
+      GITEA_RUNNER_REGISTRATION_TOKEN: "${REGISTRATION_TOKEN:-}"
+      GITEA_RUNNER_NAME: "${RUNNER_NAME:-git-runner}"
+      GITEA_RUNNER_LABELS: "${RUNNER_LABELS:-default}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DATA}/gitea-runner/config.yaml:/config.yaml
+      - ${DATA}/gitea-runner:/data
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_GITEA_RUNNER:-6G}
+        reservations:
+          memory: ${RES_RESER_MEM_GITEA_RUNNER:-4G}
