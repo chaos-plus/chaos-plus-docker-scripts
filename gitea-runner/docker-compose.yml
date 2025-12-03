@@ -8,7 +8,7 @@ networks:
 services:
   
   gitea-runner:
-    image: gitea/act_runner:latest
+    image: gitea/act_runner:nightly
     environment:
       CONFIG_FILE: /config.yaml
       GITEA_INSTANCE_URL: "${GITEA_INSTANCE_URL:-http://gitea:3000}"

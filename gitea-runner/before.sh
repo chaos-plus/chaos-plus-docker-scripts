@@ -5,7 +5,7 @@ sudo chmod 777 ${DATA}/gitea-runner/
 
 sudo rm -rf ${DATA}/gitea-runner/config.yaml
 sudo touch ${DATA}/gitea-runner/config.yaml
-docker run --entrypoint="" --rm -it docker.io/gitea/act_runner:latest act_runner generate-config > ${DATA}/gitea-runner/config.yaml
+docker run --entrypoint="" --rm -it gitea/act_runner:nightly act_runner generate-config > ${DATA}/gitea-runner/config.yaml
 cat ${DATA}/gitea-runner/config.yaml
 
 if [ -z "${GITEA_RUNNER_REGISTRATION_TOKEN}" ]; then
