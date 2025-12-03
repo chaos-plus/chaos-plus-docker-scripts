@@ -7,7 +7,7 @@ networks:
 
 services:
   
-  runner:
+  gitea-runner:
     image: gitea/act_runner:nightly
     environment:
       CONFIG_FILE: /config.yaml
