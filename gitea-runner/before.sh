@@ -7,7 +7,7 @@ sudo rm -rf ${DATA}/gitea-runner/config.yaml
 sudo cp config.yaml ${DATA}/gitea-runner/config.yaml
 
 
-if [ -z "${REGISTRATION_TOKEN}" ]; then
-    echo "REGISTRATION_TOKEN is not set"
+if [ -z "${GITEA_RUNNER_REGISTRATION_TOKEN}" ]; then
+    echo "GITEA_RUNNER_REGISTRATION_TOKEN is not set"
     exit 1
 fi
