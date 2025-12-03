@@ -15,7 +15,7 @@ services:
       - GITEA__database__DB_TYPE=mysql
       - GITEA__database__HOST=mysql8:3308
       - GITEA__database__NAME=gitea
-      - GITEA__database__USER=gitea
+      - GITEA__database__USER=root
       - GITEA__database__PASSWD=${PASSWORD}
     restart: always
     volumes:
