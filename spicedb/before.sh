@@ -33,7 +33,7 @@ echo "🗄️ 检查 MySQL 实例并创建 spicedb 数据库..."
 # 查找服务的实际容器名
 get_container_name() {
     local service_name=$1
-    docker ps --filter "name=${service_name}" --format "{{.Names}}" | head -n 1
+    docker ps -a --filter "name=${service_name}" --format "{{.Names}}" | head -n 1
 }
 
 MYSQL7_CONTAINER=$(get_container_name "mysql7")

@@ -33,7 +33,7 @@ echo "🔌 检查 RabbitMQ 容器与插件状态..."
 # 查找 rabbitmq 服务的实际容器名
 get_container_name() {
     local service_name=$1
-    docker ps --filter "name=${service_name}" --format "{{.Names}}" | head -n 1
+    docker ps -a --filter "name=${service_name}" --format "{{.Names}}" | head -n 1
 }
 
 RABBITMQ_CONTAINER=$(get_container_name "rabbitmq")
