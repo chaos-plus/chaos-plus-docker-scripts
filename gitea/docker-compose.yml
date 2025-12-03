@@ -1,4 +1,4 @@
-version: "3.8"
+
 
 networks:
   default:
@@ -8,8 +8,7 @@ networks:
 services:
   
   gitea:
-    image: docker.gitea.com/gitea:1.25.2
-    container_name: gitea
+    image: docker.gitea.com/gitea
     environment:
       - USER_UID=1000
       - USER_GID=1000
@@ -19,8 +18,6 @@ services:
       - GITEA__database__USER=gitea
       - GITEA__database__PASSWD=${PASSWORD}
     restart: always
-    networks:
-      - gitea
     volumes:
       - ${DATA}/gitea:/data
       - /etc/timezone:/etc/timezone:ro
@@ -37,37 +34,6 @@ services:
         constraints: [node.role == manager]
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_REGISTRY:-512M}
+          memory: ${RES_LIMIT_MEM_GITEA:-512M}
         reservations:
-          memory: ${RES_RESER_MEM_REGISTRY:-128M}
-
-  registry-ui:
-    image: joxit/docker-registry-ui
-    restart: always
-    environment:
-      SINGLE_REGISTRY: "true"
-      REGISTRY_TITLE: "私有镜像仓库"
-      REGISTRY_SECURED: "true"   # Basic Auth
-      DELETE_IMAGES: "true"
-      SHOW_CONTENT_DIGEST: "true"
-      THEME: "auto"
-      TAGLIST_ORDER: "num-desc;alpha-asc"
-      CATALOG_ELEMENTS_LIMIT: "1000"
-      NGINX_PROXY_PASS_URL: "http://registry:5000"   # 内部访问
-      REGISTRY_URL: ""   # 前端 JS 不直接访问 HTTP 地址
-    ports:
-      - "${PORT_REGISTRY_UI}:80"
-    depends_on:
-      - registry
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-      placement:
-        constraints: [node.role == manager]
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 64M
+          memory: ${RES_RESER_MEM_GITEA:-128M}
