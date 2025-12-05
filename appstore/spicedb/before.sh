@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-set -u -o pipefail
 
 echo "=========================================="
 echo "  Spicedb 初始化"

@@ -1,7 +1,7 @@
 
 #!/bin/bash -e
 
-set -u -o pipefail
+set -e -u -o pipefail
 
 echo "🔄 拉取最新脚本仓库代码..."
 git pull --rebase

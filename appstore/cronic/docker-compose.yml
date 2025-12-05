@@ -1,0 +1,22 @@
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  supercronic:
+    image: quay.io/aptible/supercronic:latest
+    restart: ${SRV_RESTART_MODE:-always}
+    volumes:
+      - ${DATA}/supercronic:/etc/cron.d
+      - docker.sock:/var/run/docker.sock
+    command: |
+      /etc/cron.d/supercronic.cron
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_SUPERCRONIC:-128M}
+        reservations:
+          memory: ${RES_RESER_MEM_SUPERCRONIC:-64M}

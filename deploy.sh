@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
-set -e
-set -u -o pipefail
+set -e -u -o pipefail
 
 export WORK_SPACE=$(pwd)
 
@@ -114,5 +113,15 @@ function exec() {
     done
 }
 
+if [ -z "${ENV}" ];then
+    export ENV=debug
+fi
+
+if [ -f ".env.sh" ]; then
+    source .env.sh
+fi
+if [ -f "env.${ENV}.sh" ]; then
+    source env.${ENV}.sh
+fi
 
 exec $@
