@@ -1,0 +1,28 @@
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  pulsar:
+    image: apachepulsar/pulsar:latest
+    restart: ${SRV_RESTART_MODE:-always}
+    ports:
+      - "${PORT_PULSAR}:6650"
+      - "${PORT_PULSAR_HTTP}:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/pulsar/data:/pulsar/data
+      # - ${DATA}/pulsar/conf:/pulsar/conf
+    environment:
+      - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g
+    command: bin/pulsar standalone
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_PULSAR:-2G}
+        reservations:
+          memory: ${RES_RESER_MEM_PULSAR:-512M}

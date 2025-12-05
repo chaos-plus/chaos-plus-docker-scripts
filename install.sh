@@ -3,10 +3,6 @@
 
 set -u -o pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
-
-
 echo "🔄 拉取最新脚本仓库代码..."
 git pull --rebase
 echo "✅ 代码更新完成"

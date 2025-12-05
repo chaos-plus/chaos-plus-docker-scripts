@@ -1,0 +1,28 @@
+
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  
+  gitea-runner:
+    image: gitea/act_runner:nightly
+    environment:
+      # CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: "${GITEA_INSTANCE_URL:-https://gitea.${DOMAIN}}"
+      GITEA_RUNNER_REGISTRATION_TOKEN: "${GITEA_RUNNER_REGISTRATION_TOKEN:-}"
+      GITEA_RUNNER_NAME: "${GITEA_RUNNER_NAME:-shared-runner}"
+      # GITEA_RUNNER_LABELS: "${GITEA_RUNNER_LABELS:-default}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # - ${DATA}/gitea-runner/config.yaml:/config.yaml
+      # - ${DATA}/gitea-runner:/data
+    deploy:
+      replicas: 6
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_GITEA_RUNNER:-6G}
+        reservations:
+          memory: ${RES_RESER_MEM_GITEA_RUNNER:-4G}

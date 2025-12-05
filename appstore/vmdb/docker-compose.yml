@@ -1,0 +1,33 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.120.0
+    restart: ${SRV_RESTART_MODE:-always}
+    ports:
+      - ${PORT_VICTORIAMETRICS_HTTP}:8428
+      - ${PORT_VICTORIAMETRICS_INFLUX}:8089
+      - ${PORT_VICTORIAMETRICS_INFLUX}:8089/udp
+      - ${PORT_VICTORIAMETRICS_GRAPHITE}:2003
+      - ${PORT_VICTORIAMETRICS_GRAPHITE}:2003/udp
+      - ${PORT_VICTORIAMETRICS_OPENTSDB}:4242
+    volumes:
+      - ${DATA}/vmdb:/storage
+    command:
+      - "--storageDataPath=/storage"
+      - "--graphiteListenAddr=:2003"
+      - "--opentsdbListenAddr=:4242"
+      - "--httpListenAddr=:8428"
+      - "--influxListenAddr=:8089"
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_VMDB:-2G}
+        reservations:
+          memory: ${RES_RESER_MEM_VMDB:-512M}

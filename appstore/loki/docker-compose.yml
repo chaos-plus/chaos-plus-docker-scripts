@@ -1,0 +1,70 @@
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  loki:
+    image: grafana/loki:3.5.7
+    restart: ${SRV_RESTART_MODE:-always}
+    user: "10001:10001"
+    command: 
+      - -config.file=/etc/loki/loki-config.yaml
+      - -config.expand-env=true
+      - -target=all
+    ports:
+      - "${PORT_LOKI_HTTP:-3100}:3100"
+      - "${PORT_LOKI_GRPC:-9096}:9096"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/loki:/loki
+      # 选择配置文件：本地文件系统 或 OSS 存储
+      # 使用本地存储（默认）
+      - ${DATA}/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+    environment:
+      - TZ=Asia/Shanghai
+      
+      # ========== 阿里云 OSS 配置 ==========
+      # 如果使用 OSS 存储，需要配置以下环境变量
+      
+      # OSS Endpoint（根据你的区域选择）
+      # 华东1(杭州): oss-cn-hangzhou.aliyuncs.com
+      # 华北2(北京): oss-cn-beijing.aliyuncs.com
+      # 华南1(深圳): oss-cn-shenzhen.aliyuncs.com
+      # 亚太东南1(新加坡): oss-ap-southeast-1.aliyuncs.com
+      # 亚太东南3(吉隆坡): oss-ap-southeast-3.aliyuncs.com
+      - OSS_ENDPOINT=${OSS_ENDPOINT:-oss-ap-southeast-3.aliyuncs.com}
+      
+      # OSS 区域代码
+      - OSS_REGION=${OSS_REGION:-ap-southeast-3}
+      
+      # OSS Bucket 名称
+      - OSS_BUCKET=${OSS_BUCKET:-loki-data}
+      - OSS_BUCKET_RULER=${OSS_BUCKET_RULER:-${OSS_BUCKET:-loki-ruler}}
+      
+      # 阿里云 AccessKey（建议通过 env.sh 配置）
+      - OSS_ACCESS_KEY_ID=${OSS_ACCESS_KEY_ID:-}
+      - OSS_SECRET_ACCESS_KEY=${OSS_SECRET_ACCESS_KEY:-}
+      
+      # Alertmanager URL（可选）
+      - ALERTMANAGER_URL=${ALERTMANAGER_URL:-}
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.loki.rule=HostRegexp(`^loki\..*`)
+      - traefik.http.routers.loki.tls=true
+      - traefik.http.routers.loki.entrypoints=websecure
+      - traefik.http.services.loki.loadbalancer.server.port=3100
+      - traefik.http.middlewares.loki.compress=true
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_LOKI:-1G}
+        reservations:
+          memory: ${RES_RESER_MEM_LOKI:-256M}

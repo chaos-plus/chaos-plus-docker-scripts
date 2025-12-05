@@ -1,0 +1,45 @@
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: ${SRV_RESTART_MODE:-always}
+    privileged: true
+    ports:
+      # epmd
+      -  "${PORT_RABBITMQ_EPMD}:4369"
+      # AMQP 0-9-1 without and with TLS
+      -  "${PORT_RABBITMQ_AMQP_SSL}:5671"
+      -  "${PORT_RABBITMQ_AMQP}:5672"
+      # Management
+      -  "${PORT_RABBITMQ_UI}:15672"
+      # Erlang distribution
+      -  "${PORT_RABBITMQ_CLUSTER}:25672"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/rabbitmq/:/var/lib/rabbitmq/ 
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=${PASSWORD}
+    labels:
+      - traefik.enable=true
+      
+      - traefik.http.routers.rabbitmq.rule=HostRegexp(`^rabbitmq\..*`)
+      - traefik.http.routers.rabbitmq.tls=true
+      - traefik.http.routers.rabbitmq.entrypoints=websecure
+      - traefik.http.routers.rabbitmq.service=rabbitmq@docker
+      - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
+
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_RABBITMQ:-1G}
+        reservations:
+          memory: ${RES_RESER_MEM_RABBITMQ:-256M}

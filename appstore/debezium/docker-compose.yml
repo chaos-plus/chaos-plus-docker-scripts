@@ -1,0 +1,27 @@
+
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+
+  debezium:
+    image: debezium/connect:3.0.0.Final
+    restart: ${SRV_RESTART_MODE:-always}
+    ports:
+      - "${PORT_DEBEZIUM}:8083"  # Kafka Connect REST API
+    environment:
+     - BOOTSTRAP_SERVERS=kafka:9092
+     - GROUP_ID=debezium-1
+     - CONFIG_STORAGE_TOPIC=my_connect_configs
+     - OFFSET_STORAGE_TOPIC=my_connect_offsets
+     - STATUS_STORAGE_TOPIC=my_connect_statuses
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_DEBEZIUM:-1G}
+        reservations:
+          memory: ${RES_RESER_MEM_DEBEZIUM:-256M}

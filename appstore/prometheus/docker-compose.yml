@@ -1,0 +1,51 @@
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    restart: ${SRV_RESTART_MODE:-always}
+    user: "nobody"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-30d}'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--web.enable-remote-write-receiver'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+    ports:
+      - "${PORT_PROMETHEUS:-9090}:9090"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/prometheus/data:/prometheus
+      - ${DATA}/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ${DATA}/prometheus/rules:/etc/prometheus/rules:ro
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.prometheus.rule=HostRegexp(`^prometheus\..*`)
+      - traefik.http.routers.prometheus.tls=true
+      - traefik.http.routers.prometheus.entrypoints=websecure
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      - traefik.http.middlewares.prometheus.compress=true
+   
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_PROMETHEUS:-2G}
+        reservations:
+          memory: ${RES_RESER_MEM_PROMETHEUS:-512M}

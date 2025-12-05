@@ -1,0 +1,33 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+
+services:
+  spicedb:
+    image: authzed/spicedb:${SPICEDB_VERSION}
+    restart: ${SRV_RESTART_MODE:-always}
+    ports:
+      - ${PORT_SPICEDB_HTTP:-8443}:8443
+      - ${PORT_SPICEDB_GRPC:-50051}:50051
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      # - "${DATA}/spicedb/resources:/spicedb"
+    command:
+      # https://authzed.com/docs/spicedb/concepts/commands#reference-spicedb
+      - serve 
+      - --http-enabled 
+      - --skip-release-check=true
+      - --grpc-preshared-key=${PASSWORD}${PASSWORD}
+      - --datastore-engine=mysql 
+      - --datastore-conn-uri=root:${PASSWORD}@tcp(mysql8:3306)/spicedb?parseTime=true
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_SPICEDB:-1G}
+        reservations:
+          memory: ${RES_RESER_MEM_SPICEDB:-256M}

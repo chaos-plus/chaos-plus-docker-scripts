@@ -1,0 +1,59 @@
+version: "3.8"
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  registry:
+    image: registry
+    restart: always
+    environment:
+      REGISTRY_STORAGE: s3
+      REGISTRY_STORAGE_S3_REGION: ${OSS_REGION}
+      REGISTRY_STORAGE_S3_BUCKET: ${OSS_BUCKET}
+      REGISTRY_STORAGE_S3_ACCESSKEY: ${OSS_ACCESS_KEY_ID}
+      REGISTRY_STORAGE_S3_SECRETKEY: ${OSS_SECRET_ACCESS_KEY}
+      REGISTRY_STORAGE_S3_REGIONENDPOINT: ${OSS_ENDPOINT}
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      # 开启 basic auth 需要提供 htpasswd 文件
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - ${DATA}/registry/:/auth/:ro
+    ports:
+      - "${PORT_REGISTRY}:5000"
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_REGISTRY:-512M}
+        reservations:
+          memory: ${RES_RESER_MEM_REGISTRY:-128M}
+
+  registry-ui:
+    image: joxit/docker-registry-ui
+    restart: always
+    environment:
+      SINGLE_REGISTRY: "true"
+      REGISTRY_TITLE: "私有镜像仓库"
+      REGISTRY_SECURED: "true"   # Basic Auth
+      DELETE_IMAGES: "true"
+      SHOW_CONTENT_DIGEST: "true"
+      THEME: "auto"
+      TAGLIST_ORDER: "num-desc;alpha-asc"
+      CATALOG_ELEMENTS_LIMIT: "1000"
+      NGINX_PROXY_PASS_URL: "http://registry:5000"   # 内部访问
+      REGISTRY_URL: ""   # 前端 JS 不直接访问 HTTP 地址
+    ports:
+      - "${PORT_REGISTRY_UI}:80"
+    depends_on:
+      - registry
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M

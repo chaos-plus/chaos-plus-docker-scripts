@@ -1,0 +1,33 @@
+
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+    
+
+services:
+
+  gitinsight:
+    image: 'robotism/gitinsight:latest'
+    restart: ${SRV_RESTART_MODE:-always}
+    volumes:
+        - ${DATA}/gitinsight/config.yaml:/app/config.yaml
+        - ${DATA}/gitinsight/.repo:/app/.repo
+    ports:
+        - '${PORT_GITINSIGHT}:8080'
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gitinsight.rule=HostRegexp(`^gitinsight\..*`)
+      - traefik.http.routers.gitinsight.tls=true
+      - traefik.http.routers.gitinsight.entrypoints=websecure
+      - traefik.http.routers.gitinsight.service=gitinsight@docker
+      - traefik.http.services.gitinsight.loadbalancer.server.port=8080
+      - traefik.http.services.gitinsight.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.gitinsight.compress=true
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_GITINSIGHT:-512M}
+        reservations:
+          memory: ${RES_RESER_MEM_GITINSIGHT:-128M}

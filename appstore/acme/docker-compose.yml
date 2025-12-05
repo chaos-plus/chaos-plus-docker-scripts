@@ -1,0 +1,44 @@
+
+# docker network create --driver overlay --attachable cluster
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+
+  acme:
+    image: neilpang/acme.sh:3.0.6
+    restart: "no"             # 对应 docker run --rm
+    network_mode: host        # 保持 host 网络模式
+    volumes:
+      - ${DATA}/acme:/acme.sh
+    environment:
+      ${ACME_DNS_ID_NAME:-ACME_DNS_ID_NAME}: ${ACME_DNS_ID_VALUE:-""}
+      ${ACME_DNS_KEY_NAME:-ACME_DNS_KEY_NAME}: ${ACME_DNS_KEY_VALUE:-""}
+      DOMAIN: ${DOMAIN}       # 如果命令里使用了 ${DOMAIN}
+      ACME_DNS: ${ACME_DNS}   # 如果命令里使用了 ${ACME_DNS}
+    command:
+      - --register-account
+      - -m
+      - acme@${DOMAIN}
+      - --set-default-ca
+      - --server
+      - letsencrypt
+      - --keylength
+      - "2048"
+      - --preferred-chain
+      - "ISRG Root X1"
+      - --issue
+      - --force
+      - --debug
+      - "2"
+      - --dns
+      - ${ACME_DNS}
+    deploy:
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_ACME:-128M}
+        reservations:
+          memory: ${RES_RESER_MEM_ACME:-64M}
