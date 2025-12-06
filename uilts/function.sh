@@ -48,7 +48,7 @@ export -f RED GREEN YELLOW BLUE WHITE PURPLE GRAY
 export -f RED_N GREEN_N YELLOW_N BLUE_N
 export -f NOTE INFO WARN ERROR SUCCESS DEBUG READP PM
 
-PM() {
+function PM() {
     if command -v apt &>/dev/null; then
         apt $@
     elif command -v apt-get &>/dev/null; then
