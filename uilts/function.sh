@@ -810,7 +810,7 @@ k8s_export_config() {
         export KUBECONFIG=/etc/kubernetes/admin.conf
     fi
 
-    if [ -n "$KUBECONFIG" ]; then
+    if [ -n "${KUBECONFIG:-}" ]; then
         INFO "export KUBECONFIG=$KUBECONFIG"
     fi
 }
