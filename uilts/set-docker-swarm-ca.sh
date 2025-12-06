@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-
+source "$(dirname "$0")/function.sh"
 
 swarm_state=$(sudo docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || true)
 if [[ "${swarm_state}" != "active" && "${swarm_state}" != "locked" ]]; then

@@ -7,8 +7,8 @@ export WORK_SPACE=$(pwd)
 source ./uilts/function.sh
 
 function set_dotenv() {
-    local key="$1"
-    local value="$2"
+    local key="${1:-}"
+    local value="${2:-}"
 
     if [ -z "${value}" ]; then
         if [[ "${key}" == *"="* ]]; then
@@ -159,7 +159,7 @@ if [ -f ".env.sh" ]; then
 fi
 
 # 如果没有ENV变量，就提示用户输入
-if [ -z "${ENV}" ];then
+if [ -z "${ENV:-}" ];then
     while true; do
         read -p "请输入环境 (debug/prod): " ENV
         if [ -n "${ENV}" ]; then

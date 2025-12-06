@@ -74,18 +74,20 @@ sudo docker ps -a
 
 
 ## 创建共享网络
-INFO "🌐 检查 Docker 网络: ${NETWORK}"
+INFO "🌐 检查 Docker 网络: ${NETWORK:-bridge}"
+export NETWORK=${NETWORK:-bridge}
+export MODE=${MODE:-compose}
 if sudo docker network inspect "${NETWORK}" >/dev/null 2>&1; then
     # NET EXISTS - 检查 scope 是否匹配
     current_scope=$(sudo docker network inspect "${NETWORK}" --format '{{.Scope}}' 2>/dev/null || echo "")
     
-    if [ "${MODE}" = "stack" ] && [ "${current_scope}" = "local" ]; then
+    if [ "${MODE:-compose}" = "stack" ] && [ "${current_scope}" = "local" ]; then
         WARN "网络 ${NETWORK} scope 为 local，stack 模式需要 swarm scope"
         INFO "🔄 正在删除并重建网络..."
         sudo docker network rm "${NETWORK}" || true
         sudo docker network create --driver overlay --attachable "${NETWORK}"
         SUCCESS "网络已重建为 overlay (swarm scope)"
-    elif [ "${MODE}" = "compose" ] && [ "${current_scope}" = "swarm" ]; then
+    elif [ "${MODE:-compose}" = "compose" ] && [ "${current_scope}" = "swarm" ]; then
         INFO "网络 ${NETWORK} scope 为 swarm，compose 模式仍可使用"
     else
         SUCCESS "docker 网络已存在，scope: ${current_scope}"
@@ -95,7 +97,7 @@ else
     INFO "🚧 docker 网络不存在，正在创建: ${NETWORK}"
     network_driver="bridge"
     network_cmd=(sudo docker network create)
-    if [ "${MODE}" = "stack" ]; then
+    if [ "${MODE:-compose}" = "stack" ]; then
         network_driver="overlay"
         network_cmd+=(--driver "${network_driver}" --attachable)
     else

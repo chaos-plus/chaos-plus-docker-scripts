@@ -408,7 +408,7 @@ export IPV4_LAN=$(ip -4 addr show |
     grep -v 'docker0' |
     grep -oP '(?<=inet\s)\d+\.\d+\.\d+\.\d+' |
     head -n 1)
-INFO "ENV IPV4_LAN: ${IPV4_LAN}"
+INFO "ENV IPV4_LAN: ${IPV4_LAN:-}"
 
 
 if [ ! -n "${IPV4_WAN:-}" ]; then
@@ -420,7 +420,7 @@ fi
 if [ ! -n "${IPV4_WAN:-}" ]; then
     export IPV4_WAN=$(curl -sfL https://api.ipify.org?format=text --silent --connect-timeout 5 --max-time 5 || true)
 fi
-INFO "ENV IPV4_WAN: ${IPV4_WAN}"
+INFO "ENV IPV4_WAN: ${IPV4_WAN:-}"
 
 export PING_GCR=$(curl -Is http://gcr.io --silent --connect-timeout 2 --max-time 2 | head -n 1)
 if echo "$PING_GCR" | grep -q "HTTP/1.1 200 OK"; then
