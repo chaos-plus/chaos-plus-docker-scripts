@@ -52,7 +52,7 @@ function exec() {
     check_init
 
     INFO "🌎 部署环境: ${ENV}"
-    INFO "🌐 主域名: ${DOMAIN}"
+    INFO "🌐 主域名: ${DOMAIN:-未配置}"
     if declare -p DOMAINS >/dev/null 2>&1; then
         INFO "🌐 其他域名: ${DOMAINS[*]}"
     else
