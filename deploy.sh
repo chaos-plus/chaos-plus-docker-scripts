@@ -128,9 +128,9 @@ function exec() {
         if [ -f "${compose4}" ]; then
             compose="$compose -f ${compose4}"
         fi
-        if [ -z "${compose}"]; then
+        if [ -z "${compose}" ]; then
             ERROR "missing docker-compose.yml"
-        elif
+        else
             eval "sudo -E ENV=${ENV} docker-compose --compatibility ${compose} up -d"
         fi
         # compose.yml
