@@ -56,7 +56,7 @@ function exec() {
     if declare -p DOMAINS >/dev/null 2>&1; then
         INFO "🌐 其他域名: ${DOMAINS[*]}"
     else
-        NOTE "🌐 其他域名: (未配置)"
+        NOTE "🌐 其他域名: 未配置"
     fi
     echo ""
 
@@ -65,7 +65,7 @@ function exec() {
     fi
 
     if [ -z "${SERVICES:-}" ]; then
-        SERVICES=( $(find ./appstore -maxdepth 1 -type d -not -name '.*' -printf '%f\n') )
+        SERVICES=( $(find ./appstore/ -maxdepth 1 -type d -not -name '.*' -printf '%f\n') )
         ERROR "请配置要部署的服务列表： ${SERVICES:-}"
         exit 1
     fi
