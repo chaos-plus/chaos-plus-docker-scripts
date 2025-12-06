@@ -66,7 +66,7 @@ function exec() {
 
     if [ -z "${SERVICES:-}" ]; then
         SERVICES=( $(find ./appstore/ -mindepth 1 -maxdepth 1 -type d -printf '%P/\n') )
-        ERROR "请配置要部署的服务列表： ${SERVICES:-}"
+        ERROR "请配置要部署的服务列表： ${SERVICES[*]}"
         exit 1
     fi
 
