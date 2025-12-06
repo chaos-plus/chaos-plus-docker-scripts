@@ -3,7 +3,7 @@
 
 export HOSTNAME=$(hostname)
 
-export NETWORK=traefik
+export NETWORK=cloud
 
 export TEMP=/opt/tmp
 export DATA=/opt/data

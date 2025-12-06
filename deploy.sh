@@ -6,17 +6,56 @@ export WORK_SPACE=$(pwd)
 
 source ./uilts/function.sh
 
+function set_dotenv() {
+    local key="$1"
+    local value="$2"
+
+    if [ -z "${value}" ]; then
+        if [[ "${key}" == *"="* ]]; then
+            value="${key#*=}"
+            key="${key%%=*}"
+        fi
+    fi
+
+    # 确保 .env.sh 存在
+    [ -f .env.sh ] || touch .env.sh
+
+    # 如果未传入 key，直接返回（只更新 ENV）
+    if [ -z "${key}" ]; then
+        return 0
+    fi
+
+    # 处理传入的 key/value，支持新增或更新
+    if grep -qE "^\s*${key}=" .env.sh; then
+        sed -i.bak "s#^\s*${key}=.*#${key}=${value}#" .env.sh
+    else
+        echo "${key}=${value}" >> .env.sh
+    fi
+}
+
+function check_init(){
+    if [ "${HAS_INIT:-}" == "true" ]; then
+        INFO "跳过初始化，已存在 HAS_INIT"
+        return 0
+    fi
+
+    init
+
+    export HAS_INIT="true"
+    set_dotenv "HAS_INIT" "true"
+    
+}
 
 function exec() {
     
-    init
+    check_init
 
-    echo "🌎 部署环境: ${ENV}"
-    echo "🌐 主域名: ${DOMAIN}"
+    INFO "🌎 部署环境: ${ENV}"
+    INFO "🌐 主域名: ${DOMAIN}"
     if declare -p DOMAINS >/dev/null 2>&1; then
-        echo "🌐 其他域名: ${DOMAINS[*]}"
+        INFO "🌐 其他域名: ${DOMAINS[*]}"
     else
-        echo "🌐 其他域名: (未配置)"
+        NOTE "🌐 其他域名: (未配置)"
     fi
     echo ""
 
@@ -29,7 +68,7 @@ function exec() {
         exit 1
     fi
 
-    echo "📋 将要部署的服务列表: ${SERVICES[*]}"
+    INFO "📋 将要部署的服务列表: ${SERVICES[*]}"
 
 
 
@@ -38,20 +77,20 @@ function exec() {
         cd "$WORK_SPACE"
 
         if [ ! -d "${serv}" ]; then
-            echo "service ${serv} not found"
+            WARN "service ${serv} not found"
             continue
         fi
 
         if [[ "$serv" == "."* || "$serv" == "-"* ]]; then
-            echo "service ${serv} ignored"
+            NOTE "service ${serv} ignored"
             continue
         fi
 
 
 
         echo ""
-        echo "#####################################################################"
-        echo "######################## service: ${serv} begin ########################"
+        BLUE "#####################################################################"
+        GREEN "#################### service: ${serv} begin ####################"
 
 
         local env1="env/env.sh"
@@ -89,7 +128,7 @@ function exec() {
             compose="$compose -f ${compose4}"
         fi
         if [ -z "${compose}"]; then
-            echo "missing docker-compose.yml"
+            ERROR "missing docker-compose.yml"
         elif
             eval "sudo -E ENV=${ENV} docker-compose --compatibility ${compose} up -d"
         fi
@@ -107,19 +146,32 @@ function exec() {
         # after
 
         cd $WORK_SPACE
-        echo "######################## service: ${serv} end ########################"
+        SUCCESS "#################### service: ${serv} end ####################"
         echo ""
         echo ""
     done
 }
 
-if [ -z "${ENV}" ];then
-    export ENV=debug
-fi
-
+# 如果有 .env.sh，就 source 它
 if [ -f ".env.sh" ]; then
     source .env.sh
 fi
+
+# 如果没有ENV变量，就提示用户输入
+if [ -z "${ENV}" ];then
+    while true; do
+        read -p "请输入环境 (debug/prod): " ENV
+        if [ -n "${ENV}" ]; then
+            export ENV
+            break
+        fi
+        ERROR "环境不能为空，请重新输入"
+    done
+fi
+
+set_dotenv ENV ${ENV}
+
+# 如果有 env.${ENV}.sh，就 source 它
 if [ -f "env.${ENV}.sh" ]; then
     source env.${ENV}.sh
 fi

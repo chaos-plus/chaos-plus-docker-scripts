@@ -14,20 +14,39 @@ export INFO="[${GREEN}INFO${RESET}]"
 export WARN="[${YELLOW}WARN${RESET}]"
 export ERROR="[${RED}ERROR${RESET}]"
 
-RED() { echo -e "\033[31m\033[01m$1\033[0m"; }
-GREEN() { echo -e "\033[32m\033[01m$1\033[0m"; }
-YELLOW() { echo -e "\033[33m\033[01m$1\033[0m"; }
-BLUE() { echo -e "\033[36m\033[01m$1\033[0m"; }
+# ============================================
+# 颜色输出函数 - 支持多参数
+# ============================================
+RED() { echo -e "\033[31m\033[01m$*\033[0m"; }
+GREEN() { echo -e "\033[32m\033[01m$*\033[0m"; }
+YELLOW() { echo -e "\033[33m\033[01m$*\033[0m"; }
+BLUE() { echo -e "\033[36m\033[01m$*\033[0m"; }
+WHITE() { echo -e "\033[37m\033[01m$*\033[0m"; }
+PURPLE() { echo -e "\033[35m\033[01m$*\033[0m"; }
+GRAY() { echo -e "\033[90m$*\033[0m"; }
 
-WHITE() { echo -e "\033[37m\033[01m$1\033[0m"; }
+# 带 -n 选项的颜色输出（不换行）
+RED_N() { echo -n -e "\033[31m\033[01m$*\033[0m"; }
+GREEN_N() { echo -n -e "\033[32m\033[01m$*\033[0m"; }
+YELLOW_N() { echo -n -e "\033[33m\033[01m$*\033[0m"; }
+BLUE_N() { echo -n -e "\033[36m\033[01m$*\033[0m"; }
+
+# ============================================
+# 日志级别函数 - 带前缀标签
+# ============================================
+NOTE() { echo -e "${NOTE} $*"; }
+INFO() { echo -e "${INFO} $*"; }
+WARN() { echo -e "${WARN} $*"; }
+ERROR() { echo -e "${ERROR} $*"; }
+SUCCESS() { echo -e "[${GREEN}SUCCESS${RESET}] $*"; }
+DEBUG() { [[ "${DEBUG_MODE:-}" == "true" ]] && echo -e "[${GRAY}DEBUG${RESET}] $*" || true; }
+
+# 交互式输入
 READP() { read -p "$(YELLOW "$1")" $2; }
 
-NOTE() { echo -e "${NOTE} ${1}"; }
-INFO() { echo -e "${INFO} ${1}"; }
-WARN() { echo -e "${WARN} ${1}"; }
-ERROR() { echo -e "${ERROR} ${1}"; }
-
-export -f RED GREEN YELLOW BLUE WHITE READP NOTE INFO WARN ERROR PM
+export -f RED GREEN YELLOW BLUE WHITE PURPLE GRAY
+export -f RED_N GREEN_N YELLOW_N BLUE_N
+export -f NOTE INFO WARN ERROR SUCCESS DEBUG READP PM
 
 PM() {
     if command -v apt &>/dev/null; then
@@ -57,7 +76,7 @@ PM() {
     elif command -v nix &>/dev/null; then
         nix $@
     else
-        echo "Package manager not supported on this system."
+        ERROR "Package manager not supported on this system."
     fi
 }
 export -f PM
@@ -68,147 +87,147 @@ pm_install_one() {
     if command -v apt &>/dev/null; then
         # 使用 apt
         if apt search "$package_name" | grep -q "$package_name"; then
-            echo "Installing $package_name using apt."
+            INFO "Installing $package_name using apt."
             sudo apt install -y "$package_name"
             return
         else
-            echo "Package '$package_name' not found in apt repository."
+            WARN "Package '$package_name' not found in apt repository."
         fi
     fi
 
     if command -v apt-get &>/dev/null; then
         # 使用 apt-get
         if apt-cache search "$package_name" | grep -q "$package_name"; then
-            echo "Installing $package_name using apt-get."
+            INFO "Installing $package_name using apt-get."
             sudo apt-get install -y "$package_name"
             return
         else
-            echo "Package '$package_name' not found in apt-get repository."
+            WARN "Package '$package_name' not found in apt-get repository."
         fi
     fi
 
     if command -v yum &>/dev/null; then
         # 使用 yum
         if yum list available "$package_name" &>/dev/null; then
-            echo "Installing $package_name using yum."
+            INFO "Installing $package_name using yum."
             sudo yum install -y "$package_name"
             return
         else
-            echo "Package '$package_name' not found in yum repository."
+            WARN "Package '$package_name' not found in yum repository."
         fi
     fi
 
     if command -v pacman &>/dev/null; then
         # 使用 pacman
         if pacman -Ss "$package_name" | grep -q "$package_name"; then
-            echo "Installing $package_name using pacman."
+            INFO "Installing $package_name using pacman."
             sudo pacman -S --noconfirm "$package_name"
             return
         else
-            echo "Package '$package_name' not found in pacman repository."
+            WARN "Package '$package_name' not found in pacman repository."
         fi
     fi
 
     if command -v dnf &>/dev/null; then
         # 使用 dnf
         if dnf list available "$package_name" &>/dev/null; then
-            echo "Installing $package_name using dnf."
+            INFO "Installing $package_name using dnf."
             sudo dnf install -y "$package_name"
             return
         else
-            echo "Package '$package_name' not found in dnf repository."
+            WARN "Package '$package_name' not found in dnf repository."
         fi
     fi
 
     if command -v snap &>/dev/null; then
         # 使用 snap
         if snap info "$package_name" &>/dev/null; then
-            echo "Installing $package_name using snap."
+            INFO "Installing $package_name using snap."
             sudo snap install "$package_name"
             return
         else
-            echo "Package '$package_name' not found in snap repository."
+            WARN "Package '$package_name' not found in snap repository."
         fi
     fi
 
     if command -v yay &>/dev/null; then
         # 使用 yay
         if yay -Ss "$package_name" | grep -q "$package_name"; then
-            echo "Installing $package_name using yay."
+            INFO "Installing $package_name using yay."
             yay -S --noconfirm "$package_name"
             return
         else
-            echo "Package '$package_name' not found in yay repository."
+            WARN "Package '$package_name' not found in yay repository."
         fi
     fi
 
     if command -v zypper &>/dev/null; then
         # 使用 zypper
         if zypper search "$package_name" &>/dev/null; then
-            echo "Installing $package_name using zypper."
+            INFO "Installing $package_name using zypper."
             sudo zypper install -y "$package_name"
             return
         else
-            echo "Package '$package_name' not found in zypper repository."
+            WARN "Package '$package_name' not found in zypper repository."
         fi
     fi
 
     if command -v brew &>/dev/null; then
         # 使用 brew
         if brew search "$package_name" &>/dev/null; then
-            echo "Installing $package_name using brew."
+            INFO "Installing $package_name using brew."
             brew install "$package_name"
             return
         else
-            echo "Package '$package_name' not found in brew repository."
+            WARN "Package '$package_name' not found in brew repository."
         fi
     fi
 
     if command -v flatpak &>/dev/null; then
         # 使用 flatpak
         if flatpak search "$package_name" &>/dev/null; then
-            echo "Installing $package_name using flatpak."
+            INFO "Installing $package_name using flatpak."
             sudo flatpak install -y "$package_name"
             return
         else
-            echo "Package '$package_name' not found in flatpak repository."
+            WARN "Package '$package_name' not found in flatpak repository."
         fi
     fi
 
     if command -v port &>/dev/null; then
         # 使用 port
         if port search "$package_name" &>/dev/null; then
-            echo "Installing $package_name using port."
+            INFO "Installing $package_name using port."
             sudo port install "$package_name"
             return
         else
-            echo "Package '$package_name' not found in port repository."
+            WARN "Package '$package_name' not found in port repository."
         fi
     fi
 
     if command -v conda &>/dev/null; then
         # 使用 conda
         if conda search "$package_name" &>/dev/null; then
-            echo "Installing $package_name using conda."
+            INFO "Installing $package_name using conda."
             conda install -y "$package_name"
             return
         else
-            echo "Package '$package_name' not found in conda repository."
+            WARN "Package '$package_name' not found in conda repository."
         fi
     fi
 
     if command -v nix &>/dev/null; then
         # 使用 nix
         if nix search "$package_name" &>/dev/null; then
-            echo "Installing $package_name using nix."
+            INFO "Installing $package_name using nix."
             nix-env -i "$package_name"
             return
         else
-            echo "Package '$package_name' not found in nix repository."
+            WARN "Package '$package_name' not found in nix repository."
         fi
     fi
 
-    echo "Package manager not supported on this system."
+    ERROR "Package manager not supported on this system."
 }
 
 pm_uninstall_one() {
@@ -508,7 +527,7 @@ init() {
 
     # 检查并更新 apt 系统
     if command -v apt &>/dev/null; then
-        echo "Updating and upgrading packages using apt"
+        INFO "Updating and upgrading packages using apt"
         sudo apt update -y
         sudo apt upgrade -y
         sudo apt autoremove -y
@@ -516,7 +535,7 @@ init() {
 
     # 检查并更新 apt-get 系统
     if command -v apt-get &>/dev/null; then
-        echo "Updating and upgrading packages using apt-get"
+        INFO "Updating and upgrading packages using apt-get"
         sudo apt-get update -y
         sudo apt-get upgrade -y
         sudo apt-get autoremove -y
@@ -524,7 +543,7 @@ init() {
 
     # 检查并更新 yum 系统
     if command -v yum &>/dev/null; then
-        echo "Updating and upgrading packages using yum"
+        INFO "Updating and upgrading packages using yum"
         sudo yum update -y
         sudo yum install epel-release -y
         sudo yum autoremove -y
@@ -532,14 +551,14 @@ init() {
 
     # 检查并更新 pacman 系统
     if command -v pacman &>/dev/null; then
-        echo "Updating and upgrading packages using pacman"
+        INFO "Updating and upgrading packages using pacman"
         sudo pacman -Syu --noconfirm
         sudo pacman -Rns $(pacman -Qdtq)
     fi
 
     # 检查并更新 dnf 系统
     if command -v dnf &>/dev/null; then
-        echo "Updating and upgrading packages using dnf"
+        INFO "Updating and upgrading packages using dnf"
         dnf install dnf
         sudo dnf update -y
         sudo dnf autoremove -y
@@ -547,7 +566,7 @@ init() {
 
     # 检查并更新 zypper 系统
     if command -v zypper &>/dev/null; then
-        echo "Updating and upgrading packages using zypper"
+        INFO "Updating and upgrading packages using zypper"
         sudo zypper refresh -y
         sudo zypper update -y
         sudo zypper remove --clean-deps $(zypper packages --orphaned -t package | awk '{print $3}')
@@ -555,7 +574,7 @@ init() {
 
     # 检查并更新 brew 系统
     if command -v brew &>/dev/null; then
-        echo "Updating and upgrading packages using brew"
+        INFO "Updating and upgrading packages using brew"
         brew update
         brew upgrade
         brew cleanup
@@ -563,33 +582,33 @@ init() {
 
     # 检查并更新 flatpak 系统
     if command -v flatpak &>/dev/null; then
-        echo "Updating and upgrading packages using flatpak"
+        INFO "Updating and upgrading packages using flatpak"
         sudo flatpak update -y
     fi
 
     # 检查并更新 port 系统
     if command -v port &>/dev/null; then
-        echo "Updating and upgrading packages using port"
+        INFO "Updating and upgrading packages using port"
         sudo port selfupdate
         sudo port upgrade outdated
     fi
 
     # 检查并更新 conda 系统
     if command -v conda &>/dev/null; then
-        echo "Updating and upgrading packages using conda"
+        INFO "Updating and upgrading packages using conda"
         conda update --all -y
     fi
 
     # 检查并更新 nix 系统
     if command -v nix &>/dev/null; then
-        echo "Updating and upgrading packages using nix"
+        INFO "Updating and upgrading packages using nix"
         nix-channel --update
         nix-env -u '*'
     fi
 
     # 如果没有找到支持的包管理器
     if ! (command -v apt &>/dev/null || command -v apt-get &>/dev/null || command -v yum &>/dev/null || command -v pacman &>/dev/null || command -v dnf &>/dev/null || command -v zypper &>/dev/null || command -v brew &>/dev/null || command -v flatpak &>/dev/null || command -v port &>/dev/null || command -v conda &>/dev/null || command -v nix &>/dev/null); then
-        echo "No supported package manager found on this system."
+        ERROR "No supported package manager found on this system."
     fi
 
     INFO "----------------------------------------------------------"
@@ -772,119 +791,6 @@ export -f init
 
 install_docker() {
  
-    echo "🐳 检查 Docker 安装..."
-    if ! command -v docker &>/dev/null; then
-        # 优先使用国内镜像脚本安装 Docker
-        sudo curl -fsSL https://linuxmirrors.cn/docker.sh | bash || echo "⚠️ linuxmirrors.cn 安装脚本执行失败，继续尝试其他方式"
-    fi
-
-    if ! command -v docker &>/dev/null; then
-        sudo curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
-    fi
-
-    if ! command -v docker &>/dev/null; then
-        if command -v pacman &>/dev/null; then
-            sudo pacman -S --noconfirm docker || true
-        fi
-    fi
-
-    if ! command -v docker &>/dev/null; then
-        echo "docker is not installed"
-        exit 1
-    fi
-
-
-    echo "🧩 检查 docker-compose 安装..."
-    if ! command -v docker-compose &>/dev/null; then
-        # 设置安装路径
-        DEST=/usr/local/bin/docker-compose
-        # 获取最新版本号（从 GitHub API）
-        version=$(curl -s https://api.github.com/repos/docker/compose/releases/latest \
-            | grep '"tag_name":' | cut -d '"' -f 4)
-        if [[ -z "$version" ]]; then
-            echo "❌ 无法获取 docker-compose 最新版本号"
-            exit 1
-        fi
-        echo "📦 正在下载 docker-compose $version ..."
-        # 构建下载 URL
-        url="https://github.com/docker/compose/releases/download/$version/docker-compose-$(uname -s)-$(uname -m)"
-        # 下载并安装
-        sudo curl -L "$url" -o "$DEST"
-        sudo chmod +x "$DEST"
-    fi
-
-    if [ ! -n "$(which docker-compose 2>/dev/null)" ]; then
-        if command -v apt &>/dev/null; then
-            sudo apt install -y docker-compose-plugin || true
-        fi
-        if command -v yum &>/dev/null; then
-            sudo yum install -y docker-compose-plugin || true
-        fi
-        if command -v pacman &>/dev/null; then
-            sudo pacman -S --noconfirm docker-compose || true
-        fi
-
-        DOCKER_COMPOSE=$(find / -name docker-compose | grep "docker" 2>/dev/null)
-        if [ -n "$DOCKER_COMPOSE" ]; then
-            echo $DOCKER_COMPOSE
-            sudo chmod 755 $DOCKER_COMPOSE
-            sudo \cp -rf $DOCKER_COMPOSE /usr/bin/docker-compose
-        fi
-    fi
-
-    if ! command -v docker-compose &>/dev/null; then
-        echo "docker-compose is not installed"
-        exit 1
-    fi
-
-    # ( ( ( (sudo usermod -aG docker $USER) ) ) )
-    # ( ( ( (newgrp docker) ) ) )
-
-    sudo docker version
-    sudo docker info
-    sudo docker ps -a
-
-    if [ "${MODE}" = "stack" ]; then
-        local swarm_state
-        swarm_state=$(sudo docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || true)
-        if [[ "${swarm_state}" != "active" && "${swarm_state}" != "locked" ]]; then
-            echo "⚠️ Stack 模式需要 Docker Swarm，请先执行 'sudo docker swarm init'"
-            exit 1
-        fi
-    fi
-
-    ## 创建共享网络
-    echo "🌐 检查 Docker 网络: ${NETWORK}"
-    if sudo docker network inspect "${NETWORK}" >/dev/null 2>&1; then
-        # NET EXISTS - 检查 scope 是否匹配
-        local current_scope
-        current_scope=$(sudo docker network inspect "${NETWORK}" --format '{{.Scope}}' 2>/dev/null || echo "")
-        
-        if [ "${MODE}" = "stack" ] && [ "${current_scope}" = "local" ]; then
-            echo "⚠️ 网络 ${NETWORK} scope 为 local，stack 模式需要 swarm scope"
-            echo "🔄 正在删除并重建网络..."
-            sudo docker network rm "${NETWORK}" || true
-            sudo docker network create --driver overlay --attachable "${NETWORK}"
-            echo "✅ 网络已重建为 overlay (swarm scope)"
-        elif [ "${MODE}" = "compose" ] && [ "${current_scope}" = "swarm" ]; then
-            echo "ℹ️ 网络 ${NETWORK} scope 为 swarm，compose 模式仍可使用"
-        else
-            echo "✅ docker 网络已存在，scope: ${current_scope}"
-        fi
-    else
-        # NET INIT
-        echo "🚧 docker 网络不存在，正在创建: ${NETWORK}"
-        local network_driver="bridge"
-        local network_cmd=(sudo docker network create)
-        if [ "${MODE}" = "stack" ]; then
-            network_driver="overlay"
-            network_cmd+=(--driver "${network_driver}" --attachable)
-        else
-            network_cmd+=(--driver "${network_driver}")
-        fi
-        network_cmd+=("${NETWORK}")
-        "${network_cmd[@]}"
-    fi
 }
 
 export -f install_docker
