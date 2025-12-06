@@ -161,7 +161,7 @@ fi
 # 如果没有ENV变量，就提示用户输入
 if [ -z "${ENV:-}" ];then
     while true; do
-        read -p "请输入环境 (debug/prod): " ENV
+        read -p "请输入环境 (debug/release/...): " ENV
         if [ -n "${ENV}" ]; then
             export ENV
             break
