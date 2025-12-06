@@ -65,7 +65,8 @@ function exec() {
     fi
 
     if [ -z "${SERVICES:-}" ]; then
-        SERVICES=( $(find . -maxdepth 1 -type d -not -name '.*' -printf '%f\n') )
+        SERVICES=( $(find ./appstore -maxdepth 1 -type d -not -name '.*' -printf '%f\n') )
+        ERROR "请配置要部署的服务列表： ${SERVICES:-}"
         exit 1
     fi
 
