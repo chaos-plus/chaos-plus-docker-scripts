@@ -411,14 +411,14 @@ export IPV4_LAN=$(ip -4 addr show |
 INFO "ENV IPV4_LAN: ${IPV4_LAN}"
 
 
-if [ ! -n "$IPV4_WAN" ]; then
-    export IPV4_WAN=$(curl -sfL ifconfig.me --silent --connect-timeout 5 --max-time 5)
+if [ ! -n "${IPV4_WAN:-}" ]; then
+    export IPV4_WAN=$(curl -sfL ifconfig.me --silent --connect-timeout 5 --max-time 5 || true)
 fi
-if [ ! -n "$IPV4_WAN" ]; then
-    export IPV4_WAN=$(curl -sfL 4.ipw.cn --silent --connect-timeout 5 --max-time 5)
+if [ ! -n "${IPV4_WAN:-}" ]; then
+    export IPV4_WAN=$(curl -sfL 4.ipw.cn --silent --connect-timeout 5 --max-time 5 || true)
 fi
-if [ ! -n "$IPV4_WAN" ]; then
-    export IPV4_WAN=$(curl -sfL https://api.ipify.org?format=text --silent --connect-timeout 5 --max-time 5)
+if [ ! -n "${IPV4_WAN:-}" ]; then
+    export IPV4_WAN=$(curl -sfL https://api.ipify.org?format=text --silent --connect-timeout 5 --max-time 5 || true)
 fi
 INFO "ENV IPV4_WAN: ${IPV4_WAN}"
 
