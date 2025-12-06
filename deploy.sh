@@ -40,6 +40,7 @@ function check_init(){
     fi
 
     init
+    install_docker
 
     export HAS_INIT="true"
     set_dotenv "HAS_INIT" "true"

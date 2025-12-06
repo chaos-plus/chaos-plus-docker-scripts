@@ -790,7 +790,7 @@ export -f init
 
 
 install_docker() {
- 
+    source "$(dirname "${BASH_SOURCE[0]}")/install_docker.sh"
 }
 
 export -f install_docker
