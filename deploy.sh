@@ -61,6 +61,11 @@ function exec() {
     fi
     echo ""
 
+    local env1="env/env.sh"
+    local env3="env-override/env.${ENV}.sh"
+    [ -f "$env1" ] && source ${env1}
+    [ -f "$env3" ] && source ${env3}
+    
     if [ -z "${SERVICES:-}" ]; then
         SERVICES=("${@:1}" )
     fi
@@ -83,10 +88,8 @@ function exec() {
         GREEN "#################### service: ${serv} begin ####################"
 
         local env1="env/env.sh"
-        local env2="env-2/${serv}/env.sh"
         local env3="env-override/env.${ENV}.sh"
         [ -f "$env1" ] && source ${env1}
-        [ -f "$env2" ] && source ${env2}
         [ -f "$env3" ] && source ${env3}
 
 
