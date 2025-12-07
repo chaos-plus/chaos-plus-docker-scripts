@@ -12,13 +12,18 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command: daemon --docker
-    labels:
-      ofelia.enabled: "true"
-      ofelia.job-exec.list.schedule: "@every 5s"
-      ofelia.job-exec.list.command: "docker ps -a"
     deploy:
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_SUPERCRONIC:-128M}
         reservations:
           memory: ${RES_RESER_MEM_SUPERCRONIC:-64M}
+  docker-cli:
+    image: docker:24
+    command: tail -f /dev/null
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.dockerps.schedule: "@every 50s"
+      ofelia.job-exec.dockerps.command: "docker ps -a"
