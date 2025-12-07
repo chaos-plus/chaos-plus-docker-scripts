@@ -7,13 +7,11 @@ networks:
 
 services:
   supercronic:
-    image: quay.io/aptible/supercronic:latest
+    image: hectorm/supercronic:latest
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
-      - ${DATA}/supercronic/:/cronic/
+      - ${DATA}/supercronic/crontab:/etc/crontab
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    command: |
-      supercronic /cronic/crontab
     deploy:
       resources:
         limits:
