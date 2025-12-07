@@ -26,12 +26,12 @@ function set_dotenv() {
         return 0
     fi
 
-    # 处理传入的 key/value，支持新增或更新
-    if grep -qE "^\s*${key}=" .env.sh; then
-        sed -i.bak "s#^\s*${key}=.*#${key}=${value}#" .env.sh
-    else
-        echo "export ${key}=${value}" >> .env.sh
-    fi
+    awk -v key="$key" -v val="$value" '
+        BEGIN { re = "^[[:space:]]*(export[[:space:]]+)?" key "="; found=0 }
+        $0 ~ re { print "export " key "=" val; found=1; next }
+        { print }
+        END { if(!found) print "export " key "=" val }
+    ' .env.sh > .env.sh.tmp && mv .env.sh.tmp .env.sh
 }
 
 function check_init(){
