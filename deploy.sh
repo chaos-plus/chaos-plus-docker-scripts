@@ -7,6 +7,7 @@ export WORK_SPACE=$(pwd)
 source env/env.sh
 source uilts/function.sh
 
+
 function set_dotenv() {
     local key="${1:-}"
     local value="${2:-}"
@@ -57,7 +58,6 @@ function exec() {
     [ -f "$env1" ] && source ${env1}
     [ -f "$env3" ] && source ${env3}
 
-    
     INFO "🌎 部署环境: ${ENV}"
     INFO "🌐 主域名: ${DOMAIN:-未配置}"
     if declare -p DOMAINS >/dev/null 2>&1; then
@@ -67,7 +67,6 @@ function exec() {
     fi
     echo ""
 
-    
     if [ -z "${SERVICES:-}" ]; then
         SERVICES=("${@:1}" )
     fi
@@ -89,10 +88,10 @@ function exec() {
         BLUE "#####################################################################"
         GREEN "#################### service: ${serv} begin ####################"
 
-        local env1="env/env.sh"
-        local env3="env-override/env.${ENV}.sh"
-        [ -f "$env1" ] && source ${env1}
-        [ -f "$env3" ] && source ${env3}
+    local env1="env/env.sh"
+    local env3="env-override/env.${ENV}.sh"
+    [ -f "$env1" ] && source ${env1}
+    [ -f "$env3" ] && source ${env3}
 
 
         local before1="appstore/${serv}/before.sh"
@@ -111,8 +110,11 @@ function exec() {
         local compose1="appstore/${serv}/docker-compose.yml"
         local compose2="appstore-2/${serv}/docker-compose.yml"
         local compose3="appstore-override/${serv}/docker-compose.yml"
-        local compose4="appstore-override/${serv}-${ENV}/docker-compose.yml"
-        local compose5="appstore-override/${serv}-${ENV}/docker-compose.${ENV}.yml"
+        local compose4="appstore-override/${ENV}/${serv}/docker-compose.yml"
+        local compose5="appstore-override/${serv}-${ENV}/docker-compose.yml"
+        local compose6="appstore-override/${serv}-${ENV}/docker-compose.${ENV}.yml"
+        local compose7="appstore-override/${ENV}-${serv}/docker-compose.yml"
+        local compose8="appstore-override/${ENV}-${serv}/docker-compose.${ENV}.yml"
         local compose=""
         if [ -f "${compose1}" ]; then
             compose="$compose -f ${compose1}"
@@ -129,9 +131,20 @@ function exec() {
         if [ -f "${compose5}" ]; then
             compose="$compose -f ${compose5}"
         fi
+        if [ -f "${compose6}" ]; then
+            compose="$compose -f ${compose6}"
+        fi
+        if [ -f "${compose7}" ]; then
+            compose="$compose -f ${compose7}"
+        fi
+        if [ -f "${compose8}" ]; then
+            compose="$compose -f ${compose8}"
+        fi
+
         if [ -z "${compose}" ]; then
             ERROR "missing docker-compose.yml"
         else
+            echo "sudo -E ENV=${ENV} docker-compose --compatibility ${compose} up -d --pull=${PULL_MODE:-missing}"
             eval "sudo -E ENV=${ENV} docker-compose --compatibility ${compose} up -d --pull=${PULL_MODE:-missing}"
         fi
         # compose.yml
