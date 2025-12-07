@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
-sudo mkdir ${DATA}/cronic
+sudo mkdir -p ${DATA}/cronic
 sudo chmod -R 777 ${DATA}/cronic
