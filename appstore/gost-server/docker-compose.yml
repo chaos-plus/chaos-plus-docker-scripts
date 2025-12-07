@@ -17,7 +17,7 @@ services:
     ports:
         - '${PORT_GOST:-8989}:8989'
     working_dir: /gost
-    command: ["-DD", "-L relay+wss://gost:${PASSWORD}@:8989?certFile=cert.pem&keyFile=key.pem"]
+    command: ["-DD", "-L relay+wss://gost:${GOST_TOKEN}@:8989?certFile=cert.pem&keyFile=key.pem"]
     labels:
       - traefik.enable=true
       - traefik.http.routers.gost.rule=HostRegexp(`^gost\..*`)
