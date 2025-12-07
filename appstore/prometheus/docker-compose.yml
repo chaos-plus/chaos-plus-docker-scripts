@@ -24,9 +24,9 @@ services:
       - "${PORT_PROMETHEUS:-9090}:9090"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${DATA}/prometheus/data:/prometheus
-      - ${DATA}/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ${DATA}/prometheus/rules:/etc/prometheus/rules:ro
+      - ${TEMP}/prometheus/data:/prometheus
+      - ${DATEMPTA}/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ${TEMP}/prometheus/rules:/etc/prometheus/rules:ro
     environment:
       - TZ=Asia/Shanghai
     healthcheck:

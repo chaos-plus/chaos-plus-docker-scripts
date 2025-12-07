@@ -5,8 +5,8 @@ export HOSTNAME=$(hostname)
 
 export NETWORK=cloud
 
-export TEMP=/opt/tmp
 export DATA=/opt/data
+export TEMP=/opt/tmp
 
 # export GHPROXY=https://gh-proxy.com/
 

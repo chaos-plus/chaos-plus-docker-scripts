@@ -7,7 +7,10 @@ get_container_name() {
 }
 
 sudo mkdir -p ${DATA}/nacos
+sudo mkdir -p ${TEMP}/nacos
 sudo chmod -R 777 ${DATA}/nacos/
+sudo chmod -R 777 ${TEMP}/nacos/
+
 
 
 sudo wget ${GHPROXY}https://raw.githubusercontent.com/alibaba/nacos/refs/heads/master/distribution/conf/mysql-schema.sql -O ${DATA}/nacos/mysql-schema.sql
@@ -32,7 +35,9 @@ if [ -n "$MYSQL8_CONTAINER" ]; then
 fi
 
 sudo mkdir -p ${DATA}/nacos
+sudo mkdir -p ${TEMP}/nacos
 sudo chmod -R 777 ${DATA}/nacos/
+sudo chmod -R 777 ${TEMP}/nacos/
 
 
 

@@ -30,7 +30,7 @@ services:
       - NACOS_AUTH_IDENTITY_KEY=${NACOS_AUTH_IDENTITY_KEY}
       - NACOS_AUTH_IDENTITY_VALUE=${NACOS_AUTH_IDENTITY_VALUE}
     volumes:
-      - ${DATA}/nacos/logs:/home/nacos/logs
+      - ${TEMP}/nacos/logs:/home/nacos/logs
     labels:
       - traefik.enable=true
       - traefik.http.routers.nacos.rule=HostRegexp(`^nacos\..*`)

@@ -6,7 +6,7 @@ echo "=========================================="
 echo ""
 
 # 检查必需的环境变量
-if [ -z "${DATA}" ]; then
+if [ -z "${TEMP}" ]; then
     echo "❌ 错误: DATA 环境变量未设置"
     echo "请先执行: source ../env.sh"
     exit 1
@@ -19,23 +19,23 @@ fi
 
 echo "📋 配置信息："
 echo "   - 主机名: ${HOSTNAME}"
-echo "   - 数据路径: ${DATA}/prometheus"
+echo "   - 数据路径: ${TEMP}/prometheus"
 echo "   - 保留时间: ${PROMETHEUS_RETENTION:-30d}"
 echo "   - HTTP 端口: ${PORT_PROMETHEUS:-9090}"
 echo ""
 
 # 创建 Prometheus 数据目录
 echo "📁 创建目录结构..."
-sudo mkdir -p ${DATA}/prometheus/{data,config,rules}
-sudo chmod -R 777 ${DATA}/prometheus
+sudo mkdir -p ${TEMP}/prometheus/{data,config,rules}
+sudo chmod -R 777 ${TEMP}/prometheus
 
 # 复制配置文件
 echo "📝 复制配置文件..."
-sudo \cp -rf ./prometheus.yml ${DATA}/prometheus/config/prometheus.yml
+sudo \cp -rf ./prometheus.yml ${TEMP}/prometheus/config/prometheus.yml
 
 # 如果有告警规则，也复制
 if [ -f "./alert-rules.yml" ]; then
-    sudo \cp -rf ./alert-rules.yml ${DATA}/prometheus/rules/alert-rules.yml
+    sudo \cp -rf ./alert-rules.yml ${TEMP}/prometheus/rules/alert-rules.yml
 fi
 
 echo ""

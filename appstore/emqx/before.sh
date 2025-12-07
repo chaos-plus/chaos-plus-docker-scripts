@@ -40,9 +40,10 @@ else
 
     sudo docker cp emqx:/opt/emqx/data/ ${DATA}/emqx
     sudo docker cp emqx:/opt/emqx/etc/ ${DATA}/emqx
-    sudo docker cp emqx:/opt/emqx/log/ ${DATA}/emqx
+    sudo docker cp emqx:/opt/emqx/log/ ${TEMP}/emqx
     
     sudo chmod -R 777 ${DATA}/emqx
+    sudo chmod -R 777 ${TEMP}/emqx
 
     export EMQX_CONF=${DATA}/emqx/etc/emqx.conf
     sudo echo ''>> ${EMQX_CONF} 
@@ -52,6 +53,7 @@ else
     sudo cat ${EMQX_CONF} | grep password
 
     sudo chmod -R 777 ${DATA}/emqx
+    sudo chmod -R 777 ${TEMP}/emqx
 	
 	# 删除临时实例
 	docker rm -f emqx

@@ -13,7 +13,7 @@ services:
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
         - ${DATA}/gitinsight/config.yaml:/app/config.yaml
-        - ${DATA}/gitinsight/.repo:/app/.repo
+        - ${TEMP}/gitinsight/.repo:/app/.repo
     ports:
         - '${PORT_GITINSIGHT}:8080'
     labels:
