@@ -65,13 +65,12 @@ function exec() {
     fi
 
     if [ -z "${SERVICES:-}" ]; then
-        SERVICES=( $(find ./appstore/ -mindepth 1 -maxdepth 1 -type d -printf '%P/\n') )
+        SERVICES=( $(find ./appstore/ -mindepth 1 -maxdepth 1 -type d -printf '%f\n') )
         ERROR "请配置要部署的服务列表： ${SERVICES[*]}"
         exit 1
     fi
 
     INFO "📋 将要部署的服务列表: ${SERVICES[*]}"
-
 
 
     # 按顺序部署服务

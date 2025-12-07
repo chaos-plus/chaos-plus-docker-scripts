@@ -10,10 +10,10 @@ services:
     image: quay.io/aptible/supercronic:latest
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
-      - ${DATA}/supercronic:/etc/cron.d
+      - ${DATA}/supercronic/:/cronic/
       - docker.sock:/var/run/docker.sock
     command: |
-      /etc/cron.d/supercronic.cron
+      supercronic /cronic/crontab
     deploy:
       resources:
         limits:
