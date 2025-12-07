@@ -2,7 +2,7 @@
 */1 * * * * echo "hello"
 
 # Run every 2 seconds
-*/2 * * * * * * ls 2>/dev/null
+docker ps -a
 
 # Run once every hour
 @hourly echo "$SOME_HOURLY_JOB"
