@@ -6,11 +6,11 @@ networks:
 
 
 services:
-  supercronic:
+  cronic:
     image: hectorm/supercronic:latest
     restart: ${SRV_RESTART_MODE:-always}
     volumes:
-      - ${DATA}/supercronic/crontab:/etc/crontab
+      - ${DATA}/cronic/crontab:/etc/crontab
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     deploy:
       resources:
