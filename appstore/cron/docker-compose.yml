@@ -14,9 +14,7 @@ services:
     command: daemon --docker
     labels:
       ofelia.enabled: "true"
-      # 在 host docker 上运行命令
       ofelia.job-exec.list.schedule: "@every 5s"
-      ofelia.job-exec.list.container: "cron"     # 随便指一个正在运行的容器
       ofelia.job-exec.list.command: "docker ps -a"
     deploy:
       resources:
