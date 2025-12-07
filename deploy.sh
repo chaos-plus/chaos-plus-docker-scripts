@@ -132,7 +132,7 @@ function exec() {
         if [ -z "${compose}" ]; then
             ERROR "missing docker-compose.yml"
         else
-            eval "sudo -E ENV=${ENV} docker-compose --compatibility ${compose} up -d --pull${PULL_MODE:-missing}"
+            eval "sudo -E ENV=${ENV} docker-compose --compatibility ${compose} up -d --pull=${PULL_MODE:-missing}"
         fi
         # compose.yml
 
