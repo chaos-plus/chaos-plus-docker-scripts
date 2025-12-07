@@ -77,22 +77,9 @@ function exec() {
     for serv in "${SERVICES[@]}"; do #也可以写成for element in ${array[*]}
         cd "$WORK_SPACE"
 
-        if [ ! -d "${serv}" ]; then
-            WARN "service ${serv} not found"
-            continue
-        fi
-
-        if [[ "$serv" == "."* || "$serv" == "-"* ]]; then
-            NOTE "service ${serv} ignored"
-            continue
-        fi
-
-
-
         echo ""
         BLUE "#####################################################################"
         GREEN "#################### service: ${serv} begin ####################"
-
 
         local env1="env/env.sh"
         local env2="env-2/${serv}/env.sh"
