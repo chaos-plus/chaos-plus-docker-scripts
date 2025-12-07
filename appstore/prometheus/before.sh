@@ -29,13 +29,15 @@ echo "📁 创建目录结构..."
 sudo mkdir -p ${TEMP}/prometheus/{data,config,rules}
 sudo chmod -R 777 ${TEMP}/prometheus
 
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # 复制配置文件
 echo "📝 复制配置文件..."
-sudo \cp -rf ./prometheus.yml ${TEMP}/prometheus/config/prometheus.yml
+sudo \cp -rf ${SRC_DIR}/prometheus.yml ${TEMP}/prometheus/config/prometheus.yml
 
 # 如果有告警规则，也复制
 if [ -f "./alert-rules.yml" ]; then
-    sudo \cp -rf ./alert-rules.yml ${TEMP}/prometheus/rules/alert-rules.yml
+    sudo \cp -rf ${SRC_DIR}/alert-rules.yml ${TEMP}/prometheus/rules/alert-rules.yml
 fi
 
 echo ""

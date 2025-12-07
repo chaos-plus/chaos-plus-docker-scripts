@@ -22,7 +22,8 @@ else
 
     sudo chmod -R 777 ${DATA}/mysql7/
 
-    sudo cp ./*.cnf ${DATA}/mysql7/conf/
+    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    sudo cp ${SRC_DIR}/*.cnf ${DATA}/mysql7/conf/
 
     sudo chmod -R 777 ${DATA}/mysql7
     sudo chmod -R 644 ${DATA}/mysql7/conf/*

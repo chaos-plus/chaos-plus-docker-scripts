@@ -29,7 +29,8 @@ if [ "$STORAGE_TYPE" == "OSS" ]; then
     sudo mkdir -p ${DATA}/loki/{tsdb-index,tsdb-cache,wal,compactor,blooms,rules-temp}
     sudo chmod -R 777 ${DATA}/loki
     
-    sudo cp -rf ./loki-config-oss.yaml ${DATA}/loki/loki-config.yaml
+    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    sudo cp -rf ${SRC_DIR}/loki-config-oss.yaml ${DATA}/loki/loki-config.yaml
 
     echo ""
     echo "⚠️  重要提示："
@@ -45,7 +46,8 @@ else
     sudo mkdir -p ${DATA}/loki/{chunks,tsdb-index,tsdb-cache,rules,rules-temp,compactor,wal,blooms}
     sudo chmod -R 777 ${DATA}/loki
 
-    sudo cp -rf ./loki-config-local.yaml ${DATA}/loki/loki-config.yaml
+    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    sudo cp -rf ${SRC_DIR}/loki-config-local.yaml ${DATA}/loki/loki-config.yaml
     
     echo ""
     echo "⚠️  提示："

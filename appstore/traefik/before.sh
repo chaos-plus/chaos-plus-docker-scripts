@@ -23,8 +23,9 @@ sudo mkdir -p ${DATA}/traefik/data/
 sudo mkdir -p ${DATA}/traefik/log/
 
 
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export TRAEFIX_CONF=${DATA}/traefik/config/
-sudo cp -rf ./traefik*.*ml ${TRAEFIX_CONF}
+sudo cp -rf ${SRC_DIR}/traefik*.*ml ${TRAEFIX_CONF}
 
 sudo sed -i "s/MY_DOMAIN.key/${DOMAIN}.key/g" `grep MY_DOMAIN -rl ${TRAEFIX_CONF}`
 

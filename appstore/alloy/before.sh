@@ -31,7 +31,8 @@ sudo chmod -R 777 ${DATA}/alloy
 
 # 复制配置文件
 echo "📝 复制配置文件..."
-sudo \cp -rf ./config.alloy ${DATA}/alloy/config.alloy
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+sudo \cp -rf ${SRC_DIR}/config.alloy ${DATA}/alloy/config.alloy
 
 echo ""
 echo "✅ Alloy 初始化完成"
