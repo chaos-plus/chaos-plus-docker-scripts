@@ -1,0 +1,36 @@
+# docker network create --driver overlay --attachable cluster
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  cloudreve:
+    image: cloudreve/cloudreve:latest
+    restart: ${SRV_RESTART_MODE:-always}
+    environment:
+      - TZ=Etc/UTC
+    volumes:
+      - ${DATA}/cloudreve/config:/cloudreve/config
+      - ${DATA}/cloudreve/uploads:/cloudreve/uploads
+      - ${DATA}/cloudreve/data:/cloudreve/data
+    ports:
+      - ${PORT_CLOUDREVE:-5212}:5212
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cloudreve.rule=HostRegexp(`^cloudreve\..*`)
+      - traefik.http.routers.cloudreve.tls=true
+      - traefik.http.routers.cloudreve.entrypoints=websecure
+      - traefik.http.routers.cloudreve.service=cloudreve@docker
+      - traefik.http.services.cloudreve.loadbalancer.server.port=5212
+      - traefik.http.services.cloudreve.loadBalancer.passHostHeader=true
+      - traefik.http.middlewares.cloudreve.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.cloudreve.headers.contentSecurityPolicy=upgrade-insecure-requests
+    deploy:
+      placement:
+        constraints: [ node.host == manager ]
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_CODER:-1g}
+        reservations:
+          memory: ${RES_RESER_MEM_CODER:-256m}

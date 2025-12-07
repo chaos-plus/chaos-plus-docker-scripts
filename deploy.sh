@@ -84,7 +84,7 @@ function exec() {
 
         local env1="env/env.sh"
         local env2="env-2/${serv}/env.sh"
-        local env3="env-override/${serv}/env.sh"
+        local env3="env-override/env.${ENV}.sh"
         [ -f "$env1" ] && source ${env1}
         [ -f "$env2" ] && source ${env2}
         [ -f "$env3" ] && source ${env3}
@@ -107,6 +107,7 @@ function exec() {
         local compose2="appstore-2/${serv}/docker-compose.yml"
         local compose3="appstore-override/${serv}/docker-compose.yml"
         local compose4="appstore-override/${serv}-${ENV}/docker-compose.yml"
+        local compose5="appstore-override/${serv}-${ENV}/docker-compose.${ENV}.yml"
         local compose=""
         if [ -f "${compose1}" ]; then
             compose="$compose -f ${compose1}"
@@ -119,6 +120,9 @@ function exec() {
         fi
         if [ -f "${compose4}" ]; then
             compose="$compose -f ${compose4}"
+        fi
+        if [ -f "${compose5}" ]; then
+            compose="$compose -f ${compose5}"
         fi
         if [ -z "${compose}" ]; then
             ERROR "missing docker-compose.yml"

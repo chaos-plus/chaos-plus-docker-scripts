@@ -4,7 +4,7 @@ source "$(dirname "$0")/function.sh"
 
 swarm_state=$(sudo docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || true)
 if [[ "${swarm_state}" != "active" && "${swarm_state}" != "locked" ]]; then
-    WARN "Stack 模式需要 Docker Swarm，请先执行 'sudo docker swarm init'"
+    WARN "需要 Docker Swarm, 请先执行 'sudo docker swarm init'"
     exit 1
 fi
 
