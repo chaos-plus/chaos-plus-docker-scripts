@@ -84,6 +84,10 @@ function exec() {
         local env1="env/env.sh"
         local env2="env-2/${serv}/env.sh"
         local env3="env-override/${serv}/env.sh"
+        [ -f "$env1" ] && source ${env1}
+        [ -f "$env2" ] && source ${env2}
+        [ -f "$env3" ] && source ${env3}
+
 
         local before1="appstore/${serv}/before.sh"
         local before2="appstore-2/${serv}/before.sh"
