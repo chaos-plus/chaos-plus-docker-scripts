@@ -2,4 +2,4 @@
 
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-\cp -rf ${SRC_DIR}/crontab ${DATA}/supercronic/
+\cp -rf ${SRC_DIR}/crontab ${DATA}/cronic/
