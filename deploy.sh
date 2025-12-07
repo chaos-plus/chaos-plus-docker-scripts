@@ -30,7 +30,7 @@ function set_dotenv() {
     if grep -qE "^\s*${key}=" .env.sh; then
         sed -i.bak "s#^\s*${key}=.*#${key}=${value}#" .env.sh
     else
-        echo "${key}=${value}" >> .env.sh
+        echo "export ${key}=${value}" >> .env.sh
     fi
 }
 
