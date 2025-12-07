@@ -5,7 +5,7 @@ set -e -u -o pipefail
 export WORK_SPACE=$(pwd)
 
 source env/env.sh
-source ./uilts/function.sh
+source uilts/function.sh
 
 function set_dotenv() {
     local key="${1:-}"
