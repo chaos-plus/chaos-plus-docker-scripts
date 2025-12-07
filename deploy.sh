@@ -52,6 +52,12 @@ function exec() {
     
     check_init
 
+    local env1="env/env.sh"
+    local env3="env-override/env.${ENV}.sh"
+    [ -f "$env1" ] && source ${env1}
+    [ -f "$env3" ] && source ${env3}
+
+    
     INFO "🌎 部署环境: ${ENV}"
     INFO "🌐 主域名: ${DOMAIN:-未配置}"
     if declare -p DOMAINS >/dev/null 2>&1; then
@@ -61,10 +67,6 @@ function exec() {
     fi
     echo ""
 
-    local env1="env/env.sh"
-    local env3="env-override/env.${ENV}.sh"
-    [ -f "$env1" ] && source ${env1}
-    [ -f "$env3" ] && source ${env3}
     
     if [ -z "${SERVICES:-}" ]; then
         SERVICES=("${@:1}" )
