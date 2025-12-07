@@ -12,6 +12,9 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command: daemon --docker
+    labels:
+      ofelia.job-local.test-job.schedule: "@every 5s"
+      ofelia.job-local.test-job.command: "date"
     deploy:
       resources:
         limits:
@@ -19,7 +22,7 @@ services:
         reservations:
           memory: ${RES_RESER_MEM_SUPERCRONIC:-64M}
   docker-cli:
-    image: docker:24
+    image: docker:cli
     command: tail -f /dev/null
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
