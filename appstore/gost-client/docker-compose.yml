@@ -13,12 +13,12 @@ services:
     image: 'gogost/gost:latest'
     restart: ${SRV_RESTART_MODE:-always}
     ports:
-        - '${PORT_GOST:-8989}:8989'
+      - '${PORT_GOST:-8989}:8989'
     working_dir: /gost
     command:
       - -DD
-      - -L "http://gost:${GOST_TOKEN}@0.0.0.0:8989"
-      - -F "relay+wss://gost:${GOST_TOKEN}@${GOST_SERVER_URL}:8989"
+      - "-L=http://gost:${GOST_TOKEN}@0.0.0.0:8989"
+      - "-F=relay+wss://gost:${GOST_TOKEN}@${GOST_SERVER_URL}:8989"
     labels:
       - traefik.enable=true
       - traefik.http.routers.gost.rule=HostRegexp(`^gost\..*`)
