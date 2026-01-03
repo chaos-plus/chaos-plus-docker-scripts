@@ -10,7 +10,7 @@ services:
 
   kafka:
     image: bitnami/kafka:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - '${PORT_KAFKA}:9092'
       - '${PORT_KAFKA_CONTROLLER}:9093'
@@ -28,6 +28,12 @@ services:
     volumes:
       - ${DATA}/kafka:/bitnami/kafka
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_kafka == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_KAFKA:-2G}
@@ -36,13 +42,19 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - '${PORT_KAFKA_UI}:8080'
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_kafka == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_KAFKA_UI:-512M}

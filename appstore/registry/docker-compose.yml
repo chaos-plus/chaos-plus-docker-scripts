@@ -1,4 +1,3 @@
-version: "3.8"
 
 networks:
   default:
@@ -8,7 +7,7 @@ networks:
 services:
   registry:
     image: registry
-    restart: always
+    # restart: always
     environment:
       REGISTRY_STORAGE: s3
       REGISTRY_STORAGE_S3_REGION: ${OSS_REGION}
@@ -27,6 +26,12 @@ services:
     ports:
       - "${PORT_REGISTRY}:5000"
     deploy:
+      replicas: 1
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      placement:
+        constraints:
+          - node.labels.app_registry == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_REGISTRY:-512M}
@@ -35,7 +40,7 @@ services:
 
   registry-ui:
     image: joxit/docker-registry-ui
-    restart: always
+    # restart: always
     environment:
       SINGLE_REGISTRY: "true"
       REGISTRY_TITLE: "私有镜像仓库"
@@ -49,9 +54,15 @@ services:
       REGISTRY_URL: ""   # 前端 JS 不直接访问 HTTP 地址
     ports:
       - "${PORT_REGISTRY_UI}:80"
-    depends_on:
-      - registry
+    # depends_on:  # Docker Stack 不支持
+    #   - registry
     deploy:
+      replicas: 1
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      placement:
+        constraints:
+          - node.labels.app_registry == true
       resources:
         limits:
           memory: 256M

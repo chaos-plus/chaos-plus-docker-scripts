@@ -10,7 +10,7 @@ networks:
 services:
   drawio:
     image: jgraph/drawio
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_DRAWIO}:8080"
     environment:
@@ -29,6 +29,12 @@ services:
       - traefik.http.services.drawio.loadbalancer.server.port=8080
       - traefik.http.services.drawio.loadBalancer.passHostHeader=true
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_drawio == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_DRAWIO:-512M}

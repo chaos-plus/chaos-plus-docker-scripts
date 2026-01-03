@@ -7,7 +7,7 @@ networks:
 services:
   cloudreve:
     image: cloudreve/cloudreve:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     environment:
       - TZ=Etc/UTC
     volumes:
@@ -27,8 +27,12 @@ services:
       - traefik.http.middlewares.cloudreve.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.cloudreve.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
       placement:
-        constraints: [ node.host == manager ]
+        constraints:
+          - node.labels.app_cloudreve == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_CODER:-1g}

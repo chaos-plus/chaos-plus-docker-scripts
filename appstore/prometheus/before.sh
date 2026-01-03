@@ -7,7 +7,7 @@ echo ""
 
 # 检查必需的环境变量
 if [ -z "${TEMP}" ]; then
-    echo "❌ 错误: DATA 环境变量未设置"
+    echo "❌ 错误: TEMP 环境变量未设置"
     echo "请先执行: source ../env.sh"
     exit 1
 fi
@@ -26,19 +26,14 @@ echo ""
 
 # 创建 Prometheus 数据目录
 echo "📁 创建目录结构..."
-sudo mkdir -p ${TEMP}/prometheus/{data,config,rules}
+sudo mkdir -p ${TEMP}/prometheus/data
 sudo chmod -R 777 ${TEMP}/prometheus
 
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 复制配置文件
-echo "📝 复制配置文件..."
-sudo \cp -rf ${SRC_DIR}/prometheus.yml ${TEMP}/prometheus/config/prometheus.yml
-
-# 如果有告警规则，也复制
-if [ -f "./alert-rules.yml" ]; then
-    sudo \cp -rf ${SRC_DIR}/alert-rules.yml ${TEMP}/prometheus/rules/alert-rules.yml
-fi
+# 创建版本化 Docker configs
+export PROMETHEUS_CONFIG=$(create_versioned_config "prometheus-config" "${SRC_DIR}/prometheus.yml" 3)
+[ -f "${SRC_DIR}/alert-rules.yml" ] && export PROMETHEUS_RULES=$(create_versioned_config "prometheus-rules" "${SRC_DIR}/alert-rules.yml" 3)
 
 echo ""
 echo "✅ Prometheus 初始化完成"

@@ -11,7 +11,7 @@ services:
   emqx:
     # https://www.emqx.io/docs/zh/v5.0/admin/api.html
     image: emqx/emqx:5.8.8
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_EMQX_MQTT}:1883"
       - "${PORT_EMQX_MQTT_SSL}:8883"
@@ -26,7 +26,7 @@ services:
     volumes:
       - ${DATA}/emqx/data:/opt/emqx/data 
       - ${DATA}/emqx/etc:/opt/emqx/etc 
-      - ${TEMP}/emqx/log:/opt/emqx/log  
+      - ${DATA}/emqx/log:/opt/emqx/log  
     labels:
       - traefik.enable=true
       
@@ -50,6 +50,12 @@ services:
       - traefik.http.services.websocket.loadBalancer.passHostHeader=true
 
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_emqx == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_EMQX:-2G}

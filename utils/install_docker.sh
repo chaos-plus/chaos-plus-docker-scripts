@@ -7,7 +7,11 @@ if ! command -v docker &>/dev/null; then
 fi
 
 if ! command -v docker &>/dev/null; then
-    sudo curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+    if [ -n "$HAS_GOOGLE" ]; then
+        sudo curl -fsSL https://get.docker.com | bash -s docker
+    else
+        sudo curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+    fi
 fi
 
 if ! command -v docker &>/dev/null; then
@@ -71,38 +75,3 @@ fi
 sudo docker version
 sudo docker info
 sudo docker ps -a
-
-
-## 创建共享网络
-INFO "🌐 检查 Docker 网络: ${NETWORK:-bridge}"
-export NETWORK=${NETWORK:-bridge}
-export MODE=${MODE:-compose}
-if sudo docker network inspect "${NETWORK}" >/dev/null 2>&1; then
-    # NET EXISTS - 检查 scope 是否匹配
-    current_scope=$(sudo docker network inspect "${NETWORK}" --format '{{.Scope}}' 2>/dev/null || echo "")
-    
-    if [ "${MODE:-compose}" = "stack" ] && [ "${current_scope}" = "local" ]; then
-        WARN "网络 ${NETWORK} scope 为 local，stack 模式需要 swarm scope"
-        INFO "🔄 正在删除并重建网络..."
-        sudo docker network rm "${NETWORK}" || true
-        sudo docker network create --driver overlay --attachable "${NETWORK}"
-        SUCCESS "网络已重建为 overlay (swarm scope)"
-    elif [ "${MODE:-compose}" = "compose" ] && [ "${current_scope}" = "swarm" ]; then
-        INFO "网络 ${NETWORK} scope 为 swarm，compose 模式仍可使用"
-    else
-        SUCCESS "docker 网络已存在，scope: ${current_scope}"
-    fi
-else
-    # NET INIT
-    INFO "🚧 docker 网络不存在，正在创建: ${NETWORK}"
-    network_driver="bridge"
-    network_cmd=(sudo docker network create)
-    if [ "${MODE:-compose}" = "stack" ]; then
-        network_driver="overlay"
-        network_cmd+=(--driver "${network_driver}" --attachable)
-    else
-        network_cmd+=(--driver "${network_driver}")
-    fi
-    network_cmd+=("${NETWORK}")
-    "${network_cmd[@]}"
-fi

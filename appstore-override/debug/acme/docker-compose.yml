@@ -1,0 +1,12 @@
+
+services:
+  acme:
+    environment:
+      HTTP_PROXY: http://gost:${GOST_TOKEN}@gost:8989
+      HTTPS_PROXY: http://gost:${GOST_TOKEN}@gost:8989
+      DOMAIN: ${DOMAIN}
+      DOMAINS: ${DOMAINS}
+      ACME_DNS: ${ACME_DNS}
+      CF_Email: ${CF_Email}
+      CF_Token: ${CF_Token}
+      # CF_Account_ID: ${CF_Account_ID}

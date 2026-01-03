@@ -1,0 +1,32 @@
+
+# docker network create --driver overlay --attachable cluster
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  certmate:
+    image: certimate/certimate:latest
+    ports:
+      - "${PORT_CERTMATE:-8090}:8090"
+    environment:
+      - CERTIMATE_ADMIN_USERNAME=admin@${DOMAIN}
+      - CERTIMATE_ADMIN_PASSWORD=${PASSWORD:-pa44vv0rd}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ${DATA}/certmate:/app/pb_data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      placement:
+        constraints:
+          - node.labels.app_certmate == true
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_CERTMATE:-128M}
+        reservations:
+          memory: ${RES_RESER_MEM_CERTMATE:-64M}

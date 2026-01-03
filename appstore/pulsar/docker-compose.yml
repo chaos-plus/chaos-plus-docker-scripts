@@ -9,7 +9,7 @@ networks:
 services:
   pulsar:
     image: apachepulsar/pulsar:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_PULSAR}:6650"
       - "${PORT_PULSAR_HTTP}:8080"
@@ -21,6 +21,12 @@ services:
       - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g
     command: bin/pulsar standalone
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_pulsar == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_PULSAR:-2G}

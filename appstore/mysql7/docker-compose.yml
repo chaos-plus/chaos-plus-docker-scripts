@@ -5,21 +5,26 @@ networks:
     name: ${NETWORK}
     external: true
 
+configs:
+  mysql7-config:
+    name: ${MYSQL7_CONFIG}
+    external: true
 
 services:
 
   mysql7:
     image: mysql:5.7-oracle
-    restart: ${SRV_RESTART_MODE:-always}
-    privileged: true
+    # restart: ${SRV_RESTART_MODE:-always}
+    # privileged: true  # Docker Stack 不支持
     ports:
       - "${PORT_MYSQL7}:3306"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/mysql7/data:/var/lib/mysql
       - ${DATA}/mysql7/log:/var/log/mysql
-      - ${DATA}/mysql7/conf/my.cnf:/etc/mysql/my.cnf
-    #  - /opt/data/mariadb/config/my.cnf:/etc/mysql/my.cnf 
+    configs:
+      - source: mysql7-config
+        target: /etc/mysql/my.cnf
     environment:
       TIMEZONE: Asis/Shanghai
       MYSQL_ROOT_PASSWORD: ${PASSWORD}
@@ -39,6 +44,12 @@ services:
       timeout: 10s
       retries: 10
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_mysql7 == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_MYSQL7:-2G}

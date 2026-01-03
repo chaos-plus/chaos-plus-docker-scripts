@@ -1,0 +1,44 @@
+
+
+# docker network create --driver overlay --attachable cluster
+# 使用 host 网络模式的服务不需要定义 overlay 网络
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+configs:
+  frpc-config:
+    name: ${FRPC_CONFIG}
+    external: true
+
+services:
+
+  frpc:
+    image: snowdreamtech/frpc:0.65.0-alpine
+    # restart: ${SRV_RESTART_MODE:-always}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    configs:
+      - source: frpc-config
+        target: /etc/frp/frpc.toml
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pgrep frpc || exit 1"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 15s
+    deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_frpc == true
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_FRPC:-512M}
+        reservations:
+          memory: ${RES_RESER_MEM_FRPC:-128M}
+
+

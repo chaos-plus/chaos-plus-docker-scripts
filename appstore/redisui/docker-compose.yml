@@ -11,7 +11,7 @@ services:
   redis-ui:
     image: patrikx3/p3x-redis-ui
     hostname: redis-ui
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/p3x-redis:/settings
@@ -27,6 +27,12 @@ services:
       - traefik.http.routers.redis-ui.service=redis-ui@docker
       - traefik.http.services.redis-ui.loadbalancer.server.port=7843
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_redisui == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_REDISUI:-512M}

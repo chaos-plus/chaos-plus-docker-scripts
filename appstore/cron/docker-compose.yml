@@ -8,19 +8,23 @@ networks:
 services:
   cron:
     image: mcuadros/ofelia:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command: daemon --docker
     labels:
-      ofelia.job-local.test-job.schedule: "@every 5s"
-      ofelia.job-local.test-job.command: "date"
+      ofelia.job-local.test-job.schedule: "@every 1m"
+      ofelia.job-local.test-job.command: >
+        sh -c 'date'
     deploy:
+      mode: global
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_SUPERCRONIC:-128M}
+          memory: ${RES_LIMIT_MEM_CRON:-128M}
         reservations:
-          memory: ${RES_RESER_MEM_SUPERCRONIC:-64M}
+          memory: ${RES_RESER_MEM_CRON:-64M}
   docker-cli:
     image: docker:cli
     command: tail -f /dev/null
@@ -28,5 +32,18 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       ofelia.enabled: "true"
-      ofelia.job-exec.dockerps.schedule: "@every 5s"
-      ofelia.job-exec.dockerps.command: "docker ps -a"
+      ofelia.job-exec.docker-prune.schedule: "@every 10m"
+      ofelia.job-exec.docker-prune.command: >
+        sh -c 'echo y | docker system prune'
+      ofelia.job-exec.cron-reload.schedule: "@every 10m"
+      ofelia.job-exec.cron-reload.command: >
+        sh -c 'SVC=$$(docker service ls --format "{{.Name}}" | grep _cron) && docker service update --force "$$SVC"'
+    deploy:
+      mode: global
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_DOCKERCLI:-128M}
+        reservations:
+          memory: ${RES_RESER_MEM_DOCKERCLI:-64M}

@@ -1,37 +1,36 @@
 #!/bin/bash -e
 
 sudo mkdir -p ${DATA}/acme
-sudo mkdir -p ${DATA}/cron
 
-if [ -z "${DOMAINS}" ]; then
+if [ -z "${DOMAINS:-}" ]; then
     echo "DOMAINS is empty"
     exit 1
 fi
 
-if [ -z "${ACME_DNS}" ]; then
-    echo "ACME_DNS is empty"
-    exit 1
-fi
-
-# if [ -z "${ACME_DNS_ID_NAME}" ]; then
-#     echo "ACME_DNS_ID_NAME is empty"
+# if [ -z "${ACME_DNS:-}" ]; then
+#     echo "ACME_DNS is empty"
 #     exit 1
 # fi
 
-# if [ -z "${ACME_DNS_ID_VALUE}" ]; then
-#     echo "ACME_DNS_ID_VALUE is empty"
+# # if [ -z "${ACME_DNS_ID_NAME}" ]; then
+# #     echo "ACME_DNS_ID_NAME is empty"
+# #     exit 1
+# # fi
+
+# # if [ -z "${ACME_DNS_ID_VALUE}" ]; then
+# #     echo "ACME_DNS_ID_VALUE is empty"
+# #     exit 1
+# # fi
+
+# if [ -z "${ACME_DNS_KEY_NAME:-}" ]; then
+#     echo "ACME_DNS_KEY_NAME is empty"
 #     exit 1
 # fi
 
-if [ -z "${ACME_DNS_KEY_NAME}" ]; then
-    echo "ACME_DNS_KEY_NAME is empty"
-    exit 1
-fi
-
-if [ -z "${ACME_DNS_KEY_VALUE}" ]; then
-    echo "ACME_DNS_KEY_VALUE is empty"
-    exit 1
-fi
+# if [ -z "${ACME_DNS_KEY_VALUE:-}" ]; then
+#     echo "ACME_DNS_KEY_VALUE is empty"
+#     exit 1
+# fi
 
 # sudo cat <<EOF >$ACME_CRON_SH
 # echo "##############################################################################"

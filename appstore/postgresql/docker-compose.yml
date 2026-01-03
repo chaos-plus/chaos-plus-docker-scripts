@@ -10,8 +10,8 @@ services:
 
   postgresql:
     image: postgres:17
-    restart: ${SRV_RESTART_MODE:-always}
-    privileged: true
+    # restart: ${SRV_RESTART_MODE:-always}
+    # privileged: true  # Docker Stack 不支持
     ports:
       - "${PORT_POSTGRESQL}:5432"
     volumes:
@@ -21,6 +21,12 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: ${PASSWORD}
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_postgresql == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_POSTGRESQL:-2G}

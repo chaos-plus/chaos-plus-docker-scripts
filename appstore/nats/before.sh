@@ -5,8 +5,12 @@ sudo mkdir -p ${DATA}/nats
 
 sudo chmod -R 777 ${DATA}/nats
 
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-sudo cat > ${DATA}/nats/nats.conf << EOF
+# 生成临时配置文件
+echo "📝 生成配置文件..."
+TEMP_CONF=$(mktemp)
+cat > ${TEMP_CONF} << EOF
 port: 4222
 http: 8222
 
@@ -36,3 +40,7 @@ authorization {
 # }
 
 EOF
+
+# 创建版本化 Docker config
+export NATS_CONFIG=$(create_versioned_config "nats-config" "${TEMP_CONF}" 3)
+rm -f ${TEMP_CONF}

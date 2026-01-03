@@ -10,10 +10,10 @@ services:
   # admin  http://127.0.0.1:9980/browser/dist/admin/admin.html
   collabora:
     image: collabora/code
-    restart: ${SRV_RESTART_MODE:-always}
-    cap_add:
-      - ALL
-      - CAP_MKNOD
+    # restart: ${SRV_RESTART_MODE:-always}
+    # cap_add:  # Docker Stack 不支持
+    #   - ALL
+    #   - CAP_MKNOD
     ports:
       - "${PORT_COLLABORA}:9980"
     environment:
@@ -30,6 +30,12 @@ services:
       - traefik.http.services.collabora.loadbalancer.server.port=9980
       - traefik.http.services.collabora.loadBalancer.passHostHeader=true
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_collabora == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_COLLABORA:-1G}

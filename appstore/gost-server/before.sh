@@ -4,7 +4,7 @@
 mkdir -p ${DATA}/gost
 chmod -R 777 ${DATA}/gost
 
-export GOST_TOKEN=${GOST_TOKEN:-${PASSWORD}}
+export GOST_TOKEN=${GOST_TOKEN:-${PASSWORD:-}}
 
 GOST_CA_OUT="${DATA}/gost"
 

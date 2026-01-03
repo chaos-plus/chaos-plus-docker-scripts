@@ -523,7 +523,67 @@ add_env() {
 export -f add_env
 
 
+set_cr_mirrors_auto() {
+    if [ -z "$HAS_GCR" ]; then
+        if [ -d "/etc/containerd/certs.d" ]; then
+            set_cr_mirrors_host $@
+        fi
+        if [ -d "/etc/rancher/k3s" ]; then
+            set_cr_mirrors_registries $@
+        fi
+        if [ -d "/var/snap/microk8s/current/args" ]; then
+            set_cr_mirrors_registries $@
+        fi
+    fi
+}
+
+set_linux_mirrors_official() {
+    bash <(curl -sfL https://linuxmirrors.cn/main.sh) \
+        --use-official-source true \
+        --protocol http \
+        --use-intranet-source false \
+        --backup false \
+        --upgrade-software false \
+        --clean-cache false \
+        --ignore-backup-tips
+}
+
+set_linux_mirrors_ustc() {
+    bash <(curl -sfL https://linuxmirrors.cn/main.sh) \
+        --source mirrors.ustc.edu.cn \
+        --protocol http \
+        --use-intranet-source false \
+        --backup false \
+        --upgrade-software false \
+        --clean-cache false \
+        --ignore-backup-tips
+
+}
+
+set_linux_mirrors_auto() {
+    if [ -n "$HAS_GOOGLE" ]; then
+        set_linux_mirrors_official
+    else
+        set_linux_mirrors_ustc
+    fi
+}
+
+set_linux_mirrors() {
+    local abroad=$(getarg abroad $@)
+    if [ "$abroad" == "true" ]; then
+        bash <(curl -sfL https://linuxmirrors.cn/main.sh) --abroad
+    elif [ "$abroad" == "false" ]; then
+        bash <(curl -sfL https://linuxmirrors.cn/main.sh)
+    elif [ -n "$HAS_GOOGLE" ]; then
+        bash <(curl -sfL https://linuxmirrors.cn/main.sh) --abroad
+    else
+        bash <(curl -sfL https://linuxmirrors.cn/main.sh)
+    fi
+}
+
 init() {
+
+    set_linux_mirrors_auto
 
     # 检查并更新 apt 系统
     if command -v apt &>/dev/null; then
@@ -680,8 +740,7 @@ EOF
     INFO "Configuring bridge-nf parameters and sysctl tuning"
     modprobe br_netfilter
 
-    local K8S_SYSCTL_CONF="/etc/sysctl.d/k8s.conf"
-    cat <<EOF >"$K8S_SYSCTL_CONF"
+    cat << EOF > /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 net.bridge.bridge-nf-call-arptables = 1
@@ -699,6 +758,17 @@ net.ipv4.neigh.default.gc_thresh2 = 90000
 net.ipv4.neigh.default.gc_thresh3 = 100000
 EOF
     sysctl --system
+
+    cat << EOF > /etc/sysctl.d/99-quic.conf
+net.core.rmem_max = 7500000
+net.core.wmem_max = 7500000
+net.core.rmem_default = 7500000
+net.core.wmem_default = 7500000
+net.ipv4.udp_mem = 8388608 12582912 16777216
+EOF
+
+    sysctl --system
+
 
     INFO "----------------------------------------------------------"
     INFO "setup system done"
@@ -816,3 +886,43 @@ k8s_export_config() {
 }
 k8s_export_config
 export -f k8s_export_config
+
+
+init_db() {
+  local host=$1
+  local username=$2
+  local password=$3
+  local dbname=$4
+  local charset=${5:-utf8mb4}
+  local collate=${6:-utf8mb4_general_ci}
+
+  docker run --rm \
+    --network "$NETWORK" \
+    -e MYSQL_PWD="$password" \
+    mysql:8 \
+    sh -c "
+      mysql -h$host -u$username \
+      -e \"CREATE DATABASE IF NOT EXISTS $dbname
+          DEFAULT CHARACTER SET $charset
+          DEFAULT COLLATE $collate;\"
+    "
+}
+export -f init_db
+
+
+init_sql() {
+  local host=$1
+  local username=$2
+  local password=$3
+  local dbname=$4
+  local sqlfile=$(realpath "$5")
+
+  docker run --rm \
+    --network "$NETWORK" \
+    -e MYSQL_PWD="$password" \
+    -v "$sqlfile:/init.sql:ro" \
+    mysql:8 \
+    sh -c "mysql -h$host -u$username $dbname < /init.sql"
+}
+
+export -f init_sql

@@ -26,19 +26,19 @@ MYSQL7_CONTAINER=$(get_container_name "mysql7")
 MYSQL8_CONTAINER=$(get_container_name "mysql8")
 
 if [ -n "$MYSQL7_CONTAINER" ]; then
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p${PASSWORD} \
+    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" \
         -e "CREATE DATABASE IF NOT EXISTS dtm DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p${PASSWORD} dtm < ${DATA}/dtm/dtmsvr.storage.mysql.sql
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p${PASSWORD} dtm < ${DATA}/dtm/dtmcli.barrier.mysql.sql
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p${PASSWORD} dtm < ${DATA}/dtm/busi.mysql.sql
+    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmsvr.storage.mysql.sql
+    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmcli.barrier.mysql.sql
+    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/busi.mysql.sql
 fi
 
 if [ -n "$MYSQL8_CONTAINER" ]; then
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p${PASSWORD} \
+    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" \
         -e "CREATE DATABASE IF NOT EXISTS dtm DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p${PASSWORD} dtm < ${DATA}/dtm/dtmsvr.storage.mysql.sql
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p${PASSWORD} dtm < ${DATA}/dtm/dtmcli.barrier.mysql.sql
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p${PASSWORD} dtm < ${DATA}/dtm/busi.mysql.sql
+    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmsvr.storage.mysql.sql
+    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmcli.barrier.mysql.sql
+    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/busi.mysql.sql
 fi
 
 sudo mkdir -p ${DATA}/dtm

@@ -9,7 +9,7 @@ networks:
 services:
   seata:
     image: apache/seata-server:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - ${PORT_SEATA_CLIENT:-7091}:7091
       - ${PORT_SEATA_SERVER:-8091}:8091
@@ -22,6 +22,12 @@ services:
       # - "${DATA}/seata/resources:/seata-server/resources"
       - "${DATA}/seata/logs:/seata-server/logs"
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_seata == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_SEATA:-1G}

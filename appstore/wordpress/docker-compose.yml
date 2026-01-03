@@ -11,7 +11,7 @@ services:
   # https://github.com/bitnami/containers/tree/main/bitnami/wordpress#how-to-use-this-image
   wordpress:
     image: bitnami/wordpress:latest 
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_WORDPRESS}:8080"
     volumes:
@@ -46,6 +46,12 @@ services:
       - traefik.http.middlewares.cmswww.compress=true
 
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_wordpress == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_WORDPRESS:-1G}

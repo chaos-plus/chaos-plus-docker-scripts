@@ -9,7 +9,7 @@ networks:
 services:
   waline:
     image: lizheming/waline:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_WALINE:-8360}:8360"
     environment:
@@ -35,6 +35,12 @@ services:
       - traefik.http.middlewares.waline.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.waline.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_waline == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_WALINE:-512M}

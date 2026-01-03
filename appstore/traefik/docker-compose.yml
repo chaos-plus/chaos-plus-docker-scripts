@@ -5,13 +5,17 @@ networks:
   default:
     name: ${NETWORK}
     external: true
-    
+
+configs:
+  traefik-tls-config:
+    name: ${TRAEFIK_TLS_CONFIG}
+    external: true
 
 services:
 
   traefik:
     image: traefik:v3.0
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - target: ${PORT_PROXY}
         published: ${PORT_PROXY}
@@ -24,8 +28,10 @@ services:
         mode: host
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${DATA}/traefik/config:/etc/traefik/config:ro"
       - "${DATA}/acme:${DATA}/acme:ro"
+    configs:
+      - source: traefik-tls-config
+        target: /etc/traefik/config/traefik.tls.toml
     command: 
 
       --global.checkNewVersion=false
@@ -82,6 +88,12 @@ services:
         max-size: "64m"
         max-file: "2"
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_traefik == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_TRAEFIK:-512M}

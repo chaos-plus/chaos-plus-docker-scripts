@@ -1,4 +1,5 @@
 # docker network create --driver overlay --attachable cluster
+# 使用 host 网络模式的服务不需要定义 overlay 网络
 networks:
   default:
     name: ${NETWORK}
@@ -7,14 +8,25 @@ networks:
 services:
   cloudflared:
     image: cloudflare/cloudflared:latest
-    restart: ${SRV_RESTART_MODE:-always}
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
-    network_mode: host
+    # restart: ${SRV_RESTART_MODE:-always}
+    # environment:
+    #   - TUNNEL_TRANSPORT_PROTOCOL=http2
+    command: tunnel --no-autoupdate --protocol http2 run --token ${CLOUDFLARED_TOKEN}
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pgrep cloudflared || exit 1"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 15s
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
       placement:
-        constraints: [ node.host == manager ]
+        constraints:
+          - node.labels.app_cloudflared == true
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_CLOUDFLARED:-512M}
+          memory: ${RES_LIMIT_MEM_CLOUDFLARED:-256M}
         reservations:
           memory: ${RES_RESER_MEM_CLOUDFLARED:-64M}

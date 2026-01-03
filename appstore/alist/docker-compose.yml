@@ -10,7 +10,7 @@ services:
 
   alist:
     image: 'xhofe/alist:latest'
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     volumes:
         - ${DATA}/alist:/opt/alist/data
     ports:
@@ -29,6 +29,12 @@ services:
       - traefik.http.services.alist.loadBalancer.passHostHeader=true
       - traefik.http.middlewares.alist.compress=true
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_alist == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_ALIST:-512M}

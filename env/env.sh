@@ -6,7 +6,7 @@ export HOSTNAME=$(hostname)
 export NETWORK=cloud
 
 export DATA=/opt/data
-export TEMP=/opt/tmp
+export TEMP=/opt/temp
 
 # export GHPROXY=https://gh-proxy.com/
 
@@ -44,6 +44,7 @@ export PORT_GOST=8989
 
 export PORT_WORDPRESS=8080
 
+export PORT_CERTMATE=8090
 
 export PORT_GRAFANA=3000
 
@@ -63,6 +64,7 @@ export PORT_REGISTRY_UI=5001
 
 export PORT_GITEA=5002
 export PORT_GITEA_SSH=5003
+export PORT_JENKINS=5080
 
 
 export PORT_EMQX_MQTT=31883
@@ -137,3 +139,5 @@ export PORT_GITINSIGHT=48444
 
 
 export PORT_DEBEZIUM=48083
+
+export PORT_XXLJOB=48084

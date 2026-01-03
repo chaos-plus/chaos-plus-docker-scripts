@@ -10,11 +10,17 @@ services:
 
   rmqnamesrv:
     image: apache/rocketmq:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - ${PORT_ROCKETMQ_NAMESRV}:9876
     command: sh mqnamesrv
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_rocketmq == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_RMQNAMESRV:-2G}
@@ -22,7 +28,7 @@ services:
           memory: ${RES_RESER_MEM_RMQNAMESRV:-512M}
   rmqbroker:
     image: apache/rocketmq:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - ${PORT_ROCKETMQ_BROKER}:10909
       - ${PORT_ROCKETMQ_BROKER_HTTP}:10911
@@ -31,10 +37,16 @@ services:
       - NAMESRV_ADDR=rmqnamesrv:9876
     volumes:
       - ${DATA}/rocketmq/store:/home/rocketmq/store
-    depends_on:
-      - rmqnamesrv
+    # depends_on:  # Docker Stack 不支持
+    #   - rmqnamesrv
     command: sh mqbroker
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_rocketmq == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_RMQBROKER:-2G}
@@ -43,10 +55,10 @@ services:
           
   rmqproxy:
     image: apache/rocketmq:latest
-    restart: ${SRV_RESTART_MODE:-always}
-    depends_on:
-      - rmqbroker
-      - rmqnamesrv
+    # restart: ${SRV_RESTART_MODE:-always}
+    # depends_on:  # Docker Stack 不支持
+    #   - rmqbroker
+    #   - rmqnamesrv
     ports:
       - ${PORT_ROCKETMQ_PROXY_HTTP}:8080
       - ${PORT_ROCKETMQ_PROXY_HTTPS}:8081
@@ -54,6 +66,12 @@ services:
       - NAMESRV_ADDR=rmqnamesrv:9876
     command: sh mqproxy
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_rocketmq == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_RMQPROXY:-1G}
@@ -62,15 +80,21 @@ services:
 
   dashboard:
     image: apacherocketmq/rocketmq-dashboard:latest
-    restart: ${SRV_RESTART_MODE:-always}
-    depends_on:
-      - rmqproxy
+    # restart: ${SRV_RESTART_MODE:-always}
+    # depends_on:  # Docker Stack 不支持
+    #   - rmqproxy
     ports:
       # 修改了映射端口号
       - ${PORT_ROCKETMQ_DASHBOARD_HTTP}:8080
     environment:
       - JAVA_OPTS=-Drocketmq.namesrv.addr=rmqnamesrv:9876
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_rocketmq == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_RMQDASHBOARD:-1G}

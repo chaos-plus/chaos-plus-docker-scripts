@@ -2,4 +2,4 @@
 #!/bin/bash -e
 
 
-sudo chmod -R 777 ${DATA}/wordpress/
+sudo chmod -R 777 "${DATA:-/opt/data}"/wordpress/

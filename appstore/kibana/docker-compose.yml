@@ -10,7 +10,7 @@ services:
 
   kibana:
     image: bitnami/kibana:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_KIBANA:-5601}:5601"
     environment:
@@ -32,6 +32,12 @@ services:
       - traefik.http.middlewares.kibana.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.kibana.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_kibana == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_KIBANA:-1G}

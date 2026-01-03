@@ -8,7 +8,7 @@
 # export OSS_ACCESS_KEY_ID="YOUR_ACCESS_KEY_ID"
 # export OSS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
 
-if [ -z "$OSS_ENDPOINT" ] || [ -z "$OSS_REGION" ] || [ -z "$OSS_BUCKET" ] || [ -z "$OSS_ACCESS_KEY_ID" ] || [ -z "$OSS_SECRET_ACCESS_KEY" ]; then
+if [ -z "${OSS_ENDPOINT:-}" ] || [ -z "${OSS_REGION:-}" ] || [ -z "${OSS_BUCKET:-}" ] || [ -z "${OSS_ACCESS_KEY_ID:-}" ] || [ -z "${OSS_SECRET_ACCESS_KEY:-}" ]; then
     echo "OSS_ENDPOINT, OSS_REGION, OSS_BUCKET, OSS_ACCESS_KEY_ID, OSS_SECRET_ACCESS_KEY must be set"
     exit 1
 fi

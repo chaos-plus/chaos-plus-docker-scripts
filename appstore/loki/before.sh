@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-
 # export OSS_ENDPOINT="oss-ap-southeast-3.aliyuncs.com"
 # export OSS_REGION="ap-southeast-3"
 # export OSS_BUCKET="loki-data"
@@ -9,7 +8,7 @@
 # export OSS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
 
 # 检测使用的存储类型
-if [ -n "$OSS_ACCESS_KEY_ID" ] && [ -n "$OSS_SECRET_ACCESS_KEY" ]; then
+if [ -n "${OSS_ACCESS_KEY_ID:-}" ] && [ -n "${OSS_SECRET_ACCESS_KEY:-}" ]; then
     STORAGE_TYPE="OSS"
 else
     STORAGE_TYPE="Local"
@@ -18,6 +17,8 @@ fi
 echo "=========================================="
 echo "Loki 存储类型: ${STORAGE_TYPE}"
 echo "=========================================="
+
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ "$STORAGE_TYPE" == "OSS" ]; then
     echo "📦 使用阿里云 OSS 对象存储"
@@ -29,8 +30,8 @@ if [ "$STORAGE_TYPE" == "OSS" ]; then
     sudo mkdir -p ${DATA}/loki/{tsdb-index,tsdb-cache,wal,compactor,blooms,rules-temp}
     sudo chmod -R 777 ${DATA}/loki
     
-    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    sudo cp -rf ${SRC_DIR}/loki-config-oss.yaml ${DATA}/loki/loki-config.yaml
+    # 创建版本化 Docker config
+    export LOKI_CONFIG=$(create_versioned_config "loki-config" "${SRC_DIR}/loki-config-oss.yaml" 3)
 
     echo ""
     echo "⚠️  重要提示："
@@ -46,8 +47,8 @@ else
     sudo mkdir -p ${DATA}/loki/{chunks,tsdb-index,tsdb-cache,rules,rules-temp,compactor,wal,blooms}
     sudo chmod -R 777 ${DATA}/loki
 
-    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    sudo cp -rf ${SRC_DIR}/loki-config-local.yaml ${DATA}/loki/loki-config.yaml
+    # 创建版本化 Docker config
+    export LOKI_CONFIG=$(create_versioned_config "loki-config" "${SRC_DIR}/loki-config-local.yaml" 3)
     
     echo ""
     echo "⚠️  提示："

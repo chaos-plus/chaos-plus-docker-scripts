@@ -4,16 +4,22 @@ networks:
   default:
     name: ${NETWORK}
     external: true
-    
+
+configs:
+  gitinsight-config:
+    name: ${GITINSIGHT_CONFIG}
+    external: true
 
 services:
 
   gitinsight:
     image: 'ghcr.io/robotism/gitinsight:latest'
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     volumes:
-        - ${DATA}/gitinsight/config.yaml:/app/config.yaml
         - ${TEMP}/gitinsight/.repo:/app/.repo
+    configs:
+      - source: gitinsight-config
+        target: /app/config.yaml
     ports:
         - '${PORT_GITINSIGHT}:8080'
     labels:
@@ -25,9 +31,21 @@ services:
       - traefik.http.services.gitinsight.loadbalancer.server.port=8080
       - traefik.http.services.gitinsight.loadBalancer.passHostHeader=true
       - traefik.http.middlewares.gitinsight.compress=true
+    # healthcheck:
+    #   test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/v1/branches || exit 1"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 30s
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_gitinsight == true
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_GITINSIGHT:-512M}
+          memory: ${RES_LIMIT_MEM_GITINSIGHT:-2G}
         reservations:
           memory: ${RES_RESER_MEM_GITINSIGHT:-128M}

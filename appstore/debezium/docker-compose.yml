@@ -10,7 +10,7 @@ services:
 
   debezium:
     image: debezium/connect:3.0.0.Final
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_DEBEZIUM}:8083"  # Kafka Connect REST API
     environment:
@@ -20,6 +20,12 @@ services:
      - OFFSET_STORAGE_TOPIC=my_connect_offsets
      - STATUS_STORAGE_TOPIC=my_connect_statuses
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_debezium == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_DEBEZIUM:-1G}

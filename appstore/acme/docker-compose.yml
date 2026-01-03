@@ -5,38 +5,45 @@ networks:
   default:
     name: ${NETWORK}
     external: true
-
 services:
-
   acme:
     image: neilpang/acme.sh:3.0.6
-    restart: "no"             # 对应 docker run --rm
-    network_mode: host        # 保持 host 网络模式
     volumes:
       - ${DATA}/acme:/acme.sh
     environment:
-      ${ACME_DNS_ID_NAME:-ACME_DNS_ID_NAME}: ${ACME_DNS_ID_VALUE:-""}
-      ${ACME_DNS_KEY_NAME:-ACME_DNS_KEY_NAME}: ${ACME_DNS_KEY_VALUE:-""}
-      DOMAIN: ${DOMAIN}       # 如果命令里使用了 ${DOMAIN}
-      ACME_DNS: ${ACME_DNS}   # 如果命令里使用了 ${ACME_DNS}
+      # ${ACME_DNS_ID_NAME}: ${ACME_DNS_ID_VALUE:-""}
+      # ${ACME_DNS_KEY_NAME}: ${ACME_DNS_KEY_VALUE:-""}
+      DOMAIN: ${DOMAIN}
+      DOMAINS: ${DOMAINS}
+      ACME_DNS: ${ACME_DNS}
     command:
-      - --register-account
-      - -m
-      - acme@${DOMAIN}
-      - --set-default-ca
-      - --server
-      - letsencrypt
-      - --keylength
-      - "2048"
-      - --preferred-chain
-      - "ISRG Root X1"
-      - --issue
-      - --force
-      - --debug
-      - "2"
-      - --dns
-      - ${ACME_DNS}
+      - sh
+      - -c
+      - |
+        set -e
+        acme_cmd="acme.sh --home /acme.sh --register-account -m acme@$$DOMAIN --set-default-ca --server zerossl --output-insecure --keylength 2048 --issue --force --debug 2 --dns $$ACME_DNS"
+        for d in $$DOMAINS; do
+          acme_cmd="$$acme_cmd -d $$d -d *.$$d"
+        done
+        if [ ! -f /acme.sh/$$DOMAIN/fullchain.cer ]; then
+          eval "$$acme_cmd"
+        fi
+        echo "tail -f /dev/null; #keep container alive for ofelia job-exec"
+        tail -f /dev/null
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.acme-renew.schedule: "@daily"
+      ofelia.job-exec.acme-renew.command: >
+        sh -c "
+        acme.sh --home /acme.sh --renew-all >> /acme.sh/renew.log 2>&1
+        "
     deploy:
+      replicas: 1
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      placement:
+        constraints:
+          - node.labels.app_acme == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_ACME:-128M}

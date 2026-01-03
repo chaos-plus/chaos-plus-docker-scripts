@@ -28,7 +28,7 @@ services:
   # https://github.com/kubesre/docker-registry-mirrors/blob/main/dockerproxy/README.md
   crproxy:
     image: ghcr.io/daocloud/crproxy/crproxy:${PROXY_CR_VERSION}
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_PROXY_CR}:8080"
     labels:
@@ -61,6 +61,12 @@ services:
       --override-default-registry=quay.${DOMAIN}=quay.io
       --override-default-registry=jujucharms.${DOMAIN}=registry.jujucharms.com
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_crproxy == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_CRPROXY:-512M}

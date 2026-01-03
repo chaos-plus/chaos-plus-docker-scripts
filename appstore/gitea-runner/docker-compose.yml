@@ -11,18 +11,27 @@ services:
     image: gitea/act_runner:nightly
     environment:
       # CONFIG_FILE: /config.yaml
-      GITEA_INSTANCE_URL: "${GITEA_INSTANCE_URL:-https://gitea.${DOMAIN}}"
+      GITEA_INSTANCE_URL: "${GITEA_INSTANCE_URL:-}"
       GITEA_RUNNER_REGISTRATION_TOKEN: "${GITEA_RUNNER_REGISTRATION_TOKEN:-}"
       GITEA_RUNNER_NAME: "${GITEA_RUNNER_NAME:-shared-runner}"
       # GITEA_RUNNER_LABELS: "${GITEA_RUNNER_LABELS:-default}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ${DATA}/gitea-runner/config.yaml:/config.yaml
-      # - ${DATA}/gitea-runner:/data
+      - ${DATA}/gitea-runner-{{.Task.Slot}}:/data
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep act_runner || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     deploy:
-      replicas: 6
+      replicas: ${GITEA_RUNNER_REPLICAS:-6}
+      placement:
+        constraints:
+          - node.labels.app_gitea-runner == true
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_GITEA_RUNNER:-6G}
+          memory: ${RES_LIMIT_MEM_GITEA_RUNNER:-2G}
         reservations:
-          memory: ${RES_RESER_MEM_GITEA_RUNNER:-4G}
+          memory: ${RES_RESER_MEM_GITEA_RUNNER:-512M}

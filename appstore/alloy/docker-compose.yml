@@ -5,11 +5,15 @@ networks:
   default:
     name: ${NETWORK}
     external: true
+configs:
+  alloy-config:
+    name: ${ALLOY_CONFIG}
+    external: true
 
 services:
   alloy:
     image: grafana/alloy:v1.5.1
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     user: "0:0"
     command:
       - "run"
@@ -17,17 +21,22 @@ services:
       - "--storage.path=/var/lib/alloy/data"
       - "/etc/alloy/config.alloy"
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
       - /var/log:/var/log:ro
-      - ${DATA}/alloy/config.alloy:/etc/alloy/config.alloy:ro
     ports:
       - "${PORT_ALLOY:-12345}:12345"
     environment:
       - HOSTNAME=${HOSTNAME}
       - LOKI_URL=${LOKI_URL:-http://loki:3100/loki/api/v1/push}
       - PROMETHEUS_URL=${PROMETHEUS_URL:-http://prometheus:9090/api/v1/write}
+    configs:
+      - source: alloy-config
+        target: /etc/alloy/config.alloy
     deploy:
+      mode: global
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_ALLOY:-512M}

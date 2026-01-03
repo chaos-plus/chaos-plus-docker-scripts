@@ -11,5 +11,5 @@ get_container_name() {
 ALIST_CONTAINER=$(get_container_name "alist")
 
 if [ -n "$ALIST_CONTAINER" ]; then
-    docker exec -it "$ALIST_CONTAINER" ./alist admin set ${PASSWORD} || true
+    docker exec -it "$ALIST_CONTAINER" ./alist admin set "${PASSWORD:-}" || true
 fi

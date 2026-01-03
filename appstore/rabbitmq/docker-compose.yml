@@ -10,8 +10,8 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    restart: ${SRV_RESTART_MODE:-always}
-    privileged: true
+    # restart: ${SRV_RESTART_MODE:-always}
+    # privileged: true  # Docker Stack 不支持
     ports:
       # epmd
       -  "${PORT_RABBITMQ_EPMD}:4369"
@@ -38,6 +38,12 @@ services:
       - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
 
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_rabbitmq == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_RABBITMQ:-1G}

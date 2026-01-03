@@ -9,7 +9,7 @@ networks:
 services:
   bytebase:
     image: bytebase/bytebase:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/bytebase:/var/opt/bytebase
@@ -30,6 +30,12 @@ services:
       retries: 5
       start_period: 30s
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_bytebase == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_BYTEBASE:-1G}

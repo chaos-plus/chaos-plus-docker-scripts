@@ -24,26 +24,30 @@ if ! command -v docker &>/dev/null; then
 	exit 1
 fi
 
-if [ -d "${DATA}/emqx" ]; then
+
+# https://docs.emqx.com/zh/emqx/v5.8/
+# 5.9.0后需要license才支持集群
+
+
+sudo mkdir -p ${DATA}/emqx
+sudo chmod -R 777 ${DATA}/emqx
+
+if [ -d "${DATA}/emqx/data" ]; then
 	echo "✅ emqx data exists, skip"
 else
 	echo "📁 emqx data lost, create"
 	
-    # https://docs.emqx.com/zh/emqx/v5.8/
-    # 5.9.0后需要license才支持集群
 
 	# 先启动一个临时实例
+	docker rm -f emqx | true
 	docker run -d --name emqx emqx/emqx:5.8.8
 	# 然后拷贝数据到宿主机
-    sudo mkdir -p ${DATA}/emqx/data
-    sudo chmod -R 777 ${DATA}/emqx
 
     sudo docker cp emqx:/opt/emqx/data/ ${DATA}/emqx
     sudo docker cp emqx:/opt/emqx/etc/ ${DATA}/emqx
-    sudo docker cp emqx:/opt/emqx/log/ ${TEMP}/emqx
+    sudo docker cp emqx:/opt/emqx/log/ ${DATA}/emqx
     
     sudo chmod -R 777 ${DATA}/emqx
-    sudo chmod -R 777 ${TEMP}/emqx
 
     export EMQX_CONF=${DATA}/emqx/etc/emqx.conf
     sudo echo ''>> ${EMQX_CONF} 
@@ -53,9 +57,17 @@ else
     sudo cat ${EMQX_CONF} | grep password
 
     sudo chmod -R 777 ${DATA}/emqx
-    sudo chmod -R 777 ${TEMP}/emqx
 	
 	# 删除临时实例
 	docker rm -f emqx
 fi
 
+
+if [ ! -d "${DATA}/emqx/log" ]; then
+	echo "📁 emqx log lost, create"
+
+    sudo mkdir -p ${DATA}/emqx/log
+
+    sudo chmod -R 777 ${DATA}/emqx
+	
+fi

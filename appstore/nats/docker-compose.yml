@@ -5,19 +5,31 @@ networks:
     name: ${NETWORK}
     external: true
 
+configs:
+  nats-config:
+    name: ${NATS_CONFIG}
+    external: true
 
 services:
   nats:
     image: nats
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_NATS_CLIENT:-4222}:4222"
       - "${PORT_NATS_HTTP:-8222}:8222"
     volumes:
-      - ${DATA}/nats/nats.conf:/etc/nats/nats.conf
       - ${DATA}/nats/data:/data
+    configs:
+      - source: nats-config
+        target: /etc/nats/nats.conf
     command: "--config /etc/nats/nats.conf"
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_nats == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_NATS:-512M}

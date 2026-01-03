@@ -1,0 +1,25 @@
+
+
+# docker network create --driver overlay --attachable cluster
+# 使用 host 网络模式的服务不需要定义 overlay 网络
+# networks:
+#   default:
+#     name: ${NETWORK}
+#     external: true
+
+configs:
+  frps-config:
+    name: ${FRPS_CONFIG}
+    external: true
+
+services:
+
+  frps:
+    ports:
+      # frp server ports
+      - {target: 7000, published: 7000, mode: host}
+      - {target: 7500, published: 7500, mode: host}
+
+
+
+

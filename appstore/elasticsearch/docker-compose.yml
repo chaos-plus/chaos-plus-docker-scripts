@@ -10,7 +10,7 @@ services:
 
   elasticsearch:
     image: bitnami/elasticsearch:latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     environment:
       - "ELASTICSEARCH_PASSWORD=${PASSWORD}"
     ports:
@@ -21,6 +21,12 @@ services:
       - ${DATA}/elasticsearch/data:/usr/share/elasticsearch/data
       - ${DATA}/elasticsearch/plugins:/usr/share/elasticsearch/plugins
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_elasticsearch == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_ELASTICSEARCH:-2G}

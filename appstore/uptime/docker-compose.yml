@@ -9,7 +9,7 @@ networks:
 services:
   uptime:
     image: louislam/uptime-kuma:beta
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_UPTIME:-3001}:3001"
     volumes:
@@ -41,6 +41,12 @@ services:
       - traefik.http.middlewares.uptime.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.uptime.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_uptime == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_UPTIME:-1G}

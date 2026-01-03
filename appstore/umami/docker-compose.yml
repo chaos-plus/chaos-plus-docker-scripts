@@ -9,7 +9,7 @@ networks:
 services:
   umami:
     image: umamisoftware/umami:mysql-latest
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_UMAMI:-3000}:3000"
     environment:
@@ -35,6 +35,12 @@ services:
       - traefik.http.middlewares.umami.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.umami.headers.contentSecurityPolicy=upgrade-insecure-requests
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_umami == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_UMAMI:-512M}

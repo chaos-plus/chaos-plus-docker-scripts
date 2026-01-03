@@ -5,21 +5,26 @@ networks:
     name: ${NETWORK}
     external: true
 
+configs:
+  mysql8-config:
+    name: ${MYSQL8_CONFIG}
+    external: true
 
 services:
 
   mysql8:
     image: mysql:8.0-oracle
-    restart: ${SRV_RESTART_MODE:-always}
-    privileged: true
+    # restart: ${SRV_RESTART_MODE:-always}
+    # privileged: true  # Docker Stack 不支持
     ports:
       - "${PORT_MYSQL8}:3306"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/mysql8/data:/var/lib/mysql
       - ${DATA}/mysql8/log:/var/log/mysql
-      - ${DATA}/mysql8/conf/my.cnf:/etc/mysql/my.cnf
-    #  - /opt/data/mariadb/config/my.cnf:/etc/mysql/my.cnf 
+    configs:
+      - source: mysql8-config
+        target: /etc/mysql/my.cnf
     environment:
       TIMEZONE: Asis/Shanghai
       MYSQL_ROOT_PASSWORD: ${PASSWORD}
@@ -34,11 +39,18 @@ services:
       - "environment=${ENV}"
       - "logging_level=INFO"
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
-      interval: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${PASSWORD}"]
+      interval: 30s
       timeout: 10s
-      retries: 10
+      retries: 5
+      start_period: 30s
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_mysql8 == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_MYSQL8:-2G}

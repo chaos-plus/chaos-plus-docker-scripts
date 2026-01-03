@@ -11,7 +11,7 @@ services:
   portainer:
     image: portainer/portainer-ce:latest
     hostname: portainer
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_PORTAINER}:9000"
     volumes:
@@ -28,6 +28,12 @@ services:
       - traefik.http.routers.portainer.service=portainer@docker
       - traefik.http.services.portainer.loadbalancer.server.port=9000
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_portainer == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_PORTAINER:-512M}

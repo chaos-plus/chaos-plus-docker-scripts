@@ -9,7 +9,7 @@ networks:
 services:
   spicedb:
     image: authzed/spicedb:${SPICEDB_VERSION}
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     ports:
       - ${PORT_SPICEDB_HTTP:-8443}:8443
       - ${PORT_SPICEDB_GRPC:-50051}:50051
@@ -26,6 +26,12 @@ services:
       - --datastore-engine=mysql 
       - --datastore-conn-uri=root:${PASSWORD}@tcp(mysql8:3306)/spicedb?parseTime=true
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_spicedb == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_SPICEDB:-1G}

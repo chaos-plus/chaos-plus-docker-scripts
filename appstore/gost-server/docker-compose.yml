@@ -11,7 +11,7 @@ services:
   # 服务端： 海外节点
   gost:
     image: 'gogost/gost:latest'
-    restart: ${SRV_RESTART_MODE:-always}
+    # restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - ${DATA}/gost:/gost/
     ports:
@@ -28,6 +28,12 @@ services:
       - traefik.http.services.gost.loadBalancer.passHostHeader=true
       - traefik.http.middlewares.gost.compress=true
     deploy:
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app_gost-server == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_GOST:-512M}
