@@ -1,5 +1,6 @@
 ## Docker Deploy Scripts
 
+> deploy with docker stack
 
 ```bash
 
