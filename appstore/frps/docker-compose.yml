@@ -1,27 +1,23 @@
 
 
-# docker network create --driver overlay --attachable cluster
+
 # 使用 host 网络模式的服务不需要定义 overlay 网络
 # networks:
 #   default:
 #     name: ${NETWORK}
 #     external: true
 
-configs:
-  frps-config:
-    name: ${FRPS_CONFIG}
-    external: true
-
 services:
 
   frps:
     image: snowdreamtech/frps:0.65.0-alpine
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
+    network_mode: host
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    configs:
-      - source: frps-config
-        target: /etc/frp/frps.toml
+      - ${DATA}/frps/:/etc/frp/
+    environment:
+      - FRPS_CONFIG_HASH=${FRPS_CONFIG_HASH:-}
     labels:
       - traefik.enable=true
       # - traefik.http.routers.frps-http.rule=HostRegexp(`^frp-.+\..*`)
@@ -49,20 +45,20 @@ services:
     #   retries: 3
     #   start_period: 15s
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_frps == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_frps == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_FRPS:-256M}
         reservations:
           memory: ${RES_RESER_MEM_FRPS:-64M}
-    ports:
-      - {target: 7000, published: 7000, mode: host}
-      - {target: 7500, published: 7500, mode: host}
+    # ports:
+    #   - {target: 7000, published: 7000, mode: host}
+    #   - {target: 7500, published: 7500, mode: host}
 
 
 

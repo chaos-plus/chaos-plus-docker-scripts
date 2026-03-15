@@ -1,6 +1,6 @@
 ## Docker Deploy Scripts
 
-> deploy with docker stack
+> deploy with docker compose
 
 ```bash
 
@@ -11,7 +11,6 @@ bash install.sh
 # install custom
 
 bash install.sh acme
-bash install.sh cron
 bash install.sh traefik
 
 ```

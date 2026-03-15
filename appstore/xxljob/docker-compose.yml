@@ -1,24 +1,19 @@
 
-# docker network create --driver overlay --attachable cluster
+
 networks:
   default:
     name: ${NETWORK}
     external: true
 
 
-volumes:
-  xxljob_data:
-    driver: local
-
-
 services:
   xxljob:
     # https://hub.docker.com/r/xuxueli/xxl-job-admin/tags
-    image: xuxueli/xxl-job-admin:3.3.1
-    # restart: ${SRV_RESTART_MODE:-always}
+    image: xuxueli/xxl-job-admin:3.3.2
+    restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - xxljob_data:/data/applogs
+      - ${DATA}/xxljob/logs:/data/applogs
     ports:
       - ${PORT_XXLJOB:-8080}:8080
     environment:
@@ -30,6 +25,8 @@ services:
         --spring.datasource.username=root
         --spring.datasource.password=${PASSWORD}
         --xxl.job.accessToken=${XXLJOB_TOKEN}
+        --xxl.job.logretentiondays=${XXLJOB_LOG_RETENTION_DAYS:-3}
+        --xxl.job.executor.logretentiondays=${XXLJOB_LOG_RETENTION_DAYS:-3}
     labels:
       - "logging.enabled=true"
       - "app_name=xxljob"
@@ -43,18 +40,18 @@ services:
       - traefik.http.services.xxljob.loadbalancer.server.port=8080
     healthcheck:
       disable: true
-      # test: ["CMD-SHELL", "curl -fs http://localhost:8080/xxl-job-admin/actuator/health || exit 1"]
-      # interval: 30s
-      # timeout: 5s
-      # retries: 5
-      # start_period: 30s
+#      test: [ "CMD-SHELL", "wget -fs http://localhost:8080/xxl-job-admin/actuator/health || exit 1" ]
+#      interval: 30s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 30s
     deploy:
-      replicas: 1
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      placement:
-        constraints:
-          - node.labels.app_xxljob == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_xxljob == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_XXLJOB:-512M}

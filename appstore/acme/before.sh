@@ -7,6 +7,10 @@ if [ -z "${DOMAINS:-}" ]; then
     exit 1
 fi
 
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+sudo \cp -rf ${SRC_DIR}/entry.sh ${DATA}/acme/entry.sh
+export ACME_CONFIG_HASH=$(md5sum ${DATA}/acme/entry.sh | cut -d' ' -f1)
+
 # if [ -z "${ACME_DNS:-}" ]; then
 #     echo "ACME_DNS is empty"
 #     exit 1

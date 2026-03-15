@@ -9,6 +9,7 @@ services:
   
   gitea-runner:
     image: gitea/act_runner:nightly
+    restart: ${SRV_RESTART_MODE:-always}
     environment:
       # CONFIG_FILE: /config.yaml
       GITEA_INSTANCE_URL: "${GITEA_INSTANCE_URL:-}"
@@ -26,10 +27,11 @@ services:
       retries: 3
       start_period: 30s
     deploy:
-      replicas: ${GITEA_RUNNER_REPLICAS:-6}
-      placement:
-        constraints:
-          - node.labels.app_gitea-runner == true
+      # endpoint_mode: dnsrr
+      # replicas: ${GITEA_RUNNER_REPLICAS:-6}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_gitea-runner == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_GITEA_RUNNER:-2G}

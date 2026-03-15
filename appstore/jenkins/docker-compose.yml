@@ -7,30 +7,29 @@ services:
   jenkins:
     image: jenkins/jenkins:lts
     ports:
-      - "${PORT_JENKINS}:8080"
+      - "${PORT_JENKINS}:${PORT_JENKINS}"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/jenkins:/var/jenkins_home
     environment:
-      - JENKINS_OPTS=--prefix=/
+      - JENKINS_OPTS=--prefix=/ --httpPort=${PORT_JENKINS}
     labels:
       - traefik.enable=true
       - traefik.http.routers.jenkins.rule=Host(`jenkins.${DOMAIN}`)
       - traefik.http.routers.jenkins.tls=true
       - traefik.http.routers.jenkins.entrypoints=websecure
-      - traefik.http.services.jenkins.loadbalancer.server.port=8080
+      - traefik.http.services.jenkins.loadbalancer.server.port=${PORT_JENKINS}
       - traefik.http.services.jenkins.loadBalancer.passHostHeader=true
       - traefik.http.middlewares.jenkins.compress=true
-
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_jenkins == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_jenkins == true
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_JENKINS:-1G}
+          memory: ${RES_LIMIT_MEM_JENKINS:-1024M}
         reservations:
-          memory: ${RES_RESER_MEM_JENKINS:-1G}
+          memory: ${RES_RESER_MEM_JENKINS:-256M}

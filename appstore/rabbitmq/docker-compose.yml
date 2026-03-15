@@ -1,6 +1,6 @@
 
 
-# docker network create --driver overlay --attachable cluster
+
 networks:
   default:
     name: ${NETWORK}
@@ -10,18 +10,18 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-    # restart: ${SRV_RESTART_MODE:-always}
-    # privileged: true  # Docker Stack 不支持
+    restart: ${SRV_RESTART_MODE:-always}
+    privileged: true  # Docker Stack 不支持
     ports:
       # epmd
-      -  "${PORT_RABBITMQ_EPMD}:4369"
+      - "${PORT_RABBITMQ_EPMD}:4369"
       # AMQP 0-9-1 without and with TLS
-      -  "${PORT_RABBITMQ_AMQP_SSL}:5671"
-      -  "${PORT_RABBITMQ_AMQP}:5672"
+      - "${PORT_RABBITMQ_AMQP_SSL}:5671"
+      - "${PORT_RABBITMQ_AMQP}:5672"
       # Management
-      -  "${PORT_RABBITMQ_UI}:15672"
+      - "${PORT_RABBITMQ_UI}:15672"
       # Erlang distribution
-      -  "${PORT_RABBITMQ_CLUSTER}:25672"
+      - "${PORT_RABBITMQ_CLUSTER}:25672"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/rabbitmq/:/var/lib/rabbitmq/ 
@@ -30,20 +30,18 @@ services:
       - RABBITMQ_DEFAULT_PASS=${PASSWORD}
     labels:
       - traefik.enable=true
-      
       - traefik.http.routers.rabbitmq.rule=HostRegexp(`^rabbitmq\..*`)
       - traefik.http.routers.rabbitmq.tls=true
       - traefik.http.routers.rabbitmq.entrypoints=websecure
       - traefik.http.routers.rabbitmq.service=rabbitmq@docker
       - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
-
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_rabbitmq == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_rabbitmq == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_RABBITMQ:-1G}

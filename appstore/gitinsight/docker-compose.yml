@@ -1,27 +1,22 @@
 
-# docker network create --driver overlay --attachable cluster
+
 networks:
   default:
     name: ${NETWORK}
-    external: true
-
-configs:
-  gitinsight-config:
-    name: ${GITINSIGHT_CONFIG}
     external: true
 
 services:
 
   gitinsight:
     image: 'ghcr.io/robotism/gitinsight:latest'
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
     volumes:
-        - ${TEMP}/gitinsight/.repo:/app/.repo
-    configs:
-      - source: gitinsight-config
-        target: /app/config.yaml
+      - ${TEMP}/gitinsight/.repo:/app/.repo
+      - ${GITINSIGHT_CONFIG}:/app/config.yaml:ro
+    environment:
+      - GITINSIGHT_CONFIG_HASH=${GITINSIGHT_CONFIG_HASH:-}
     ports:
-        - '${PORT_GITINSIGHT}:8080'
+      - '${PORT_GITINSIGHT}:8080'
     labels:
       - traefik.enable=true
       - traefik.http.routers.gitinsight.rule=HostRegexp(`^gitinsight\..*`)
@@ -38,12 +33,12 @@ services:
     #   retries: 3
     #   start_period: 30s
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_gitinsight == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_gitinsight == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_GITINSIGHT:-2G}

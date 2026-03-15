@@ -1,0 +1,49 @@
+
+
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
+
+services:
+  # https://github.com/shaogme/x-ui-yg-docker
+  xui:
+    # 使用发布的镜像
+    image: shaogme/x-ui-yg:alpine
+    restart: ${SRV_RESTART_MODE:-always}
+    tty: true
+    ports:
+      - "${PORT_XUI_FROM:-54321}-${PORT_XUI_TO:-54345}:${PORT_XUI_FROM:-54321}-${PORT_XUI_TO:-54345}"
+      - "${PORT_XUI_FROM:-54321}-${PORT_XUI_TO:-54345}:${PORT_XUI_FROM:-54321}-${PORT_XUI_TO:-54345}/udp"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA}/xui:/usr/local/x-ui
+      #  - ./your_ssl_certs:/root/ygkkkca/ #  你的ssl 证书存放目录映射到/root/ygkkkca/，因为默认ssl目录位置在/root/ygkkkca/
+    environment:
+      - XUI_USER=${XUI_USER:-xuiadmin}
+      - XUI_PASS=${XUI_PASS:-xuipa44k0dex}
+      - XUI_PORT=${PORT_XUI_FROM:-54321}
+      - XUI_PATH=anywhere
+    labels:
+      - "logging.enabled=true"
+      - "app_name=xui"
+      - "environment=${ENV}"
+      - "logging_level=INFO"
+      - traefik.enable=true
+      - traefik.http.routers.xui.rule=HostRegexp(`^xui\..*`)
+      - traefik.http.routers.xui.tls=true
+      - traefik.http.routers.xui.entrypoints=websecure
+      - traefik.http.routers.xui.service=xui@docker
+      - traefik.http.services.xui.loadbalancer.server.port=${PORT_XUI_FROM:-54321}
+    deploy:
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_xxljob == true
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_XUI:-512M}
+        reservations:
+          memory: ${RES_RESER_MEM_XUI:-64M}

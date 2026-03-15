@@ -6,8 +6,8 @@ echo "=========================================="
 echo ""
 
 # 检查必需的环境变量
-if [ -z "${TEMP}" ]; then
-    echo "❌ 错误: TEMP 环境变量未设置"
+if [ -z "${DATA}" ]; then
+    echo "❌ 错误: DATA 环境变量未设置"
     echo "请先执行: source ../env.sh"
     exit 1
 fi
@@ -19,21 +19,24 @@ fi
 
 echo "📋 配置信息："
 echo "   - 主机名: ${HOSTNAME}"
-echo "   - 数据路径: ${TEMP}/prometheus"
+echo "   - 数据路径: ${DATA}/prometheus"
 echo "   - 保留时间: ${PROMETHEUS_RETENTION:-30d}"
-echo "   - HTTP 端口: ${PORT_PROMETHEUS:-9090}"
+echo "   - HTTP端口: ${PORT_PROMETHEUS:-9090}"
 echo ""
 
 # 创建 Prometheus 数据目录
 echo "📁 创建目录结构..."
-sudo mkdir -p ${TEMP}/prometheus/data
-sudo chmod -R 777 ${TEMP}/prometheus
+sudo mkdir -p ${DATA}/prometheus/data
+sudo chmod -R 777 ${DATA}/prometheus
 
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 创建版本化 Docker configs
-export PROMETHEUS_CONFIG=$(create_versioned_config "prometheus-config" "${SRC_DIR}/prometheus.yml" 3)
-[ -f "${SRC_DIR}/alert-rules.yml" ] && export PROMETHEUS_RULES=$(create_versioned_config "prometheus-rules" "${SRC_DIR}/alert-rules.yml" 3)
+sudo \cp "${SRC_DIR}/prometheus.yml" "${DATA}/prometheus/prometheus.yml"
+sudo \cp "${SRC_DIR}/alert-rules.yml" "${DATA}/prometheus/alert-rules.yml"
+
+# 生成配置哈希
+export PROMETHEUS_CONFIG_HASH=$(md5sum "${DATA}/prometheus/prometheus.yml" "${DATA}/prometheus/alert-rules.yml" | md5sum | cut -d' ' -f1)
 
 echo ""
 echo "✅ Prometheus 初始化完成"

@@ -1,17 +1,17 @@
-# docker network create --driver overlay --attachable cluster
-# 使用 host 网络模式的服务不需要定义 overlay 网络
+
 networks:
   default:
     name: ${NETWORK}
     external: true
 
 services:
-  cloudflared:
+  cloudflared-tunnel:
     image: cloudflare/cloudflared:latest
-    # restart: ${SRV_RESTART_MODE:-always}
-    # environment:
+    restart: ${SRV_RESTART_MODE:-always}
+    environment:
+      - CLOUDFLARED_CONFIG_HASH=${CLOUDFLARED_CONFIG_HASH:-}
     #   - TUNNEL_TRANSPORT_PROTOCOL=http2
-    command: tunnel --no-autoupdate --protocol http2 run --token ${CLOUDFLARED_TOKEN}
+    command: tunnel --no-autoupdate --protocol http2 --no-tls-verify run --token ${CLOUDFLARED_TOKEN}
     # healthcheck:
     #   test: ["CMD-SHELL", "pgrep cloudflared || exit 1"]
     #   interval: 30s
@@ -19,14 +19,35 @@ services:
     #   retries: 3
     #   start_period: 15s
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_cloudflared == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_cloudflared == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_CLOUDFLARED:-256M}
         reservations:
           memory: ${RES_RESER_MEM_CLOUDFLARED:-64M}
+          
+  cloudflared-watchdog:
+    image: docker:cli
+    command: tail -f /dev/null
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DATA}/cloudflared/cf_monitor.sh:/cf_monitor.sh:ro
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.cloudflared-watchdog.schedule: "@every 5m"
+      ofelia.job-exec.cloudflared-watchdog.command: "sh /cf_monitor.sh"
+    deploy:
+      # endpoint_mode: dnsrr
+      # mode: global
+      restart_policy:
+        condition: ${SRV_RESTART_MODE:-any}
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_DOCKERCLI:-128M}
+        reservations:
+          memory: ${RES_RESER_MEM_DOCKERCLI:-64M}

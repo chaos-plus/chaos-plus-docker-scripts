@@ -1,21 +1,13 @@
-# docker network create --driver overlay --attachable cluster
+
 networks:
   default:
     name: ${NETWORK}
     external: true
 
-configs:
-  prometheus-config:
-    name: ${PROMETHEUS_CONFIG}
-    external: true
-  prometheus-rules:
-    name: ${PROMETHEUS_RULES}
-    external: true
-
 services:
   prometheus:
     image: prom/prometheus:v3.0.1
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
     user: "nobody"
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -31,14 +23,12 @@ services:
       - "${PORT_PROMETHEUS:-9090}:9090"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${TEMP}/prometheus/data:/prometheus
-    configs:
-      - source: prometheus-config
-        target: /etc/prometheus/prometheus.yml
-      - source: prometheus-rules
-        target: /etc/prometheus/rules/alert-rules.yml
+      - ${DATA}/prometheus/data:/prometheus
+      - ${DATA}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ${DATA}/prometheus/alert-rules.yml:/etc/prometheus/rules/alert-rules.yml:ro
     environment:
       - TZ=Asia/Shanghai
+      - PROMETHEUS_CONFIG_HASH=${PROMETHEUS_CONFIG_HASH:-}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
       interval: 30s
@@ -52,14 +42,13 @@ services:
       - traefik.http.routers.prometheus.entrypoints=websecure
       - traefik.http.services.prometheus.loadbalancer.server.port=9090
       - traefik.http.middlewares.prometheus.compress=true
-   
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_prometheus == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_prometheus == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_PROMETHEUS:-2G}

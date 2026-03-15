@@ -19,9 +19,11 @@ else
     sudo chmod -R 777 ${DATA}/mysql7/
 fi
 
-# 创建 Docker config（每次都需要导出变量）
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export MYSQL7_CONFIG=$(create_versioned_config "mysql7-config" "${SRC_DIR}/my.cnf" 3)
+sudo \cp ${SRC_DIR}/*.cnf ${DATA}/mysql7/
+sudo chmod 644 ${DATA}/mysql7/my.cnf
+
+export MYSQL7_CONFIG_HASH=$(md5sum ${DATA}/mysql7/my.cnf | cut -d' ' -f1)
 
 sudo chmod -R 777 ${DATA}/mysql7
 ################################################

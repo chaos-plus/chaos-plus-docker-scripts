@@ -1,6 +1,6 @@
 
 
-# docker network create --driver overlay --attachable cluster
+
 networks:
   default:
     name: ${NETWORK}
@@ -11,7 +11,7 @@ services:
 
   grafana:
     image: grafana/grafana
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_GRAFANA}:3000"
     volumes:
@@ -31,12 +31,12 @@ services:
       - traefik.http.middlewares.grafana.compress=true
 
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_grafana == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_grafana == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_GRAFANA:-512M}

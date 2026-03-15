@@ -1,99 +1,11 @@
 #!/bin/bash
-# Docker Config 版本化管理工具
-# 用于创建带内容哈希的 Docker config，只有配置变化时才创建新版本
-
-# 创建版本化的 Docker config（使用内容哈希）
-# 参数：
-#   $1 - config 基础名称（如 "prometheus-config"）
-#   $2 - 配置文件路径
-#   $3 - 保留的历史版本数量（默认 3）
-create_versioned_config() {
-    local CONFIG_BASE=$1
-    local CONFIG_FILE=$2
-    local KEEP_COUNT=${3:-3}
-    
-    if [ -z "${CONFIG_BASE}" ] || [ -z "${CONFIG_FILE}" ]; then
-        ERROR "需要提供 config 名称和文件路径" >&2
-        return 1
-    fi
-    
-    if [ ! -f "${CONFIG_FILE}" ]; then
-        ERROR "配置文件不存在: ${CONFIG_FILE}" >&2
-        return 1
-    fi
-    
-    # 生成内容哈希版本（使用 md5 或 sha256）
-    local CONFIG_HASH
-    if command -v md5sum &>/dev/null; then
-        CONFIG_HASH=$(md5sum "${CONFIG_FILE}" | awk '{print $1}' | cut -c1-8)
-    elif command -v md5 &>/dev/null; then
-        CONFIG_HASH=$(md5 -q "${CONFIG_FILE}" | cut -c1-8)
-    else
-        # fallback to timestamp if no hash command available
-        CONFIG_HASH=$(date +%Y%m%d-%H%M%S)
-    fi
-    
-    local CONFIG_NAME="${CONFIG_BASE}-${CONFIG_HASH}"
-    
-    # 检查是否已存在相同哈希的 config
-    if docker config inspect "${CONFIG_NAME}" >/dev/null 2>&1; then
-        NOTE "配置未变化，使用已有版本: ${CONFIG_NAME}" >&2
-    else
-        INFO "配置已变化，创建新版本: ${CONFIG_NAME}" >&2
-        if docker config create "${CONFIG_NAME}" "${CONFIG_FILE}" >/dev/null; then
-            SUCCESS "配置创建成功: ${CONFIG_NAME}" >&2
-            # 清理旧版本
-            cleanup_old_configs "${CONFIG_BASE}" "${KEEP_COUNT}" >&2
-        else
-            ERROR "配置创建失败" >&2
-            return 1
-        fi
-    fi
-    
-    # 返回完整的配置名称
-    echo "${CONFIG_NAME}"
-}
-
-# 清理旧版本的 config
-# 参数：
-#   $1 - config 基础名称
-#   $2 - 保留的版本数量（默认 3）
-cleanup_old_configs() {
-    local CONFIG_BASE=$1
-    local KEEP_COUNT=${2:-3}
-    
-    NOTE "清理旧版本配置 (保留最新 ${KEEP_COUNT} 个)..."
-    
-    # 获取所有匹配的 config 并排序，删除旧的
-    local OLD_CONFIGS=$(docker config ls --filter "name=${CONFIG_BASE}-" \
-        --format "{{.CreatedAt}}\t{{.Name}}" 2>/dev/null | \
-        sort -r | \
-        tail -n +$((KEEP_COUNT + 1)) | \
-        awk '{print $NF}')
-    
-    if [ ! -z "${OLD_CONFIGS}" ]; then
-        echo "${OLD_CONFIGS}" | while read config_name; do
-            NOTE "删除旧配置: ${config_name}"
-            docker config rm "${config_name}" 2>/dev/null || true
-        done
-        SUCCESS "清理完成"
-    else
-        NOTE "无需清理"
-    fi
-}
-
-# 导出函数供外部调用
-export -f create_versioned_config
-export -f cleanup_old_configs
-
 
 function create_network() {
-    INFO "🌐 检查 Docker 网络: ${NETWORK:-bridge}"
+    INFO "🌐 检查 Docker 网络: ${NETWORK:-cloud}"
 
     # 设置默认值
-    NETWORK=${NETWORK:-bridge}
-    MODE=${MODE:-${1:-compose}}
-    export NETWORK MODE
+    export NETWORK=${NETWORK:-cloud}
+    MODE=${1:-${MODE:-stack}}
 
     # 统一获取当前网络信息（如果存在）
     if sudo docker network inspect "${NETWORK}" >/dev/null 2>&1; then
@@ -136,12 +48,18 @@ function create_network() {
     local network_driver
     local -a network_cmd=(sudo docker network create)
 
+    # MTU 设置，默认 1400 (保守值，兼容多层封装环境如 VPN/代理)
+    # 标准值参考：1500(以太网) - 50(VXLAN) - 50(预留) = 1400
+    local network_mtu=${NETWORK_MTU:-1450}
+    
     if [ "${MODE}" = "stack" ]; then
         network_driver="overlay"
         network_cmd+=(--driver "${network_driver}" --attachable)
+        network_cmd+=(--opt "com.docker.network.driver.mtu=${network_mtu}")
     else
         network_driver="bridge"
         network_cmd+=(--driver "${network_driver}")
+        network_cmd+=(--opt "com.docker.network.driver.mtu=${network_mtu}")
     fi
 
     network_cmd+=("${NETWORK}")

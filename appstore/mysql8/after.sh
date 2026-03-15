@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+
+sudo chmod 644 ${DATA}/mysql8/my.cnf
+
+
 # 查找 mysql8 服务的实际容器名（带重试）
 get_container_name() {
     local service_name=$1

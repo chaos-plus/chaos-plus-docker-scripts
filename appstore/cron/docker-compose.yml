@@ -6,9 +6,32 @@ networks:
 
 
 services:
+
+  docker-image-prune:
+    image: docker:cli
+    restart: ${SRV_RESTART_MODE:-always}
+    command: tail -f /dev/null
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.docker-cli.schedule: "@every 7m"
+      ofelia.job-exec.docker-cli.command: >
+        sh -c 'docker image prune -a -f --filter "until=24h"'
+    deploy:
+      # endpoint_mode: dnsrr
+      # mode: global
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      resources:
+        limits:
+          memory: ${RES_LIMIT_MEM_DOCKERCLI:-128M}
+        reservations:
+          memory: ${RES_RESER_MEM_DOCKERCLI:-64M}
+          
   cron:
     image: mcuadros/ofelia:latest
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command: daemon --docker
@@ -17,33 +40,12 @@ services:
       ofelia.job-local.test-job.command: >
         sh -c 'date'
     deploy:
-      mode: global
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
+      # endpoint_mode: dnsrr
+      # mode: global
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_CRON:-128M}
         reservations:
           memory: ${RES_RESER_MEM_CRON:-64M}
-  docker-cli:
-    image: docker:cli
-    command: tail -f /dev/null
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      ofelia.enabled: "true"
-      ofelia.job-exec.docker-prune.schedule: "@every 10m"
-      ofelia.job-exec.docker-prune.command: >
-        sh -c 'echo y | docker system prune'
-      ofelia.job-exec.cron-reload.schedule: "@every 10m"
-      ofelia.job-exec.cron-reload.command: >
-        sh -c 'SVC=$$(docker service ls --format "{{.Name}}" | grep _cron) && docker service update --force "$$SVC"'
-    deploy:
-      mode: global
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      resources:
-        limits:
-          memory: ${RES_LIMIT_MEM_DOCKERCLI:-128M}
-        reservations:
-          memory: ${RES_RESER_MEM_DOCKERCLI:-64M}

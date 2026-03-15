@@ -21,6 +21,11 @@ if [ -z "${HOSTNAME}" ]; then
     exit 1
 fi
 
+# 创建版本化配置
+SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+sudo \cp -rf ${SRC_DIR}/config.alloy ${DATA}/alloy/config.alloy
+export ALLOY_CONFIG_HASH=$(md5sum ${DATA}/alloy/config.alloy | cut -d' ' -f1)
+
 # 导出环境变量供 docker-compose 使用
 export LOKI_URL="${LOKI_URL:-http://loki:3100/loki/api/v1/push}"
 export PROMETHEUS_URL="${PROMETHEUS_URL:-http://prometheus:9090/api/v1/write}"
@@ -32,9 +37,4 @@ echo "   - 数据路径: ${DATA}/alloy"
 echo "   - Loki URL: ${LOKI_URL}"
 echo "   - Prometheus URL: ${PROMETHEUS_URL}"
 echo ""
-
-
-# 创建版本化配置
-SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export ALLOY_CONFIG=$(create_versioned_config "alloy-config" "${SRC_DIR}/config.alloy" 3)
 

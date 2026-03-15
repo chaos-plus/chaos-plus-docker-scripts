@@ -5,11 +5,11 @@
 ## FRPS 
 ################################################
 # 生成临时 TOML 配置文件
-TEMP_CONF=$(mktemp)
-cat << EOF > ${TEMP_CONF}
+mkdir -p ${DATA}/frps
+cat << EOF > ${DATA}/frps/frps.toml
 [common]
 bind_port = ${PORT_FRPS_BIND:-7000}
-allow_ports = "7000-7999"
+allow_ports = "7000-65535"
 
 dashboard_addr = "0.0.0.0"
 dashboard_port = ${PORT_FRPS_UI:-7500}
@@ -28,8 +28,4 @@ detailed_errors_to_client = true
 # custom_404_page = "/path/to/404.html"
 EOF
 
-# 创建版本化 Docker config
-export FRPS_CONFIG=$(create_versioned_config "frps-config" "${TEMP_CONF}" 3)
-
-# 删除临时文件
-rm -f ${TEMP_CONF}
+export FRPS_CONFIG_HASH=$(md5sum ${DATA}/frps/frps.toml | cut -d' ' -f1)

@@ -22,24 +22,18 @@ sudo cat ${DATA}/dtm/dtmsvr.storage.mysql.sql
 sudo cat ${DATA}/dtm/dtmcli.barrier.mysql.sql
 sudo cat ${DATA}/dtm/busi.mysql.sql
 
-MYSQL7_CONTAINER=$(get_container_name "mysql7")
-MYSQL8_CONTAINER=$(get_container_name "mysql8")
 
-if [ -n "$MYSQL7_CONTAINER" ]; then
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" \
-        -e "CREATE DATABASE IF NOT EXISTS dtm DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmsvr.storage.mysql.sql
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmcli.barrier.mysql.sql
-    sudo docker exec -i "$MYSQL7_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/busi.mysql.sql
-fi
+init_db mysql7 3306 root ${PASSWORD:-} dtm
+init_db mysql8 3306 root ${PASSWORD:-} dtm
 
-if [ -n "$MYSQL8_CONTAINER" ]; then
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" \
-        -e "CREATE DATABASE IF NOT EXISTS dtm DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;"
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmsvr.storage.mysql.sql
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/dtmcli.barrier.mysql.sql
-    sudo docker exec -i "$MYSQL8_CONTAINER" mysql -uroot -p"${PASSWORD:-}" dtm < ${DATA}/dtm/busi.mysql.sql
-fi
+init_sql mysql7 3306 root ${PASSWORD:-} dtm ${DATA}/dtm/dtmsvr.storage.mysql.sql
+init_sql mysql8 3306 root ${PASSWORD:-} dtm ${DATA}/dtm/dtmsvr.storage.mysql.sql
+
+init_sql mysql7 3306 root ${PASSWORD:-} dtm ${DATA}/dtm/dtmcli.barrier.mysql.sql
+init_sql mysql8 3306 root ${PASSWORD:-} dtm ${DATA}/dtm/dtmcli.barrier.mysql.sql
+
+init_sql mysql7 3306 root ${PASSWORD:-} dtm ${DATA}/dtm/busi.mysql.sql
+init_sql mysql8 3306 root ${PASSWORD:-} dtm ${DATA}/dtm/busi.mysql.sql
 
 sudo mkdir -p ${DATA}/dtm
 sudo chmod -R 777 ${DATA}/dtm/

@@ -1,35 +1,22 @@
 
-# docker network create --driver overlay --attachable cluster
-
 networks:
   default:
     name: ${NETWORK}
     external: true
+
 services:
   acme:
     image: neilpang/acme.sh:3.0.6
+    restart: ${SRV_RESTART_MODE:-always}
     volumes:
       - ${DATA}/acme:/acme.sh
+      - ${DATA}/acme/entry.sh:/tmp/entry.sh:ro
     environment:
-      # ${ACME_DNS_ID_NAME}: ${ACME_DNS_ID_VALUE:-""}
-      # ${ACME_DNS_KEY_NAME}: ${ACME_DNS_KEY_VALUE:-""}
       DOMAIN: ${DOMAIN}
       DOMAINS: ${DOMAINS}
       ACME_DNS: ${ACME_DNS}
-    command:
-      - sh
-      - -c
-      - |
-        set -e
-        acme_cmd="acme.sh --home /acme.sh --register-account -m acme@$$DOMAIN --set-default-ca --server zerossl --output-insecure --keylength 2048 --issue --force --debug 2 --dns $$ACME_DNS"
-        for d in $$DOMAINS; do
-          acme_cmd="$$acme_cmd -d $$d -d *.$$d"
-        done
-        if [ ! -f /acme.sh/$$DOMAIN/fullchain.cer ]; then
-          eval "$$acme_cmd"
-        fi
-        echo "tail -f /dev/null; #keep container alive for ofelia job-exec"
-        tail -f /dev/null
+      CONFIG_HASH: ${ACME_CONFIG_HASH:-}
+    command: ["sh", "/tmp/entry.sh"]
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.acme-renew.schedule: "@daily"
@@ -38,12 +25,12 @@ services:
         acme.sh --home /acme.sh --renew-all >> /acme.sh/renew.log 2>&1
         "
     deploy:
-      replicas: 1
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      placement:
-        constraints:
-          - node.labels.app_acme == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_acme == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_ACME:-128M}

@@ -6,22 +6,20 @@
 ################################################
 
 # 生成临时配置文件
-# TEMP_CONF=$(mktemp)
-# cat << EOF > ${TEMP_CONF}
-# serverAddr = "${PORT_FRPS_URL:-127.0.0.1}"
-# serverPort = ${PORT_FRPS_BIND:-7000}
+mkdir -p ${DATA}/frpc
+cat << EOF > ${DATA}/frpc/frpc.toml
+serverAddr = "${PORT_FRPS_URL:-127.0.0.1}"
+serverPort = ${PORT_FRPS_BIND:-7000}
 
-# auth.token = "${HTPASSWD:-${PASSWORD:-pa44vv0rd}}"
+auth.token = "${HTPASSWD:-${PASSWORD:-pa44vv0rd}}"
 
-# # [[proxies]]
-# # name = "local-web"
-# # type = "tcp"
-# # localIP = "127.0.0.1"
-# # localPort = 5173
-# # remotePort = 7001
+# [[proxies]]
+# name = "local-web"
+# type = "tcp"
+# localIP = "127.0.0.1"
+# localPort = 5173
+# remotePort = 7001
 
-# EOF
+EOF
 
-# # 创建版本化 Docker config
-# export FRPC_CONFIG=$(create_versioned_config "frpc-config" "${TEMP_CONF}" 3)
-# rm -f ${TEMP_CONF}
+export FRPC_CONFIG_HASH=$(md5sum ${DATA}/frpc/frpc.toml | cut -d' ' -f1)

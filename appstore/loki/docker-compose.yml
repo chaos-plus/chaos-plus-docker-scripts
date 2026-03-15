@@ -1,18 +1,13 @@
-# docker network create --driver overlay --attachable cluster
+
 networks:
   default:
     name: ${NETWORK}
     external: true
 
-configs:
-  loki-config:
-    name: ${LOKI_CONFIG}
-    external: true
-
 services:
   loki:
     image: grafana/loki:3.5.7
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
     user: "10001:10001"
     command: 
       - -config.file=/etc/loki/loki-config.yaml
@@ -24,11 +19,10 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DATA}/loki:/loki
-    configs:
-      - source: loki-config
-        target: /etc/loki/loki-config.yaml
+      - ${DATA}/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
     environment:
       - TZ=Asia/Shanghai
+      - LOKI_CONFIG_HASH=${LOKI_CONFIG_HASH:-}
       
       # ========== 阿里云 OSS 配置 ==========
       # 如果使用 OSS 存储，需要配置以下环境变量
@@ -68,12 +62,12 @@ services:
       - traefik.http.services.loki.loadbalancer.server.port=3100
       - traefik.http.middlewares.loki.compress=true
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_loki == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_loki == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_LOKI:-2G}

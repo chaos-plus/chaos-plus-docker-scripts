@@ -30,8 +30,10 @@ if [ "$STORAGE_TYPE" == "OSS" ]; then
     sudo mkdir -p ${DATA}/loki/{tsdb-index,tsdb-cache,wal,compactor,blooms,rules-temp}
     sudo chmod -R 777 ${DATA}/loki
     
-    # 创建版本化 Docker config
-    export LOKI_CONFIG=$(create_versioned_config "loki-config" "${SRC_DIR}/loki-config-oss.yaml" 3)
+    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    sudo \cp -rf ${SRC_DIR}/loki-config-oss.yaml ${DATA}/loki/loki-config.yaml
+    
+    export LOKI_CONFIG_HASH=$(md5sum ${DATA}/loki/loki-config.yaml | cut -d' ' -f1)
 
     echo ""
     echo "⚠️  重要提示："
@@ -47,9 +49,11 @@ else
     sudo mkdir -p ${DATA}/loki/{chunks,tsdb-index,tsdb-cache,rules,rules-temp,compactor,wal,blooms}
     sudo chmod -R 777 ${DATA}/loki
 
-    # 创建版本化 Docker config
-    export LOKI_CONFIG=$(create_versioned_config "loki-config" "${SRC_DIR}/loki-config-local.yaml" 3)
+    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    sudo \cp -rf ${SRC_DIR}/loki-config-local.yaml ${DATA}/loki/loki-config.yaml
     
+    export LOKI_CONFIG_HASH=$(md5sum ${DATA}/loki/loki-config.yaml | cut -d' ' -f1)
+
     echo ""
     echo "⚠️  提示："
     echo "   - 本地存储受限于磁盘容量"

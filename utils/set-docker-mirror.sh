@@ -13,8 +13,8 @@ sudo mkdir -p /etc/docker
 # 若已存在 daemon.json，则先做备份
 if [ -f /etc/docker/daemon.json ]; then
     backup="/etc/docker/daemon.json.bak-$(date +%Y%m%d%H%M%S)"
-    NOTE "检测到已有 /etc/docker/daemon.json，备份到: ${backup}"
-    sudo cp /etc/docker/daemon.json "${backup}"
+    NOTE "检测到已有 /etc/docker/daemon.json, 备份到: ${backup}"
+    sudo \cp /etc/docker/daemon.json "${backup}"
 fi
 
 INFO "写入 /etc/docker/daemon.json ..."
@@ -36,7 +36,7 @@ sudo tee /etc/docker/daemon.json >/dev/null <<EOF
     "exec-opts": ["native.cgroupdriver=systemd"],
     "storage-driver": "overlay2",
     "default-shm-size": "128M",
-    "live-restore": true,
+    "live-restore": false,
     "userland-proxy": false,
     "iptables": true,
     "ipv6": false,
@@ -64,5 +64,6 @@ echo ""
 INFO "重新加载并重启 Docker 服务 ..."
 sudo systemctl daemon-reload
 sudo systemctl enable docker
+sudo systemctl reset-failed docker.service
 sudo systemctl restart docker
 SUCCESS "Docker 服务已重启"

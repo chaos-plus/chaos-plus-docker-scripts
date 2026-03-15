@@ -1,5 +1,5 @@
 
-# docker network create --driver overlay --attachable cluster
+
 
 networks:
   default:
@@ -10,7 +10,10 @@ services:
   certmate:
     image: certimate/certimate:latest
     ports:
-      - "${PORT_CERTMATE:-8090}:8090"
+      # - "${PORT_CERTMATE:-8090}:8090"
+      - target: 8090
+        published: ${PORT_CERTMATE:-8090}
+        # mode: host
     environment:
       - CERTIMATE_ADMIN_USERNAME=admin@${DOMAIN}
       - CERTIMATE_ADMIN_PASSWORD=${PASSWORD:-pa44vv0rd}
@@ -19,7 +22,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - ${DATA}/certmate:/app/pb_data
     deploy:
-      replicas: 1
+      # endpoint_mode: dnsrr
       restart_policy:
         condition: ${SRV_RESTART_MODE:-any}
       placement:

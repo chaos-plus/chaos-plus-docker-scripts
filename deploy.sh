@@ -1,6 +1,11 @@
 #!/bin/bash -e
 
-set -euxo pipefail
+
+if [ -n "${DEBUG:-}" ]; then
+    set -x
+fi
+
+set -euo pipefail
 
 export WORK_SPACE=$(pwd)
 
@@ -51,13 +56,7 @@ function check_init(){
 function exec() {
     
     check_init
-    create_network stack
-
-    swarm_state=$(sudo docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || true)
-    if [[ "${swarm_state}" != "active" && "${swarm_state}" != "locked" ]]; then
-        WARN "需要 Docker Swarm, 请先执行 'sudo docker swarm init'或join"
-        exit 1
-    fi
+    create_network compose
 
     local env1="env/env.sh"
     local env3="env-override/env.${ENV}.sh"
@@ -100,7 +99,7 @@ function exec() {
         GREEN "#################### service: ${serv} begin ####################"
 
 
-        export PULL_MODE=always #always|changed|never(default "always")
+        export PULL_MODE=always #always|changed|never - changed: 只在 digest 变化时更新
         export COMPOSE_ARGS="" # --force-recreate
 
         local env1="env/env.sh"
@@ -162,25 +161,19 @@ function exec() {
             TMP_COMPOSE=".tmp-${serv}.yml"
             rm -f "$TMP_COMPOSE"
             INFO "🔧 合并 compose 文件: ${compose_files[*]}"
-            set -x
-            # 使用 sed 修复 docker compose config 输出格式问题
-            # 1. Docker Stack 要求 published/target 必须是整数，不能是字符串
-            # 2. Docker Stack 不支持顶级 name 属性
-            docker compose ${compose_files[@]/#/-f } config \
-            | sed -E 's/published: "([0-9]+)"/published: \1/g' \
-            | sed -E 's/target: "([0-9]+)"/target: \1/g' \
-            | sed -E '/^name:[[:space:]]*[^:]+$/d' \
-            > "$TMP_COMPOSE"
+            
+            
+            # 使用 docker compose config 合并和插值 compose 文件
+            docker compose ${compose_files[@]/#/-f } config > "$TMP_COMPOSE"
 
-            set +x
-            INFO "🚀 使用 stack 模式部署服务 ${NETWORK:-cloud}-${serv}"
-            echo "docker stack deploy --with-registry-auth -c ${TMP_COMPOSE} ${NETWORK:-cloud}-${serv}"
-            set -x
-            docker stack deploy --with-registry-auth --prune --resolve-image=changed \
-                -c "${TMP_COMPOSE}" \
-                --resolve-image ${PULL_MODE:-always} \
-                "${NETWORK:-cloud}-${serv}"
-            set +x
+            INFO "🚀 使用 compose 模式部署服务 ${serv}"
+            local project_name="${NETWORK:-cloud}-${serv}"
+            echo "docker compose -p ${project_name} -f ${TMP_COMPOSE} up -d --pull ${PULL_MODE:-always} ${COMPOSE_ARGS:-}"
+           
+            docker compose -p "${project_name}" -f "${TMP_COMPOSE}" up -d \
+                --pull ${PULL_MODE:-always} \
+                --remove-orphans \
+                ${COMPOSE_ARGS:-}
         fi
         # compose.yml
 

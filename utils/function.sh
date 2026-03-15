@@ -128,104 +128,104 @@ pm_install_one() {
         fi
     fi
 
-    if command -v dnf &>/dev/null; then
-        # 使用 dnf
-        if dnf list available "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using dnf."
-            sudo dnf install -y "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in dnf repository."
-        fi
-    fi
+    # if command -v dnf &>/dev/null; then
+    #     # 使用 dnf
+    #     if dnf list available "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using dnf."
+    #         sudo dnf install -y "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in dnf repository."
+    #     fi
+    # fi
 
-    if command -v snap &>/dev/null; then
-        # 使用 snap
-        if snap info "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using snap."
-            sudo snap install "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in snap repository."
-        fi
-    fi
+    # if command -v snap &>/dev/null; then
+    #     # 使用 snap
+    #     if snap info "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using snap."
+    #         sudo snap install "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in snap repository."
+    #     fi
+    # fi
 
-    if command -v yay &>/dev/null; then
-        # 使用 yay
-        if yay -Ss "$package_name" | grep -q "$package_name"; then
-            INFO "Installing $package_name using yay."
-            yay -S --noconfirm "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in yay repository."
-        fi
-    fi
+    # if command -v yay &>/dev/null; then
+    #     # 使用 yay
+    #     if yay -Ss "$package_name" | grep -q "$package_name"; then
+    #         INFO "Installing $package_name using yay."
+    #         yay -S --noconfirm "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in yay repository."
+    #     fi
+    # fi
 
-    if command -v zypper &>/dev/null; then
-        # 使用 zypper
-        if zypper search "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using zypper."
-            sudo zypper install -y "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in zypper repository."
-        fi
-    fi
+    # if command -v zypper &>/dev/null; then
+    #     # 使用 zypper
+    #     if zypper search "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using zypper."
+    #         sudo zypper install -y "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in zypper repository."
+    #     fi
+    # fi
 
-    if command -v brew &>/dev/null; then
-        # 使用 brew
-        if brew search "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using brew."
-            brew install "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in brew repository."
-        fi
-    fi
+    # if command -v brew &>/dev/null; then
+    #     # 使用 brew
+    #     if brew search "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using brew."
+    #         brew install "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in brew repository."
+    #     fi
+    # fi
 
-    if command -v flatpak &>/dev/null; then
-        # 使用 flatpak
-        if flatpak search "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using flatpak."
-            sudo flatpak install -y "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in flatpak repository."
-        fi
-    fi
+    # if command -v flatpak &>/dev/null; then
+    #     # 使用 flatpak
+    #     if flatpak search "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using flatpak."
+    #         sudo flatpak install -y "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in flatpak repository."
+    #     fi
+    # fi
 
-    if command -v port &>/dev/null; then
-        # 使用 port
-        if port search "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using port."
-            sudo port install "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in port repository."
-        fi
-    fi
+    # if command -v port &>/dev/null; then
+    #     # 使用 port
+    #     if port search "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using port."
+    #         sudo port install "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in port repository."
+    #     fi
+    # fi
 
-    if command -v conda &>/dev/null; then
-        # 使用 conda
-        if conda search "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using conda."
-            conda install -y "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in conda repository."
-        fi
-    fi
+    # if command -v conda &>/dev/null; then
+    #     # 使用 conda
+    #     if conda search "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using conda."
+    #         conda install -y "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in conda repository."
+    #     fi
+    # fi
 
-    if command -v nix &>/dev/null; then
-        # 使用 nix
-        if nix search "$package_name" &>/dev/null; then
-            INFO "Installing $package_name using nix."
-            nix-env -i "$package_name"
-            return
-        else
-            WARN "Package '$package_name' not found in nix repository."
-        fi
-    fi
+    # if command -v nix &>/dev/null; then
+    #     # 使用 nix
+    #     if nix search "$package_name" &>/dev/null; then
+    #         INFO "Installing $package_name using nix."
+    #         nix-env -i "$package_name"
+    #         return
+    #     else
+    #         WARN "Package '$package_name' not found in nix repository."
+    #     fi
+    # fi
 
     ERROR "Package manager not supported on this system."
 }
@@ -247,50 +247,50 @@ pm_uninstall_one() {
         sudo pacman -R --noconfirm "$package_name" || true
     fi
 
-    if command -v dnf &>/dev/null; then
-        # 使用 dnf
-        sudo dnf remove -y "$package_name" || true
-    fi
+    # if command -v dnf &>/dev/null; then
+    #     # 使用 dnf
+    #     sudo dnf remove -y "$package_name" || true
+    # fi
 
-    if command -v snap &>/dev/null; then
-        # 使用 snap
-        sudo snap remove "$package_name" --purge || true
-    fi
+    # if command -v snap &>/dev/null; then
+    #     # 使用 snap
+    #     sudo snap remove "$package_name" --purge || true
+    # fi
 
-    if command -v yay &>/dev/null; then
-        # 使用 yay
-        sudo yay -R --noconfirm "$package_name" || true
-    fi
+    # if command -v yay &>/dev/null; then
+    #     # 使用 yay
+    #     sudo yay -R --noconfirm "$package_name" || true
+    # fi
 
-    if command -v zypper &>/dev/null; then
-        # 使用 zypper
-        sudo zypper remove -y "$package_name" || true
-    fi
+    # if command -v zypper &>/dev/null; then
+    #     # 使用 zypper
+    #     sudo zypper remove -y "$package_name" || true
+    # fi
 
-    if command -v brew &>/dev/null; then
-        # 使用 brew
-        sudo brew uninstall "$package_name" || true
-    fi
+    # if command -v brew &>/dev/null; then
+    #     # 使用 brew
+    #     sudo brew uninstall "$package_name" || true
+    # fi
 
-    if command -v flatpak &>/dev/null; then
-        # 使用 flatpak
-        sudo flatpak uninstall "$package_name" || true
-    fi
+    # if command -v flatpak &>/dev/null; then
+    #     # 使用 flatpak
+    #     sudo flatpak uninstall "$package_name" || true
+    # fi
 
-    if command -v port &>/dev/null; then
-        # 使用 port
-        sudo port uninstall "$package_name" || true
-    fi
+    # if command -v port &>/dev/null; then
+    #     # 使用 port
+    #     sudo port uninstall "$package_name" || true
+    # fi
 
-    if command -v conda &>/dev/null; then
-        # 使用 conda
-        sudo conda remove "$package_name" || true
-    fi
+    # if command -v conda &>/dev/null; then
+    #     # 使用 conda
+    #     sudo conda remove "$package_name" || true
+    # fi
 
-    if command -v nix &>/dev/null; then
-        # 使用 nix
-        sudo nix-env -e "$package_name" || true
-    fi
+    # if command -v nix &>/dev/null; then
+    #     # 使用 nix
+    #     sudo nix-env -e "$package_name" || true
+    # fi
 
 }
 
@@ -312,8 +312,6 @@ export -f pm_install pm_uninstall pm_install_one pm_uninstall_one
 if [ "$(PM -v)" == 'not supported.' ]; then
     ERROR "脚本不支持当前的系统，请选择使用Ubuntu,Debian,Centos系统。" && exit
 fi
-
-INFO "ENV PM: $(PM -v)"
 
 export TIMEZONE=$(timedatectl | grep "Time zone" | awk '{print $3}')
 INFO "ENV TIMEZONE: ${TIMEZONE}"
@@ -542,6 +540,19 @@ set_linux_mirrors_official() {
         --use-official-source true \
         --protocol http \
         --use-intranet-source false \
+        --install-epel true \
+        --backup false \
+        --upgrade-software false \
+        --clean-cache false \
+        --ignore-backup-tips
+}
+
+set_linux_mirrors_mit() {
+    bash <(curl -sfL https://linuxmirrors.cn/main.sh) \
+        --source mirrors.mit.edu \
+        --protocol http \
+        --use-intranet-source false \
+        --install-epel true \
         --backup false \
         --upgrade-software false \
         --clean-cache false \
@@ -553,11 +564,23 @@ set_linux_mirrors_ustc() {
         --source mirrors.ustc.edu.cn \
         --protocol http \
         --use-intranet-source false \
+        --install-epel true \
         --backup false \
         --upgrade-software false \
         --clean-cache false \
         --ignore-backup-tips
+}
 
+set_linux_mirrors_aliyun() {
+    bash <(curl -sfL https://linuxmirrors.cn/main.sh) \
+        --source mirrors.aliyun.com \
+        --protocol http \
+        --use-intranet-source false \
+        --install-epel true \
+        --backup false \
+        --upgrade-software false \
+        --clean-cache false \
+        --ignore-backup-tips
 }
 
 set_linux_mirrors_auto() {
@@ -582,8 +605,11 @@ set_linux_mirrors() {
 }
 
 init() {
-
-    set_linux_mirrors_auto
+    if command -v yum &>/dev/null; then
+        set_linux_mirrors_aliyun
+    else
+        set_linux_mirrors_auto
+    fi
 
     # 检查并更新 apt 系统
     if command -v apt &>/dev/null; then
@@ -711,7 +737,7 @@ init() {
     add_sysctl_param "net.ipv4.tcp_syncookies" 0
     add_sysctl_param "vm.overcommit_memory" 1
     add_sysctl_param "vm.swappiness" 0
-
+    
     # 获取主版本+次版本号（如 4.15）
     kernel_version=$(uname -r | cut -d'-' -f1 | cut -d'.' -f1-2)
 
@@ -724,7 +750,15 @@ init() {
     fi
 
     # 应用配置
-    sysctl -p || true
+    sysctl -p --system
+
+sudo bash -c 'cat > /etc/sysctl.d/99-disable-ipv6.conf <<EOF
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOF
+sysctl --system'
+
 
     # 设置文件描述符限制
     if ! grep -q 'root.*nofile.*1000000' /etc/security/limits.conf; then
@@ -813,24 +847,46 @@ EOF
     # iptables --flush
     # iptables -tnat --flush
 
-    if command -v neofetch &>/dev/null; then
-        local MOTD=/etc/motd
-        echo -e "" >$MOTD
-        echo -e "\e[31m**********************************\e[0m" >>$MOTD
-        echo -e "\e[33m\e[05m⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎\e[0m" >>$MOTD
-        echo -e "\e[31m正式环境, 数据无价, 谨慎操作\e[0m" >>$MOTD
-        echo -e "\e[33m\e[05m⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎\e[0m" >>$MOTD
-        echo -e "\e[31m**********************************\e[0m" >>$MOTD
-        echo -e "" >>$MOTD
-        local NEOFETCH=/etc/profile.d/neofetch.sh
-        echo '' >$NEOFETCH
-        echo 'echo "" ' >>$NEOFETCH
-        echo 'neofetch' >>$NEOFETCH
-        echo 'echo -e "\e[35mIPV4 WAN: \e[36m`curl ifconfig.me --silent`"' >>$NEOFETCH
-        echo 'echo -e "\e[31m**********************************" ' >>$NEOFETCH
-        echo 'echo -e "\e[0m" ' >>$NEOFETCH
-        echo '' >>$NEOFETCH
+    # if command -v neofetch &>/dev/null; then
+    #     local MOTD=/etc/motd
+    #     echo -e "" >$MOTD
+    #     echo -e "\e[31m**********************************\e[0m" >>$MOTD
+    #     echo -e "\e[33m\e[05m⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎\e[0m" >>$MOTD
+    #     echo -e "\e[31m正式环境, 数据无价, 谨慎操作\e[0m" >>$MOTD
+    #     echo -e "\e[33m\e[05m⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎\e[0m" >>$MOTD
+    #     echo -e "\e[31m**********************************\e[0m" >>$MOTD
+    #     echo -e "" >>$MOTD
+    #     local NEOFETCH=/etc/profile.d/neofetch.sh
+    #     echo '' >$NEOFETCH
+    #     echo 'echo "" ' >>$NEOFETCH
+    #     echo 'neofetch' >>$NEOFETCH
+    #     echo 'echo -e "\e[35mIPV4 WAN: \e[36m`curl ifconfig.me --silent`"' >>$NEOFETCH
+    #     echo 'echo -e "\e[31m**********************************" ' >>$NEOFETCH
+    #     echo 'echo -e "\e[0m" ' >>$NEOFETCH
+    #     echo '' >>$NEOFETCH
+    # fi
+    
+    if [ -d "/etc/profile.d" ]; then
+        NEOFETCH=/etc/profile.d/neofetch.sh
+
+        : >"$NEOFETCH"
+
+        echo '[[ -n "$SSH_CONNECTION" ]] || return' >>"$NEOFETCH"
+        echo 'case "$-" in *i*) ;; *) return;; esac' >>"$NEOFETCH"
+
+        echo 'echo -e "\e[31m**********************************\e[0m"' >>"$NEOFETCH"
+        echo 'echo -e "\e[33m\e[05m⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎\e[0m"' >>"$NEOFETCH"
+        echo 'echo -e "\e[31m正式环境, 数据无价, 谨慎操作\e[0m"' >>"$NEOFETCH"
+        echo 'echo -e "\e[33m\e[05m⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎⚠︎⚠︎⚠️⚠️⚠️⚠︎\e[0m"' >>"$NEOFETCH"
+        echo 'echo -e "\e[31m**********************************\e[0m"' >>"$NEOFETCH"
+
+        echo 'echo ""' >>"$NEOFETCH"
+        echo 'neofetch &>/dev/null || true' >>"$NEOFETCH"
+        echo 'echo -e "\e[35mIPV4 WAN: \e[36m$(curl -fs --max-time 3 ifconfig.me 2>/dev/null || true)"' >>"$NEOFETCH"
+        echo 'echo -e "\e[31m**********************************\e[0m"' >>"$NEOFETCH"
+        echo 'echo -e "\e[0m"' >>"$NEOFETCH"
     fi
+
 
     if command -v ntpd &>/dev/null; then
         sudo systemctl start ntpsec || true
@@ -887,42 +943,65 @@ k8s_export_config() {
 k8s_export_config
 export -f k8s_export_config
 
+get_mysql_image() {
+  local found
+  found=$(docker images --format '{{.Repository}}:{{.Tag}}' \
+    | awk '$1=="mysql:8"{print; exit}')
+
+  echo "${found:-mysql:8.0-oracle}"
+}
+
 
 init_db() {
   local host=$1
-  local username=$2
-  local password=$3
-  local dbname=$4
-  local charset=${5:-utf8mb4}
-  local collate=${6:-utf8mb4_general_ci}
+  local port=$2
+  local username=$3
+  local password=$4
+  local dbname=$5
+  local charset=${6:-utf8mb4}
+  local collate=${7:-utf8mb4_general_ci}
 
+  local mysql_image
+  mysql_image=$(get_mysql_image)
   docker run --rm \
     --network "$NETWORK" \
     -e MYSQL_PWD="$password" \
-    mysql:8 \
-    sh -c "
-      mysql -h$host -u$username \
+    "$mysql_image" \
+    sh -c " \
+      mysql -h$host -P$port -u$username \
       -e \"CREATE DATABASE IF NOT EXISTS $dbname
           DEFAULT CHARACTER SET $charset
           DEFAULT COLLATE $collate;\"
-    "
+    " \
+    || {
+      echo "⚠️ init_db $dbname failed, ignored"
+      sleep 2
+  }
 }
 export -f init_db
 
 
 init_sql() {
   local host=$1
-  local username=$2
-  local password=$3
-  local dbname=$4
-  local sqlfile=$(realpath "$5")
+  local port=$2
+  local username=$3
+  local password=$4
+  local dbname=$5
+  local sqlfile=$(realpath "$6")
 
+  local mysql_image
+  mysql_image=$(get_mysql_image)
+  
   docker run --rm \
     --network "$NETWORK" \
     -e MYSQL_PWD="$password" \
     -v "$sqlfile:/init.sql:ro" \
-    mysql:8 \
-    sh -c "mysql -h$host -u$username $dbname < /init.sql"
+    "$mysql_image" \
+    sh -c "mysql -h$host -P$port -u$username $dbname < /init.sql" \
+    || {
+      echo "⚠️ init_sql $dbname failed, ignored"
+      sleep 2
+  }
 }
 
 export -f init_sql

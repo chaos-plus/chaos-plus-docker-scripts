@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 # 创建每个副本的数据目录
-REPLICAS=${GITEA_RUNNER_REPLICAS:-6}
-for i in $(seq 1 $REPLICAS); do
+export GITEA_RUNNER_REPLICAS=${GITEA_RUNNER_REPLICAS:-6}
+for i in $(seq 1 $GITEA_RUNNER_REPLICAS); do
     sudo mkdir -p ${DATA}/gitea-runner-${i}
     sudo chmod 777 ${DATA}/gitea-runner-${i}
 done

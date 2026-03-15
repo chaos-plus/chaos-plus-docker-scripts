@@ -1,6 +1,6 @@
 
 
-# docker network create --driver overlay --attachable cluster
+
 networks:
   default:
     name: ${NETWORK}
@@ -10,8 +10,9 @@ services:
 
   emqx:
     # https://www.emqx.io/docs/zh/v5.0/admin/api.html
+    # dashboard admin:public
     image: emqx/emqx:5.8.8
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
     ports:
       - "${PORT_EMQX_MQTT}:1883"
       - "${PORT_EMQX_MQTT_SSL}:8883"
@@ -19,7 +20,6 @@ services:
       - "${PORT_EMQX_MQTT_WSS}:8084"
       - "${PORT_EMQX_HTTP}:8081"
       - "${PORT_EMQX_UI}:18083"
-      # dashboard admin:public
     environment:
       EMQX_HOST: 127.0.0.1
       EMQX_NAME: emqx_cloud
@@ -50,12 +50,12 @@ services:
       - traefik.http.services.websocket.loadBalancer.passHostHeader=true
 
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_emqx == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # placement:
+      #   constraints:
+      #     - node.labels.app_emqx == true
       resources:
         limits:
           memory: ${RES_LIMIT_MEM_EMQX:-2G}

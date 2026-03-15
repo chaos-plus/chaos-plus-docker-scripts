@@ -9,12 +9,13 @@ services:
   nginx:
     # image: nginx:latest
     image: openresty/openresty:alpine
-    # restart: ${SRV_RESTART_MODE:-always}
+    restart: ${SRV_RESTART_MODE:-always}
     user: "root"
     ports:
       - "${PORT_PROXY:-80}:80"
       - "${PORT_PROXY_SSL:-443}:443"
     volumes:
+      - ${DATA}/nginx/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
       - /etc/localtime:/etc/localtime:ro
       # openresty /usr/local/openresty/nginx/conf/nginx.conf
       # openresty /etc/nginx/conf.d
@@ -27,28 +28,40 @@ services:
       # - ${DATA}/nginx/lua:/usr/local/openresty/nginx/lua
     environment:
       - TZ=Asia/Shanghai
-    # healthcheck:
-    #   test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
-    #   interval: 30s
-    #   timeout: 5s
-    #   retries: 3
-    #   start_period: 20s
+      - NGINX_CONFIG_HASH=${NGINX_CONFIG_HASH:-}
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.nginx.rule=HostRegexp(`^nginx\..*`)
-      - traefik.http.routers.nginx.tls=true
-      - traefik.http.routers.nginx.entrypoints=websecure
-      - traefik.http.services.nginx.loadbalancer.server.port=80
-      - traefik.http.middlewares.nginx.compress=true
+      traefik.enable: "true"
+      traefik.http.routers.nginx.rule: HostRegexp(`^nginx\..*`)
+      traefik.http.routers.nginx.tls: "true"
+      traefik.http.routers.nginx.entrypoints: websecure
+      traefik.http.services.nginx.loadbalancer.server.port: "80"
+      traefik.http.middlewares.nginx.compress: "true"
+      ofelia.enabled: "true"
+      ofelia.job-exec.cert-reload.schedule: "@every 5m"
+      ofelia.job-exec.cert-reload.command: >
+        sh -c "
+        nginx -t && nginx -s reload
+        "
     deploy:
-      restart_policy:
-        condition: ${SRV_RESTART_MODE:-any}
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.app_nginx == true
+      # endpoint_mode: dnsrr
+      # restart_policy:
+      #   condition: ${SRV_RESTART_MODE:-any}
+      # update_config:
+      #   parallelism: 1 
+      #   delay: 5s
+      #   failure_action: rollback
+      #   order: start-first
+      # placement:
+      #   constraints:
+      #     - node.labels.app_nginx == true
       resources:
         limits:
-          memory: ${RES_LIMIT_MEM_NGINX:-512M}
+          memory: ${RES_LIMIT_MEM_NGINX:-1G}
         reservations:
           memory: ${RES_RESER_MEM_NGINX:-128M}

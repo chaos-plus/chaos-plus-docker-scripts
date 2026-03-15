@@ -1,28 +1,30 @@
 #
 
-export SERVICES=('mysql8' 'redis' 'phpadmin')
+export SERVICES=('mysql8' 'redis' 'phpadmin' 'acme' 'cron')
 
-docker node inspect $(hostname) --format '{{range $k,$v := .Spec.Labels}}{{$k}} {{end}}' \
-| tr ' ' '\n' \
-| grep -v '^$' \
-| grep '^app_' \
-| xargs -r -I {} docker node update --label-rm {} $(hostname) >/dev/null 2>&1
+# docker node inspect $(hostname) --format '{{range $k,$v := .Spec.Labels}}{{$k}} {{end}}' \
+# | tr ' ' '\n' \
+# | grep -v '^$' \
+# | grep '^app_' \
+# | xargs -r -I {} docker node update --label-rm {} $(hostname)
 
-for s in "${SERVICES[@]}"; do
-  docker node update --label-add app_$s=true $(hostname) >/dev/null 2>&1
-done
-docker node inspect $(hostname) --format '{{json .Spec.Labels}}'
+# for s in "${SERVICES[@]}"; do
+#   docker node update --label-add app_$s=true $(hostname)  || true
+# done
+# docker node inspect $(hostname) --format '{{json .Spec.Labels}}'
 
 
 
 export PASSWORD=${PASSWORD:-"12345678"}
 export HTPASSWD=$(openssl passwd -apr1 $PASSWORD)
 
-export DOMAINS=("example.com")
-export DOMAIN="${DOMAINS[0]}"
+export DOMAINS="example.com"  # 空格分隔的域名列表
+export DOMAIN="${DOMAINS%% *}"
 export DOMAIN_REGEX=${DOMAIN/./\\.}
 
-# export ACME_DNS="dns_namesilo"
+export CLOUDFLARED_TOKEN=
+
+export ACME_DNS="dns_namesilo"
 # export ACME_DNS_ID_NAME=""
 # export ACME_DNS_ID_VALUE=""
 # export ACME_DNS_KEY_NAME="Namesilo_Key"
@@ -47,3 +49,5 @@ export DOMAIN_REGEX=${DOMAIN/./\\.}
 # export ACME_DNS_ID_VALUE=""
 # export ACME_DNS_KEY_NAME="CF_Zone_ID"
 # export ACME_DNS_KEY_VALUE="xxxx"
+
+
