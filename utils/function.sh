@@ -752,12 +752,12 @@ init() {
     # 应用配置
     sysctl -p --system
 
-sudo bash -c 'cat > /etc/sysctl.d/99-disable-ipv6.conf <<EOF
+    cat > /etc/sysctl.d/99-disable-ipv6.conf <<EOF
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
 EOF
-sysctl --system'
+    sysctl --system
 
 
     # 设置文件描述符限制
